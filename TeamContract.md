@@ -18,7 +18,7 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* We will use Discord as our primary communication channel.
+* We will use Instagram as our primary communication channel.
 
 * Each teammate agrees to respond to messages within **24 hours on weekdays**
 
