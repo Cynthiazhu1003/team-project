@@ -18,38 +18,46 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* We will use Discord as our primary communication channel.
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+* Each teammate agrees to respond to messages within **24 hours on weekdays**
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+* If they think they won't be able to meet a deadline, if they have to miss lecture, they must **inform** the group.
 
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
+* Respectful and inclusive behaviour are necessary for smooth and productive communication will include:
+* -Actively listening to each other's ideas
+* -Giving everyone a chance to contribute
+* -Using supportive and constructive feedback
 
 ---
 
 ### [Other Categories of norms and expectations go here]
 
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
-
+* All deliverables should be completed on time and meet the agreed quality standard.  
+  Each member agrees to test and review their work before submission.  
+  All Pull Requests (PRs) will be reviewed by at least one other team member before merging.
 ---
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
-
+* Decisions will be made by **consensus whenever possible**
+* If consensus cannot be reached, a **majority note** will decide.
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* If conflict arises:
+1. The team will first discuss the issue privately and respectfully to reach a compromise.
+2. If the issue remains unresolved, the team will consult a **TA or course instructor** for mediation.
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
-
+* Each team member is responsible for:
+- Completing their assigned tasks on time
+- Asking for help early when needed
+- Communicating issues or delays honestly
+- Contributing equally to discussions and deliverables
 ---
 
 ---
@@ -57,5 +65,9 @@ This contract sets out shared expectations and commitments for how our team will
 By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
 
 Team Member Signatures:
-
-(type names here)
+- Xingtong(Cynthia) Zhu
+- Ben DeCosta
+- Diana Borunova
+- Eric An
+- Ryan Jin
+- Silvia Shen
