@@ -36,8 +36,7 @@ import java.awt.dnd.*;
 import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.util.List;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.Border;
 
 /**
@@ -1194,9 +1193,40 @@ public class HomePageView extends javax.swing.JFrame {
         mainPanel.add(jPanel12, "card10");
 
         getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
-
+        //Diana
+        importFileButton.addActionListener(e -> handleImportFileButtonClick());
         pack();
-    }// </editor-fold>                        
+    }// </editor-fold>
+
+    private void handleImportFileButtonClick() {
+            JFileChooser chooser = new JFileChooser();
+            int result = chooser.showOpenDialog(this);
+
+            if (result != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+
+            File file = chooser.getSelectedFile();
+
+            if (!file.getName().endsWith(".csv")) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Invalid file type. File must be .csv",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            File selectedFile = file;
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Selected file:\n" + selectedFile.getName(),
+                    "File chosen",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+    }
 
     private void homeButtonActionPerformed(java.awt.event.ActionEvent evt) {                                           
         showCard(CARD_HOME);
