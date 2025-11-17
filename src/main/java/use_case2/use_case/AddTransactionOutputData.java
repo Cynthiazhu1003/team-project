@@ -1,4 +1,4 @@
-package use_case.add_transaction;
+package use_case2.use_case;
 
 public class AddTransactionOutputData {
     private final boolean success;
