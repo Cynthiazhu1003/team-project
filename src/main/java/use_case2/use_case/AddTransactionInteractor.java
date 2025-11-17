@@ -1,7 +1,6 @@
 package use_case2.use_case;
 
 import use_case2.entity.Transaction;
-import use_case2.interface_adapter.add_transaction.AddTransactionPresenter;
 
 
 public class AddTransactionInteractor implements AddTransactionInputBoundary {
@@ -31,9 +30,9 @@ public class AddTransactionInteractor implements AddTransactionInputBoundary {
 
             Transaction transaction = new Transaction(
                     inputData.getDate(),
+                    inputData.getDescription(),
                     inputData.getAmount(),
-                    inputData.getCategory(),
-                    inputData.getDescription()
+                    inputData.getCategory()
             );
 
             transactionDataAccess.save(transaction);
