@@ -28,7 +28,7 @@ public class AddTransactionInteractorTest {
     public void testSuccess() {
         // Given
         AddTransactionInputData inputData = new AddTransactionInputData(
-                LocalDate.now(), "Dining", -5.75, "Starbucks coffee"
+                LocalDate.now(), "Starbucks","Latte", -5.75, "Drinks"
         );
 
         // When
@@ -43,7 +43,7 @@ public class AddTransactionInteractorTest {
     public void testFailureEmptyDescription() {
         // Given
         AddTransactionInputData inputData = new AddTransactionInputData(
-                LocalDate.now(), "", -5.75, "Dining"
+                LocalDate.now(), "", "Latte",-5.75, "Drinks"
         );
 
         // When
@@ -58,7 +58,7 @@ public class AddTransactionInteractorTest {
     public void testFailureZeroAmount() {
         // Given
         AddTransactionInputData inputData = new AddTransactionInputData(
-                LocalDate.now(), "Starbucks coffee", 0.0, "Dining"
+                LocalDate.now(), "Starbucks", "Latte",0.0, "Dining"
         );
 
         // When
@@ -67,6 +67,21 @@ public class AddTransactionInteractorTest {
         // Then
         assertFalse(presenter.success);
         assertEquals("Amount cannot be zero", presenter.errorMessage);
+    }
+
+    @Test
+    public void testFailureEmptyMerchant() {
+        // Given
+        AddTransactionInputData inputData = new AddTransactionInputData(
+                LocalDate.now(), "Starbucks", "", -5.75, "Dining"  // Empty merchant
+        );
+
+        // When
+        interactor.execute(inputData);
+
+        // Then
+        assertFalse(presenter.success);
+        assertEquals("Merchant is required", presenter.errorMessage);
     }
 
     // Helper class

@@ -22,6 +22,7 @@ public class AddTransactionPresenter implements AddTransactionOutputBoundary {
         TransactionState currentState = transactionViewModel.getState();
         currentState.setDate(null);
         currentState.setAmount(0.0);
+        currentState.setMerchant("");
         currentState.setCategory("");
         currentState.setDescription("");
         currentState.setTransactionError(null);

@@ -23,8 +23,9 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
     // Form components
     private final JTextField dateField = new JTextField(10);
     private final JTextField categoryField = new JTextField(10);
+    private final JTextField  merchantField = new JTextField(10);
     private final JTextField amountField = new JTextField(10);
-    private final JTextField descriptionField = new JTextField(20);
+    private final JTextField descriptionField = new JTextField(10);
     private final JButton submitButton = new JButton("Submit");
 
     private final JLabel errorLabel = new JLabel();
@@ -70,7 +71,7 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
 
         // Form Panel
         JPanel formPanel = new JPanel();
-        formPanel.setLayout(new GridLayout(5, 2, 10, 10));
+        formPanel.setLayout(new GridLayout(6, 2, 10, 10));
         formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         formPanel.add(new JLabel("Date (YYYY-MM-DD):"));
@@ -78,6 +79,9 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
 
         formPanel.add(new JLabel("Category:"));
         formPanel.add(categoryField);
+
+        formPanel.add(new JLabel("Merchant:"));
+        formPanel.add(merchantField);
 
         formPanel.add(new JLabel("Amount:"));
         formPanel.add(amountField);
@@ -110,10 +114,11 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
         try {
             LocalDate date = LocalDate.parse(dateField.getText());
             String category = categoryField.getText();
+            String merchant = merchantField.getText();
             double amount = Double.parseDouble(amountField.getText());
             String description = descriptionField.getText();
 
-            addTransactionController.execute(date, category, amount, description);
+            addTransactionController.execute(date, category, merchant, amount, description);
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Invalid input: " + ex.getMessage(),
@@ -137,6 +142,7 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
             if (state.getTransactionSuccess().contains("successfully")) {
                 dateField.setText(LocalDate.now().toString());
                 categoryField.setText("");
+                merchantField.setText("");
                 amountField.setText("");
                 descriptionField.setText("");
 

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 public class TransactionState {
     private LocalDate date;
     private String category = "";
+    private String merchant = "";
     private double amount = 0.0;
     private String description = "";
     private String transactionError;
@@ -14,6 +15,7 @@ public class TransactionState {
     public TransactionState(TransactionState copy) {
         this.date = copy.date;
         this.category = copy.category;
+        this.merchant = copy.merchant;
         this.amount = copy.amount;
         this.description = copy.description;
         this.transactionError = copy.transactionError;
@@ -25,6 +27,8 @@ public class TransactionState {
     public void setDate(LocalDate date) { this.date = date; }
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+    public String getMerchant() { return merchant; }
+    public void setMerchant(String merchant) { this.merchant = merchant; }
     public double getAmount() { return amount; }
     public void setAmount(double amount) { this.amount = amount; }
     public String getDescription() { return description; }

@@ -22,6 +22,10 @@ public class AddTransactionInteractor implements AddTransactionInputBoundary {
                 presenter.prepareFailView("Description is required");
                 return;
             }
+            if (inputData.getMerchant() == null || inputData.getMerchant().trim().isEmpty()) {
+                presenter.prepareFailView("Merchant is required");
+                return;
+            }
 
             if (inputData.getAmount() == 0) {
                 presenter.prepareFailView("Amount cannot be zero");
@@ -31,6 +35,7 @@ public class AddTransactionInteractor implements AddTransactionInputBoundary {
             Transaction transaction = new Transaction(
                     inputData.getDate(),
                     inputData.getDescription(),
+                    inputData.getMerchant(),
                     inputData.getAmount(),
                     inputData.getCategory()
             );
