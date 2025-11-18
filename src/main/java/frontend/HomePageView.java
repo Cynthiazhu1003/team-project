@@ -1,4 +1,4 @@
-/*
+/* team proj one
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -54,9 +54,9 @@ public class HomePageView extends javax.swing.JFrame {
     private static final String CARD_IMPORT   = "cardImport";
     private static final String CARD_ADD_TRANS   = "cardAddTransaction";
     private static final String CARD_ADD_BUDGET = "cardAddBudget";
-    private DashedRoundBorder dropIdleBorder;
-    private DashedRoundBorder dropActiveBorder;
-    private JLabel dropLabel;  // text inside the drop zone
+    private static final String CARD_CHARTS = "cardCharts";
+    private static final String CARD_EDIT_TRANS = "cardEditTransaction";
+    private static final String CARD_EDIT_BUDGET = "cardEditBudget";
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
@@ -78,93 +78,16 @@ public class HomePageView extends javax.swing.JFrame {
         mainPanel.add(cardImport,      CARD_IMPORT);
         mainPanel.add(cardAddTransaction,CARD_ADD_TRANS);
         mainPanel.add(cardAddBudget, CARD_ADD_BUDGET);
+        mainPanel.add(cardCharts, CARD_CHARTS);
+        mainPanel.add(cardEditTransaction, CARD_EDIT_TRANS);
+        mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
 
         // Optional: show a default screen when program starts
         showCard(CARD_HOME);
         
-        // ---- Drop box styling + DnD ----
-        styleImportDropBox();   // dashed rounded border + label
-        enableCsvDrop();        // drag-and-drop CSV handler + hover highlight
     }
     
-    /** Style jPanel11 like the mock: white card, dashed rounded border, title + subtitle. */
-    private void styleImportDropBox() {
-        // PANEL (drop zone)
-        jPanel11.setOpaque(true);
-        jPanel11.setBackground(Color.WHITE);
-        jPanel11.setLayout(new BorderLayout());
-
-        // make the panel bigger than the label’s text
-        jPanel11.setPreferredSize(new java.awt.Dimension(360, 180));
-        jPanel11.setMinimumSize(new java.awt.Dimension(320, 160));
-
-        dropIdleBorder   = new DashedRoundBorder(new Color(60,60,60), 3f, 16f, 10f, 6f, 12);
-        dropActiveBorder = new DashedRoundBorder(new Color(0,0,0),    3f, 16f, 10f, 6f, 12);
-        jPanel11.setBorder(dropIdleBorder); // <-- border on the PANEL
-
-        // LABEL (content)
-        String html = "Drop CSV here";
-        dropLabel = new JLabel(html, SwingConstants.CENTER);
-        // inner padding for the text; this does NOT affect the panel border
-        dropLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(16,16,16,16));
-        jPanel11.add(dropLabel, BorderLayout.CENTER);
-    }
-
-    /** Enable drag-and-drop of files; accept only .csv; highlight border on hover. */
-    @SuppressWarnings("unchecked")
-    private void enableCsvDrop() {
-        new DropTarget(jPanel11, new DropTargetListener() {
-            @Override public void dragEnter(DropTargetDragEvent e) {
-                if (e.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                    e.acceptDrag(DnDConstants.ACTION_COPY);
-                    jPanel11.setBorder(dropActiveBorder);
-                    jPanel11.repaint();
-                } else {
-                    e.rejectDrag();
-                }
-            }
-            @Override public void dragOver(DropTargetDragEvent e) { /* no-op */ }
-            @Override public void dropActionChanged(DropTargetDragEvent e) { /* no-op */ }
-            @Override public void dragExit(DropTargetEvent e) {
-                jPanel11.setBorder(dropIdleBorder);
-                jPanel11.repaint();
-            }
-            @Override public void drop(DropTargetDropEvent e) {
-                try {
-                    e.acceptDrop(DnDConstants.ACTION_COPY);
-                    List<File> files = (List<File>) e.getTransferable()
-                            .getTransferData(DataFlavor.javaFileListFlavor);
-
-                    boolean gotCsv = false;
-                    for (File f : files) {
-                        if (f.getName().toLowerCase().endsWith(".csv")) {
-                            gotCsv = true;
-                            // TODO: store/use file path for your Import button
-                            // e.g., this.lastDroppedCsv = f;
-                            dropLabel.setText("<html><div style='text-align:center;'>"
-                                    + "<div style='font-size:16px; font-weight:700; margin-bottom:6px;'>"
-                                    + f.getName() + "</div>"
-                                    + "<div style='font-size:12px; color:#666;'>Ready to import.</div>"
-                                    + "</div></html>");
-                            break;
-                        }
-                    }
-                    if (!gotCsv) {
-                        dropLabel.setText("<html><div style='text-align:center;'>"
-                                + "<div style='font-size:16px; font-weight:700; margin-bottom:6px;'>Not a CSV</div>"
-                                + "<div style='font-size:12px; color:#666;'>Please drop a .csv file.</div>"
-                                + "</div></html>");
-                    }
-                } catch (Exception ex) {
-                    logger.log(java.util.logging.Level.SEVERE, "Drop failed", ex);
-                } finally {
-                    jPanel11.setBorder(dropIdleBorder);
-                    jPanel11.repaint();
-                    e.dropComplete(true);
-                }
-            }
-        });
-    }
+   
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -187,24 +110,27 @@ public class HomePageView extends javax.swing.JFrame {
         reportButton = new javax.swing.JButton();
         homeButton = new javax.swing.JButton();
         importButton = new javax.swing.JButton();
+        chartButton = new javax.swing.JButton();
         mainPanel = new javax.swing.JPanel();
         cardHome = new javax.swing.JPanel();
         cardTransaction = new javax.swing.JPanel();
         transactionHeader = new javax.swing.JPanel();
         transactionHeaderHeader = new javax.swing.JPanel();
-        transactionHeaderTitle = new javax.swing.JPanel();
-        transactionLabel = new javax.swing.JLabel();
         transactionHeaderButton = new javax.swing.JPanel();
+        jLabel32 = new javax.swing.JLabel();
         addTransactionButton = new javax.swing.JButton();
+        editTransactionButton = new javax.swing.JButton();
         transactionFilterPanel = new javax.swing.JPanel();
         filterLabel = new javax.swing.JLabel();
         filterCategoryBox = new javax.swing.JComboBox<>();
+        editCategoryButton = new javax.swing.JButton();
         transactionScrollPane = new javax.swing.JScrollPane();
         transactionTable = new javax.swing.JTable();
         cardBudget = new javax.swing.JPanel();
         budgetHeaderPanel = new javax.swing.JPanel();
         budgetHeader = new javax.swing.JLabel();
         addBudgetButton = new javax.swing.JButton();
+        editBudgetButton = new javax.swing.JButton();
         budgetScrollPane = new javax.swing.JScrollPane();
         budgetTable = new javax.swing.JTable();
         cardCharts = new javax.swing.JPanel();
@@ -225,12 +151,6 @@ public class HomePageView extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         cardImport = new javax.swing.JPanel();
-        importHeaderPanel = new javax.swing.JPanel();
-        importLabel = new javax.swing.JLabel();
-        importBodyPanel = new javax.swing.JPanel();
-        jPanel11 = new javax.swing.JPanel();
-        importFileButton = new javax.swing.JButton();
-        cancelImportButton = new javax.swing.JButton();
         cardAddTransaction = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -251,6 +171,8 @@ public class HomePageView extends javax.swing.JFrame {
         jComboBox6 = new javax.swing.JComboBox<>();
         cancelAddTransactionButton = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        jLabel18 = new javax.swing.JLabel();
+        jTextField4 = new javax.swing.JTextField();
         cardAddBudget = new javax.swing.JPanel();
         jPanel10 = new javax.swing.JPanel();
         jLabel14 = new javax.swing.JLabel();
@@ -261,8 +183,39 @@ public class HomePageView extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jComboBox8 = new javax.swing.JComboBox<>();
+        JPanel26 = new javax.swing.JPanel();
+        cardEditTransaction = new javax.swing.JPanel();
+        jPanel11 = new javax.swing.JPanel();
+        jLabel19 = new javax.swing.JLabel();
         jPanel12 = new javax.swing.JPanel();
+        jLabel20 = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
+        jLabel23 = new javax.swing.JLabel();
+        jComboBox7 = new javax.swing.JComboBox<>();
+        jComboBox9 = new javax.swing.JComboBox<>();
+        jComboBox10 = new javax.swing.JComboBox<>();
+        jLabel24 = new javax.swing.JLabel();
+        jTextField5 = new javax.swing.JTextField();
+        jLabel25 = new javax.swing.JLabel();
+        jLabel26 = new javax.swing.JLabel();
+        jTextField6 = new javax.swing.JTextField();
+        jLabel27 = new javax.swing.JLabel();
+        jComboBox11 = new javax.swing.JComboBox<>();
+        cancelEditTransactionButton = new javax.swing.JButton();
+        finishEditTransactionButton = new javax.swing.JButton();
+        jLabel28 = new javax.swing.JLabel();
+        jTextField7 = new javax.swing.JTextField();
+        cardEditBudget = new javax.swing.JPanel();
         jPanel14 = new javax.swing.JPanel();
+        jLabel29 = new javax.swing.JLabel();
+        jPanel15 = new javax.swing.JPanel();
+        jLabel30 = new javax.swing.JLabel();
+        jLabel31 = new javax.swing.JLabel();
+        jTextField8 = new javax.swing.JTextField();
+        cancelEditLimitButton = new javax.swing.JButton();
+        finishEditLimitButton = new javax.swing.JButton();
+        jComboBox12 = new javax.swing.JComboBox<>();
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -425,6 +378,16 @@ public class HomePageView extends javax.swing.JFrame {
             }
         });
 
+        chartButton.setBackground(new java.awt.Color(100, 100, 100));
+        chartButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        chartButton.setText("Charts");
+        chartButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        chartButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chartButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout buttonPanelLayout = new javax.swing.GroupLayout(buttonPanel);
         buttonPanel.setLayout(buttonPanelLayout);
         buttonPanelLayout.setHorizontalGroup(
@@ -434,6 +397,7 @@ public class HomePageView extends javax.swing.JFrame {
             .addComponent(reportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(importButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(homeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(chartButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         buttonPanelLayout.setVerticalGroup(
             buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -448,7 +412,9 @@ public class HomePageView extends javax.swing.JFrame {
                 .addComponent(reportButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(importButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(320, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chartButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(276, Short.MAX_VALUE))
         );
 
         sidebarPanel.add(buttonPanel, java.awt.BorderLayout.CENTER);
@@ -478,31 +444,20 @@ public class HomePageView extends javax.swing.JFrame {
         transactionHeaderHeader.setPreferredSize(new java.awt.Dimension(445, 50));
         transactionHeaderHeader.setLayout(new java.awt.BorderLayout());
 
-        transactionLabel.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        transactionLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        transactionLabel.setText("Transactions");
+        jLabel32.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel32.setText("Transactions");
 
-        javax.swing.GroupLayout transactionHeaderTitleLayout = new javax.swing.GroupLayout(transactionHeaderTitle);
-        transactionHeaderTitle.setLayout(transactionHeaderTitleLayout);
-        transactionHeaderTitleLayout.setHorizontalGroup(
-            transactionHeaderTitleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, transactionHeaderTitleLayout.createSequentialGroup()
-                .addContainerGap(27, Short.MAX_VALUE)
-                .addComponent(transactionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        transactionHeaderTitleLayout.setVerticalGroup(
-            transactionHeaderTitleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(transactionLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
-        );
-
-        transactionHeaderHeader.add(transactionHeaderTitle, java.awt.BorderLayout.LINE_START);
-
-        addTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         addTransactionButton.setText("Add Transaction [+]");
         addTransactionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addTransactionButtonActionPerformed(evt);
+            }
+        });
+
+        editTransactionButton.setText("Edit Transaction [-]");
+        editTransactionButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editTransactionButtonActionPerformed(evt);
             }
         });
 
@@ -511,16 +466,23 @@ public class HomePageView extends javax.swing.JFrame {
         transactionHeaderButtonLayout.setHorizontalGroup(
             transactionHeaderButtonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(transactionHeaderButtonLayout.createSequentialGroup()
-                .addGap(43, 43, 43)
+                .addGap(48, 48, 48)
+                .addComponent(jLabel32)
+                .addGap(18, 18, 18)
                 .addComponent(addTransactionButton)
-                .addContainerGap(59, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(editTransactionButton)
+                .addContainerGap(58, Short.MAX_VALUE))
         );
         transactionHeaderButtonLayout.setVerticalGroup(
             transactionHeaderButtonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, transactionHeaderButtonLayout.createSequentialGroup()
+            .addGroup(transactionHeaderButtonLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(addTransactionButton, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGroup(transactionHeaderButtonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel32, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(editTransactionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(addTransactionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         transactionHeaderHeader.add(transactionHeaderButton, java.awt.BorderLayout.CENTER);
@@ -536,24 +498,34 @@ public class HomePageView extends javax.swing.JFrame {
 
         filterCategoryBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Category...", "Dining", "Leisure", "Gifts", "School" }));
 
+        editCategoryButton.setText("Edit Category [+]");
+        editCategoryButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editCategoryButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout transactionFilterPanelLayout = new javax.swing.GroupLayout(transactionFilterPanel);
         transactionFilterPanel.setLayout(transactionFilterPanelLayout);
         transactionFilterPanelLayout.setHorizontalGroup(
             transactionFilterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(transactionFilterPanelLayout.createSequentialGroup()
-                .addGap(159, 159, 159)
+                .addGap(41, 41, 41)
                 .addComponent(filterLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(filterCategoryBox, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(147, Short.MAX_VALUE))
+                .addGap(65, 65, 65)
+                .addComponent(editCategoryButton)
+                .addContainerGap(79, Short.MAX_VALUE))
         );
         transactionFilterPanelLayout.setVerticalGroup(
             transactionFilterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(transactionFilterPanelLayout.createSequentialGroup()
                 .addGroup(transactionFilterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(filterLabel)
-                    .addComponent(filterCategoryBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 8, Short.MAX_VALUE))
+                    .addComponent(filterCategoryBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(editCategoryButton))
+                .addGap(0, 7, Short.MAX_VALUE))
         );
 
         transactionHeader.add(transactionFilterPanel, java.awt.BorderLayout.CENTER);
@@ -567,11 +539,11 @@ public class HomePageView extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Date", "Amount", "Company", "Category", "Actions"
+                "Date", "Merchant", "Description", "Amount", "Category"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Double.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false
@@ -613,6 +585,13 @@ public class HomePageView extends javax.swing.JFrame {
             }
         });
 
+        editBudgetButton.setText("Edit Budget [-]");
+        editBudgetButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editBudgetButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout budgetHeaderPanelLayout = new javax.swing.GroupLayout(budgetHeaderPanel);
         budgetHeaderPanel.setLayout(budgetHeaderPanelLayout);
         budgetHeaderPanelLayout.setHorizontalGroup(
@@ -620,17 +599,20 @@ public class HomePageView extends javax.swing.JFrame {
             .addGroup(budgetHeaderPanelLayout.createSequentialGroup()
                 .addGap(23, 23, 23)
                 .addComponent(budgetHeader, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 148, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(addBudgetButton, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(35, 35, 35))
+                .addGap(18, 18, 18)
+                .addComponent(editBudgetButton, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(30, Short.MAX_VALUE))
         );
         budgetHeaderPanelLayout.setVerticalGroup(
             budgetHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, budgetHeaderPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(budgetHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(budgetHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(budgetHeader, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
                     .addComponent(addBudgetButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(budgetHeader, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE))
+                    .addComponent(editBudgetButton))
                 .addContainerGap())
         );
 
@@ -643,14 +625,14 @@ public class HomePageView extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Category", "Budget", "Spent", "Remaining", "Action"
+                "Category", "Budget", "Spent", "Remaining"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class, java.lang.Object.class
+                java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -667,7 +649,6 @@ public class HomePageView extends javax.swing.JFrame {
             budgetTable.getColumnModel().getColumn(1).setResizable(false);
             budgetTable.getColumnModel().getColumn(2).setResizable(false);
             budgetTable.getColumnModel().getColumn(3).setResizable(false);
-            budgetTable.getColumnModel().getColumn(4).setResizable(false);
         }
 
         cardBudget.add(budgetScrollPane, java.awt.BorderLayout.CENTER);
@@ -817,80 +798,16 @@ public class HomePageView extends javax.swing.JFrame {
 
         mainPanel.add(cardReport, "card6");
 
-        cardImport.setLayout(new java.awt.BorderLayout());
-
-        importHeaderPanel.setBackground(new java.awt.Color(200, 200, 200));
-        importHeaderPanel.setPreferredSize(new java.awt.Dimension(462, 50));
-
-        importLabel.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        importLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        importLabel.setText("Import");
-
-        javax.swing.GroupLayout importHeaderPanelLayout = new javax.swing.GroupLayout(importHeaderPanel);
-        importHeaderPanel.setLayout(importHeaderPanelLayout);
-        importHeaderPanelLayout.setHorizontalGroup(
-            importHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(importLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 551, Short.MAX_VALUE)
+        javax.swing.GroupLayout cardImportLayout = new javax.swing.GroupLayout(cardImport);
+        cardImport.setLayout(cardImportLayout);
+        cardImportLayout.setHorizontalGroup(
+            cardImportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 551, Short.MAX_VALUE)
         );
-        importHeaderPanelLayout.setVerticalGroup(
-            importHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(importHeaderPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(importLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
-                .addContainerGap())
+        cardImportLayout.setVerticalGroup(
+            cardImportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 604, Short.MAX_VALUE)
         );
-
-        cardImport.add(importHeaderPanel, java.awt.BorderLayout.PAGE_START);
-
-        jPanel11.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel11.setBorder(javax.swing.BorderFactory.createCompoundBorder(null, javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3)));
-        jPanel11.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-
-        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
-        jPanel11.setLayout(jPanel11Layout);
-        jPanel11Layout.setHorizontalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 230, Short.MAX_VALUE)
-        );
-        jPanel11Layout.setVerticalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 118, Short.MAX_VALUE)
-        );
-
-        importFileButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        importFileButton.setText("Import");
-
-        cancelImportButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        cancelImportButton.setText("Cancel");
-
-        javax.swing.GroupLayout importBodyPanelLayout = new javax.swing.GroupLayout(importBodyPanel);
-        importBodyPanel.setLayout(importBodyPanelLayout);
-        importBodyPanelLayout.setHorizontalGroup(
-            importBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(importBodyPanelLayout.createSequentialGroup()
-                .addGap(114, 114, 114)
-                .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(importBodyPanelLayout.createSequentialGroup()
-                .addContainerGap(150, Short.MAX_VALUE)
-                .addComponent(cancelImportButton)
-                .addGap(79, 79, 79)
-                .addComponent(importFileButton)
-                .addGap(171, 171, 171))
-        );
-        importBodyPanelLayout.setVerticalGroup(
-            importBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(importBodyPanelLayout.createSequentialGroup()
-                .addGap(21, 21, 21)
-                .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(importBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(importFileButton)
-                    .addComponent(cancelImportButton))
-                .addContainerGap(370, Short.MAX_VALUE))
-        );
-
-        cardImport.add(importBodyPanel, java.awt.BorderLayout.CENTER);
 
         mainPanel.add(cardImport, "card8");
 
@@ -906,10 +823,10 @@ public class HomePageView extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(68, 68, 68)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(162, Short.MAX_VALUE)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(251, Short.MAX_VALUE))
+                .addGap(157, 157, 157))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -924,10 +841,13 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel4.setText("Date:");
 
+        jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel6.setText("Year:");
 
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel7.setText("Month:");
 
+        jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel8.setText("Day:");
 
         jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016" }));
@@ -977,50 +897,62 @@ public class HomePageView extends javax.swing.JFrame {
             }
         });
 
+        jLabel18.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel18.setText("Item Name:");
+
+        jTextField4.setText("Item");
+
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
-                .addGap(26, 26, 26)
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel9Layout.createSequentialGroup()
-                        .addGap(90, 90, 90)
+                        .addGap(116, 116, 116)
                         .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel9Layout.createSequentialGroup()
-                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGap(38, 38, 38)
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel9Layout.createSequentialGroup()
+                                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(jPanel9Layout.createSequentialGroup()
+                                        .addComponent(jLabel11)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(cancelAddTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel9Layout.createSequentialGroup()
+                                        .addGap(93, 93, 93)
+                                        .addComponent(jButton3))
+                                    .addGroup(jPanel9Layout.createSequentialGroup()
+                                        .addGap(70, 70, 70)
+                                        .addComponent(jLabel18)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(jPanel9Layout.createSequentialGroup()
                                 .addComponent(jLabel9)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextField1))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel9Layout.createSequentialGroup()
                                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jLabel6)
-                                .addGap(5, 5, 5)
-                                .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(11, 11, 11)
-                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel9Layout.createSequentialGroup()
-                        .addComponent(jLabel13)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel9Layout.createSequentialGroup()
-                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(cancelAddTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel9Layout.createSequentialGroup()
-                                .addComponent(jLabel11)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(77, 77, 77)
-                        .addComponent(jButton3)))
-                .addContainerGap(112, Short.MAX_VALUE))
+                                .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(12, 12, 12)
+                                .addComponent(jLabel8)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel9Layout.createSequentialGroup()
+                                .addComponent(jLabel13)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jComboBox6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap(82, Short.MAX_VALUE))
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1041,9 +973,11 @@ public class HomePageView extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel10)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel18)
                     .addComponent(jLabel11)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
@@ -1071,10 +1005,10 @@ public class HomePageView extends javax.swing.JFrame {
         jPanel10.setLayout(jPanel10Layout);
         jPanel10Layout.setHorizontalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel10Layout.createSequentialGroup()
-                .addGap(171, 171, 171)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
+                .addContainerGap(186, Short.MAX_VALUE)
                 .addComponent(jLabel14)
-                .addContainerGap(191, Short.MAX_VALUE))
+                .addGap(176, 176, 176))
         );
         jPanel10Layout.setVerticalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1126,22 +1060,21 @@ public class HomePageView extends javax.swing.JFrame {
         jPanel13Layout.setHorizontalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel13Layout.createSequentialGroup()
-                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(79, 79, 79)
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel13Layout.createSequentialGroup()
-                        .addGap(67, 67, 67)
                         .addComponent(jLabel16)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(73, 73, 73)
+                        .addComponent(jComboBox8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(73, 73, 73)
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel13Layout.createSequentialGroup()
                         .addComponent(jLabel17)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel13Layout.createSequentialGroup()
-                        .addGap(113, 113, 113)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(69, 69, 69)
-                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(99, Short.MAX_VALUE))
+                    .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(87, Short.MAX_VALUE))
         );
         jPanel13Layout.setVerticalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1163,35 +1096,303 @@ public class HomePageView extends javax.swing.JFrame {
 
         mainPanel.add(cardAddBudget, "card9");
 
-        javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
-        jPanel14.setLayout(jPanel14Layout);
-        jPanel14Layout.setHorizontalGroup(
-            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 100, Short.MAX_VALUE)
+        javax.swing.GroupLayout JPanel26Layout = new javax.swing.GroupLayout(JPanel26);
+        JPanel26.setLayout(JPanel26Layout);
+        JPanel26Layout.setHorizontalGroup(
+            JPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 551, Short.MAX_VALUE)
         );
-        jPanel14Layout.setVerticalGroup(
-            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 100, Short.MAX_VALUE)
+        JPanel26Layout.setVerticalGroup(
+            JPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 604, Short.MAX_VALUE)
         );
+
+        mainPanel.add(JPanel26, "card11");
+
+        cardEditTransaction.setLayout(new java.awt.BorderLayout());
+
+        jPanel11.setBackground(new java.awt.Color(200, 200, 200));
+        jPanel11.setPreferredSize(new java.awt.Dimension(551, 50));
+
+        jLabel19.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel19.setText("Edit Transaction");
+
+        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
+        jPanel11.setLayout(jPanel11Layout);
+        jPanel11Layout.setHorizontalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
+                .addContainerGap(162, Short.MAX_VALUE)
+                .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(157, 157, 157))
+        );
+        jPanel11Layout.setVerticalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel19, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        cardEditTransaction.add(jPanel11, java.awt.BorderLayout.PAGE_START);
+
+        jLabel20.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel20.setText("Date:");
+
+        jLabel21.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel21.setText("Year:");
+
+        jLabel22.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel22.setText("Month:");
+
+        jLabel23.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel23.setText("Day:");
+
+        jComboBox7.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016" }));
+
+        jComboBox9.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }));
+
+        jComboBox10.setMaximumRowCount(32);
+        jComboBox10.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31" }));
+
+        jLabel24.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel24.setText("Amount:");
+
+        jTextField5.setText("0.00");
+
+        jLabel25.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+
+        jLabel26.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel26.setText("Store Name:");
+
+        jTextField6.setText("Store");
+        jTextField6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField6ActionPerformed(evt);
+            }
+        });
+
+        jLabel27.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel27.setText("Category:");
+
+        jComboBox11.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
+
+        cancelEditTransactionButton.setBackground(new java.awt.Color(255, 0, 0));
+        cancelEditTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        cancelEditTransactionButton.setText("Cancel");
+        cancelEditTransactionButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelEditTransactionButtonActionPerformed(evt);
+            }
+        });
+
+        finishEditTransactionButton.setBackground(new java.awt.Color(0, 255, 0));
+        finishEditTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        finishEditTransactionButton.setText("Edit Transaction");
+        finishEditTransactionButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                finishEditTransactionButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel28.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel28.setText("Item Name:");
+
+        jTextField7.setText("Item");
 
         javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
         jPanel12.setLayout(jPanel12Layout);
         jPanel12Layout.setHorizontalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel12Layout.createSequentialGroup()
-                .addContainerGap(240, Short.MAX_VALUE)
-                .addComponent(jPanel14, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(211, 211, 211))
+            .addGroup(jPanel12Layout.createSequentialGroup()
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel12Layout.createSequentialGroup()
+                        .addGap(116, 116, 116)
+                        .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel12Layout.createSequentialGroup()
+                        .addGap(38, 38, 38)
+                        .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel12Layout.createSequentialGroup()
+                                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(jPanel12Layout.createSequentialGroup()
+                                        .addComponent(jLabel26)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(cancelEditTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel12Layout.createSequentialGroup()
+                                        .addGap(93, 93, 93)
+                                        .addComponent(finishEditTransactionButton))
+                                    .addGroup(jPanel12Layout.createSequentialGroup()
+                                        .addGap(70, 70, 70)
+                                        .addComponent(jLabel28)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(jPanel12Layout.createSequentialGroup()
+                                .addComponent(jLabel24)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel12Layout.createSequentialGroup()
+                                .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel21)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBox7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel22)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBox9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(12, 12, 12)
+                                .addComponent(jLabel23)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBox10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel12Layout.createSequentialGroup()
+                                .addComponent(jLabel27)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jComboBox11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap(82, Short.MAX_VALUE))
         );
         jPanel12Layout.setVerticalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel12Layout.createSequentialGroup()
-                .addGap(95, 95, 95)
-                .addComponent(jPanel14, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(409, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel20)
+                    .addComponent(jLabel21)
+                    .addComponent(jComboBox7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel22)
+                    .addComponent(jComboBox9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel23)
+                    .addComponent(jComboBox10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel24)
+                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel25)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel28)
+                    .addComponent(jLabel26)
+                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel27)
+                    .addComponent(jComboBox11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(28, 28, 28)
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cancelEditTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(finishEditTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(361, Short.MAX_VALUE))
         );
 
-        mainPanel.add(jPanel12, "card10");
+        cardEditTransaction.add(jPanel12, java.awt.BorderLayout.CENTER);
+
+        mainPanel.add(cardEditTransaction, "card8");
+
+        cardEditBudget.setLayout(new java.awt.BorderLayout());
+
+        jPanel14.setBackground(new java.awt.Color(200, 200, 200));
+        jPanel14.setPreferredSize(new java.awt.Dimension(551, 50));
+
+        jLabel29.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel29.setText("Edit Budget Limit");
+
+        javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
+        jPanel14.setLayout(jPanel14Layout);
+        jPanel14Layout.setHorizontalGroup(
+            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel14Layout.createSequentialGroup()
+                .addContainerGap(177, Short.MAX_VALUE)
+                .addComponent(jLabel29)
+                .addGap(176, 176, 176))
+        );
+        jPanel14Layout.setVerticalGroup(
+            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel14Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel29)
+                .addGap(16, 16, 16))
+        );
+
+        cardEditBudget.add(jPanel14, java.awt.BorderLayout.PAGE_START);
+
+        jPanel15.setPreferredSize(new java.awt.Dimension(551, 250));
+
+        jLabel30.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel30.setText("Category:");
+
+        jLabel31.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel31.setText("Amount:");
+
+        jTextField8.setText("0.00");
+        jTextField8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField8ActionPerformed(evt);
+            }
+        });
+
+        cancelEditLimitButton.setBackground(new java.awt.Color(255, 0, 0));
+        cancelEditLimitButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        cancelEditLimitButton.setText("Cancel");
+        cancelEditLimitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelEditLimitButtonActionPerformed(evt);
+            }
+        });
+
+        finishEditLimitButton.setBackground(new java.awt.Color(0, 255, 0));
+        finishEditLimitButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        finishEditLimitButton.setText("Edit Limit");
+        finishEditLimitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                finishEditLimitButtonActionPerformed(evt);
+            }
+        });
+
+        jComboBox12.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        javax.swing.GroupLayout jPanel15Layout = new javax.swing.GroupLayout(jPanel15);
+        jPanel15.setLayout(jPanel15Layout);
+        jPanel15Layout.setHorizontalGroup(
+            jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel15Layout.createSequentialGroup()
+                .addGap(79, 79, 79)
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addComponent(jLabel30)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBox12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cancelEditLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(73, 73, 73)
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addComponent(jLabel31)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(finishEditLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(87, Short.MAX_VALUE))
+        );
+        jPanel15Layout.setVerticalGroup(
+            jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel15Layout.createSequentialGroup()
+                .addGap(37, 37, 37)
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel31)
+                    .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel30)
+                    .addComponent(jComboBox12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(38, 38, 38)
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cancelEditLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(finishEditLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(414, Short.MAX_VALUE))
+        );
+
+        cardEditBudget.add(jPanel15, java.awt.BorderLayout.CENTER);
+
+        mainPanel.add(cardEditBudget, "card9");
 
         getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
 
@@ -1221,10 +1422,6 @@ public class HomePageView extends javax.swing.JFrame {
     private void addBudgetButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                
         showCard(CARD_ADD_BUDGET);
     }                                               
-
-    private void addTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                     
-        showCard(CARD_ADD_TRANS);
-    }                                                    
 
     private void homeButtonMouseEntered(java.awt.event.MouseEvent evt) {                                        
         homeButton.setBackground(new java.awt.Color(150,150,150)); // bluish hover
@@ -1324,6 +1521,50 @@ public class HomePageView extends javax.swing.JFrame {
         // TODO add your handling code here:
     }                                        
 
+    private void chartButtonActionPerformed(java.awt.event.ActionEvent evt) {                                            
+        showCard(CARD_CHARTS);
+    }                                           
+
+    private void editBudgetButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                 
+        showCard(CARD_EDIT_BUDGET);
+    }                                                
+
+    private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {                                            
+        // TODO add your handling code here:
+    }                                           
+
+    private void cancelEditTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                            
+        showCard(CARD_TRANS);
+    }                                                           
+
+    private void finishEditTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                            
+        // TODO add your handling code here:
+    }                                                           
+
+    private void jTextField8ActionPerformed(java.awt.event.ActionEvent evt) {                                            
+        // TODO add your handling code here:
+    }                                           
+
+    private void cancelEditLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                      
+        showCard(CARD_BUDGET);
+    }                                                     
+
+    private void finishEditLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                      
+        // TODO add your handling code here:
+    }                                                     
+
+    private void editTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                      
+        showCard(CARD_EDIT_TRANS);
+    }                                                     
+
+    private void editCategoryButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                   
+        // TODO add your handling code here:
+    }                                                  
+
+    private void addTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                     
+        showCard(CARD_ADD_TRANS);
+    }                                                    
+
     /**
      * @param args the command line arguments
      */
@@ -1350,6 +1591,7 @@ public class HomePageView extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify                     
+    private javax.swing.JPanel JPanel26;
     private javax.swing.JButton addBudgetButton;
     private javax.swing.JButton addTransactionButton;
     private javax.swing.JButton budgetButton;
@@ -1359,34 +1601,44 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JTable budgetTable;
     private javax.swing.JPanel buttonPanel;
     private javax.swing.JButton cancelAddTransactionButton;
-    private javax.swing.JButton cancelImportButton;
+    private javax.swing.JButton cancelEditLimitButton;
+    private javax.swing.JButton cancelEditTransactionButton;
     private javax.swing.JPanel cardAddBudget;
     private javax.swing.JPanel cardAddTransaction;
     private javax.swing.JPanel cardBudget;
     private javax.swing.JPanel cardCharts;
+    private javax.swing.JPanel cardEditBudget;
+    private javax.swing.JPanel cardEditTransaction;
     private javax.swing.JPanel cardHome;
     private javax.swing.JPanel cardImport;
     private javax.swing.JPanel cardReport;
     private javax.swing.JPanel cardTransaction;
+    private javax.swing.JButton chartButton;
+    private javax.swing.JButton editBudgetButton;
+    private javax.swing.JButton editCategoryButton;
+    private javax.swing.JButton editTransactionButton;
     private javax.swing.JComboBox<String> filterCategoryBox;
     private javax.swing.JLabel filterLabel;
+    private javax.swing.JButton finishEditLimitButton;
+    private javax.swing.JButton finishEditTransactionButton;
     private javax.swing.JButton homeButton;
-    private javax.swing.JPanel importBodyPanel;
     private javax.swing.JButton importButton;
-    private javax.swing.JButton importFileButton;
-    private javax.swing.JPanel importHeaderPanel;
-    private javax.swing.JLabel importLabel;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JComboBox<String> jComboBox10;
+    private javax.swing.JComboBox<String> jComboBox11;
+    private javax.swing.JComboBox<String> jComboBox12;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JComboBox<String> jComboBox3;
     private javax.swing.JComboBox<String> jComboBox4;
     private javax.swing.JComboBox<String> jComboBox5;
     private javax.swing.JComboBox<String> jComboBox6;
+    private javax.swing.JComboBox<String> jComboBox7;
     private javax.swing.JComboBox<String> jComboBox8;
+    private javax.swing.JComboBox<String> jComboBox9;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1396,8 +1648,23 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -1410,6 +1677,7 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel13;
     private javax.swing.JPanel jPanel14;
+    private javax.swing.JPanel jPanel15;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -1423,6 +1691,11 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextField jTextField4;
+    private javax.swing.JTextField jTextField5;
+    private javax.swing.JTextField jTextField6;
+    private javax.swing.JTextField jTextField7;
+    private javax.swing.JTextField jTextField8;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JLabel projectLabel;
     private javax.swing.JButton reportButton;
@@ -1434,8 +1707,6 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JPanel transactionHeader;
     private javax.swing.JPanel transactionHeaderButton;
     private javax.swing.JPanel transactionHeaderHeader;
-    private javax.swing.JPanel transactionHeaderTitle;
-    private javax.swing.JLabel transactionLabel;
     private javax.swing.JScrollPane transactionScrollPane;
     private javax.swing.JTable transactionTable;
     // End of variables declaration                   
@@ -1500,4 +1771,3 @@ public class HomePageView extends javax.swing.JFrame {
 }
 
     
-
