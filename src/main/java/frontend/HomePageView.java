@@ -115,10 +115,8 @@ public class HomePageView extends javax.swing.JFrame {
         // Initialize controller
         addBudgetController = new use_case2.interface_adapter.add_budget.AddBudgetController(interactor);
 
-        // Initialize budget tracking interactor
         updateBudgetSpendingInteractor = new use_case2.use_case.UpdateBudgetSpendingInteractor(budgetDataAccess);
 
-        // Update category dropdown with B2B SaaS categories
         jComboBox8.setModel(new javax.swing.DefaultComboBoxModel<>(
             new String[] {
                 "Software & Tools",
@@ -134,11 +132,9 @@ public class HomePageView extends javax.swing.JFrame {
             }
         ));
 
-        // Set up budget table with custom renderer for warnings
         setupBudgetTableRenderer();
     }
 
-    /** Set up custom cell renderer for budget table to show visual warnings */
     private void setupBudgetTableRenderer() {
         budgetTable.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
             @Override
@@ -150,17 +146,15 @@ public class HomePageView extends javax.swing.JFrame {
                 java.awt.Component c = super.getTableCellRendererComponent(
                     table, value, isSelected, hasFocus, row, column);
 
-                // Get the budget for this row
                 if (row < budgetDataAccess.getAll().size()) {
                     use_case2.entity.Budget budget = budgetDataAccess.getAll().get(row);
                     String warningLevel = budget.getWarningLevel();
 
-                    // Set background color based on warning level
                     if (!isSelected) {
                         if ("EXCEEDED".equals(warningLevel)) {
-                            c.setBackground(new Color(255, 200, 200)); // Light red
+                            c.setBackground(new Color(255, 200, 200));
                         } else if ("WARNING".equals(warningLevel)) {
-                            c.setBackground(new Color(255, 255, 200)); // Light yellow
+                            c.setBackground(new Color(255, 255, 200));
                         } else {
                             c.setBackground(Color.WHITE);
                         }
@@ -172,28 +166,23 @@ public class HomePageView extends javax.swing.JFrame {
         });
     }
 
-    /** Refresh the budget table with current data */
     private void refreshBudgetTable() {
         javax.swing.table.DefaultTableModel model =
             (javax.swing.table.DefaultTableModel) budgetTable.getModel();
 
-        // Clear existing rows
         model.setRowCount(0);
 
-        // Get current month's budgets
         java.time.YearMonth currentMonth = java.time.YearMonth.now();
         java.util.List<use_case2.entity.Budget> budgets =
             budgetDataAccess.getAllForMonth(currentMonth);
 
-        // Add each budget to the table
         for (use_case2.entity.Budget budget : budgets) {
             Object[] row = new Object[5];
             row[0] = budget.getCategory();
-            row[1] = budget.getMonthlyLimit();  // Pass raw Double value
-            row[2] = budget.getSpent();          // Pass raw Double value
-            row[3] = budget.getRemaining();      // Pass raw Double value
+            row[1] = budget.getMonthlyLimit();
+            row[2] = budget.getSpent();
+            row[3] = budget.getRemaining();
 
-            // Warning indicator - this column is Object type, so String is fine
             String warningLevel = budget.getWarningLevel();
             if ("EXCEEDED".equals(warningLevel)) {
                 row[4] = "EXCEEDED!";
@@ -206,7 +195,6 @@ public class HomePageView extends javax.swing.JFrame {
             model.addRow(row);
         }
 
-        // Refresh table display
         budgetTable.repaint();
     }
     
@@ -1433,9 +1421,7 @@ public class HomePageView extends javax.swing.JFrame {
     }                                                          
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {
-        // Add Transaction button clicked
         try {
-            // Parse date from dropdowns
             String yearStr = (String) jComboBox3.getSelectedItem();
             String monthStr = (String) jComboBox4.getSelectedItem();
             String dayStr = (String) jComboBox5.getSelectedItem();
@@ -1453,7 +1439,6 @@ public class HomePageView extends javax.swing.JFrame {
             int day = Integer.parseInt(dayStr);
             java.time.LocalDate date = java.time.LocalDate.of(year, month, day);
 
-            // Get amount
             String amountText = jTextField1.getText().trim();
             double amount;
             try {
@@ -1466,7 +1451,6 @@ public class HomePageView extends javax.swing.JFrame {
                 return;
             }
 
-            // Get store name
             String storeName = jTextField2.getText().trim();
             if (storeName.isEmpty() || "Store".equals(storeName)) {
                 javax.swing.JOptionPane.showMessageDialog(this,
@@ -1476,7 +1460,6 @@ public class HomePageView extends javax.swing.JFrame {
                 return;
             }
 
-            // Get category
             String category = (String) jComboBox6.getSelectedItem();
             if ("Select...".equals(category)) {
                 javax.swing.JOptionPane.showMessageDialog(this,
@@ -1486,18 +1469,15 @@ public class HomePageView extends javax.swing.JFrame {
                 return;
             }
 
-            // Update budget spending
             use_case2.use_case.UpdateBudgetSpendingInputData budgetInputData =
                 new use_case2.use_case.UpdateBudgetSpendingInputData(category, amount, date);
             updateBudgetSpendingInteractor.execute(budgetInputData);
 
-            // Show success message
             javax.swing.JOptionPane.showMessageDialog(this,
                 "Transaction added successfully!",
                 "Success",
                 javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
-            // Reset form
             jComboBox3.setSelectedIndex(0);
             jComboBox4.setSelectedIndex(0);
             jComboBox5.setSelectedIndex(0);
@@ -1505,7 +1485,6 @@ public class HomePageView extends javax.swing.JFrame {
             jTextField2.setText("Store");
             jComboBox6.setSelectedIndex(0);
 
-            // Go back to transaction list
             showCard(CARD_TRANS);
 
         } catch (Exception ex) {
@@ -1517,7 +1496,6 @@ public class HomePageView extends javax.swing.JFrame {
         }
     }
 
-    /** Helper method to convert month name to number */
     private int getMonthNumber(String monthName) {
         switch (monthName) {
             case "January": return 1;
@@ -1545,13 +1523,10 @@ public class HomePageView extends javax.swing.JFrame {
     }                                        
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {
-        // Set Limit button clicked - add budget
         try {
-            // Get values from UI
             String category = (String) jComboBox8.getSelectedItem();
             String amountText = jTextField3.getText().trim();
 
-            // Validate inputs
             if (category == null || category.isEmpty()) {
                 javax.swing.JOptionPane.showMessageDialog(this,
                     "Please select a category",
@@ -1571,11 +1546,9 @@ public class HomePageView extends javax.swing.JFrame {
                 return;
             }
 
-            // Execute use case with current month
             java.time.YearMonth currentMonth = java.time.YearMonth.now();
             addBudgetController.execute(category, amount, currentMonth);
 
-            // Check result
             if (budgetState.getBudgetError() != null) {
                 javax.swing.JOptionPane.showMessageDialog(this,
                     budgetState.getBudgetError(),
@@ -1587,14 +1560,11 @@ public class HomePageView extends javax.swing.JFrame {
                     "Success",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
-                // Reset form
                 jTextField3.setText("0.00");
                 jComboBox8.setSelectedIndex(0);
 
-                // Refresh budget table
                 refreshBudgetTable();
 
-                // Go back to budget list view
                 showCard(CARD_BUDGET);
             }
         } catch (Exception ex) {
