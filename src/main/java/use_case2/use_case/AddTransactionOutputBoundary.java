@@ -1,4 +1,6 @@
 package use_case2.use_case;
 
-public class AddTransactionOutputBoundary {
+public interface AddTransactionOutputBoundary {
+    void prepareSuccessView(AddTransactionOutputData outputData);
+    void prepareFailView(String errorMessage);
 }
