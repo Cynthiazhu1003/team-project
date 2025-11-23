@@ -31,9 +31,9 @@ public class AddTransactionInteractor implements AddTransactionInputBoundary {
 
             Transaction transaction = new Transaction(
                     inputData.getDate(),
-                    inputData.getDescription(),
                     inputData.getAmount(),
-                    inputData.getCategory()
+                    inputData.getCategory(),
+                    inputData.getDescription()
             );
 
             transactionDataAccess.save(transaction);
