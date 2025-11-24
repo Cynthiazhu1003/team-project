@@ -9,3 +9,7 @@ public interface TransactionDataAccessInterface {
     void update(Transaction transaction);
     void delete(Transaction transaction);
 }
+
+public interface TransactionDataAccessInterface {
+    void save(Transaction transaction);
+}

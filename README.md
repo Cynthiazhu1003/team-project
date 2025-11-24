@@ -26,7 +26,7 @@ User story 3: Categorize spending.
 
 As a user, I want to assign categories to transactions so I can see where my money goes.
 
-Eirc:
+Eric:
 
 User story 4: Auto-categorization.
 
