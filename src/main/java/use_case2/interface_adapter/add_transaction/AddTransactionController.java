@@ -1,0 +1,20 @@
+package use_case2.interface_adapter.add_transaction;
+
+import use_case2.use_case.AddTransactionInputBoundary;
+import use_case2.use_case.AddTransactionInputData;
+import java.time.LocalDate;
+
+public class AddTransactionController {
+    private final AddTransactionInputBoundary addTransactionUseCase;
+
+    public AddTransactionController(AddTransactionInputBoundary addTransactionUseCase) {
+        this.addTransactionUseCase = addTransactionUseCase;
+    }
+
+    public void execute(LocalDate date, String category,double amount, String description) {
+        AddTransactionInputData inputData = new AddTransactionInputData(
+                date, category, amount, description
+        );
+        addTransactionUseCase.execute(inputData);
+    }
+}
