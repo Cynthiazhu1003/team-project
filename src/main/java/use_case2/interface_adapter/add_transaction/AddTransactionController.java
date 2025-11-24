@@ -11,9 +11,9 @@ public class AddTransactionController {
         this.addTransactionUseCase = addTransactionUseCase;
     }
 
-    public void execute(LocalDate date, String category,double amount, String description) {
+    public void execute(LocalDate date, String description, String merchant, double amount, String category) {
         AddTransactionInputData inputData = new AddTransactionInputData(
-                date, category, amount, description
+                date, description, merchant, amount, category
         );
         addTransactionUseCase.execute(inputData);
     }

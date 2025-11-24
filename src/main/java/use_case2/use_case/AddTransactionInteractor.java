@@ -1,7 +1,6 @@
 package use_case2.use_case;
 
 import use_case2.entity.Transaction;
-import use_case2.interface_adapter.add_transaction.AddTransactionPresenter;
 
 
 public class AddTransactionInteractor implements AddTransactionInputBoundary {
@@ -21,6 +20,10 @@ public class AddTransactionInteractor implements AddTransactionInputBoundary {
             // Let's validate that we have at least a description or amount
             if (inputData.getDescription() == null || inputData.getDescription().trim().isEmpty()) {
                 presenter.prepareFailView("Description is required");
+                return;
+            }
+            if (inputData.getMerchant() == null || inputData.getMerchant().trim().isEmpty()) {
+                presenter.prepareFailView("Merchant is required");
                 return;
             }
 
