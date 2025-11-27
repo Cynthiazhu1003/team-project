@@ -22,7 +22,7 @@
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
 */
-package frontend;
+package frontend; // this is for the gui
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
