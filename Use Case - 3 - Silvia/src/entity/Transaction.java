@@ -4,31 +4,40 @@ import java.util.Objects;
 public class Transaction {
 
     private LocalDate date;
+    private String description;
+    private String merchant;
     private double amount;
     private String category;
-    private String description;
+
 
     public Transaction(LocalDate date,
+                       String description,
+                       String merchant,
                        double amount,
-                       String category,
-                       String description) {
+                       String category) {
         this.date = date;
+        this.description = description;
+        this.merchant = merchant;
         this.amount = amount;
         this.category = category;
-        this.description = description;
+
     }
 
     // Getters
     public LocalDate getDate() { return date; }
+    public String getDescription() { return description; }
+    public String getMerchant() {return merchant; }
     public double getAmount() { return amount; }
     public String getCategory() { return category; }
-    public String getDescription() { return description; }
+
 
     // Setters
     public void setDate(LocalDate date) { this.date = date; }
+    public void setDescription(String description) { this.description = description; }
+    public void setMerchant(String merchant) { this.merchant = merchant; }
     public void setAmount(double amount) { this.amount = amount; }
     public void setCategory(String category) { this.category = category; }
-    public void setDescription(String description) { this.description = description; }
+
 
     @Override
     public boolean equals(Object o) {
@@ -37,22 +46,25 @@ public class Transaction {
         Transaction that = (Transaction) o;
         return Double.compare(that.amount, amount) == 0 &&
                 Objects.equals(date, that.date) &&
-                Objects.equals(category, that.category) &&
-                Objects.equals(description, that.description);
+                Objects.equals(description, that.description) &&
+                Objects.equals(merchant, that.merchant) &&
+                Objects.equals(category, that.category);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date, amount, category, description);
+
+        return Objects.hash(date, description, merchant, amount, category);
     }
 
     @Override
     public String toString() {
         return "Transaction{" +
                 "date=" + date +
+                ", description='" + description + '\'' +
+                ", merchant='" + merchant + '\'' +
                 ", amount=" + amount +
                 ", category='" + category + '\'' +
-                ", description='" + description + '\'' +
                 '}';
     }
 }

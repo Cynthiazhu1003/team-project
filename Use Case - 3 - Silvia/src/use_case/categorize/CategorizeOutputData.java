@@ -14,4 +14,3 @@ public class CategorizeOutputData {
     public double getNewCategoryTotal() {
         return newCategoryTotal;
     }
-}
