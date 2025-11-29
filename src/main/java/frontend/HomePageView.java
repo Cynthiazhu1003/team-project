@@ -54,15 +54,9 @@ public class HomePageView extends javax.swing.JFrame {
     private static final String CARD_IMPORT   = "cardImport";
     private static final String CARD_ADD_TRANS   = "cardAddTransaction";
     private static final String CARD_ADD_BUDGET = "cardAddBudget";
-    private static final String CARD_CHARTS = "cardCharts";
-    private static final String CARD_EDIT_TRANS = "cardEditTransaction";
+    //private static final String CARD_EDIT_TRANS = "cardEditTransaction";
     private static final String CARD_EDIT_BUDGET = "cardEditBudget";
-
-    // --- Budget feature components ---
-    private use_case2.interface_adapter.add_budget.AddBudgetController addBudgetController;
-    private use_case2.interface_adapter.add_budget.BudgetState budgetState;
-    private use_case2.data_access.InMemoryBudgetDataAccessObject budgetDataAccess;
-    private use_case2.use_case.UpdateBudgetSpendingInteractor updateBudgetSpendingInteractor;
+    private static final String CARD_EDIT_CATEGORY = "cardEditCategory";
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
@@ -72,7 +66,7 @@ public class HomePageView extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(HomePageView.class.getName());
 
     /**
-     * Creates new form HomePage
+     * Creates new form HomePage 
      */
     public HomePageView() {
         initComponents();
@@ -82,124 +76,15 @@ public class HomePageView extends javax.swing.JFrame {
         mainPanel.add(cardBudget,      CARD_BUDGET);
         mainPanel.add(cardReport,      CARD_REPORT);
         mainPanel.add(cardImport,      CARD_IMPORT);
-        mainPanel.add(cardAddTransaction,CARD_ADD_TRANS);
+        //mainPanel.add(cardEditTransaction,CARD_EDIT_TRANS);
         mainPanel.add(cardAddBudget, CARD_ADD_BUDGET);
-        mainPanel.add(cardCharts, CARD_CHARTS);
-        mainPanel.add(cardEditTransaction, CARD_EDIT_TRANS);
-        mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
+        mainPanel.add(cardAddTransaction, CARD_ADD_TRANS);
+        //mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
+        mainPanel.add(cardEditCategory, CARD_EDIT_CATEGORY);
 
         // Optional: show a default screen when program starts
         showCard(CARD_HOME);
         
-
-        // ---- Drop box styling + DnD ----
-        styleImportDropBox();   // dashed rounded border + label
-        enableCsvDrop();        // drag-and-drop CSV handler + hover highlight
-
-        // ---- Budget feature initialization ----
-        initializeBudgetFeature();
-    }
-
-    /** Initialize budget feature with Clean Architecture components */
-    private void initializeBudgetFeature() {
-        // Initialize data access layer
-        budgetDataAccess = new use_case2.data_access.InMemoryBudgetDataAccessObject();
-
-        // Initialize state
-        budgetState = new use_case2.interface_adapter.add_budget.BudgetState();
-
-        // Initialize presenter
-        use_case2.interface_adapter.add_budget.AddBudgetPresenter presenter =
-            new use_case2.interface_adapter.add_budget.AddBudgetPresenter(budgetState);
-
-        // Initialize interactor
-        use_case2.use_case.AddBudgetInteractor interactor =
-            new use_case2.use_case.AddBudgetInteractor(presenter, budgetDataAccess);
-
-        // Initialize controller
-        addBudgetController = new use_case2.interface_adapter.add_budget.AddBudgetController(interactor);
-
-        updateBudgetSpendingInteractor = new use_case2.use_case.UpdateBudgetSpendingInteractor(budgetDataAccess);
-
-        jComboBox8.setModel(new javax.swing.DefaultComboBoxModel<>(
-            new String[] {
-                "Software & Tools",
-                "Cloud Infrastructure",
-                "Marketing & Advertising",
-                "Office Supplies",
-                "Professional Services",
-                "Travel & Entertainment",
-                "Hardware & Equipment",
-                "Training & Development",
-                "Subscriptions",
-                "Other"
-            }
-        ));
-
-        setupBudgetTableRenderer();
-    }
-
-    private void setupBudgetTableRenderer() {
-        budgetTable.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
-            @Override
-            public java.awt.Component getTableCellRendererComponent(
-                    javax.swing.JTable table, Object value,
-                    boolean isSelected, boolean hasFocus,
-                    int row, int column) {
-
-                java.awt.Component c = super.getTableCellRendererComponent(
-                    table, value, isSelected, hasFocus, row, column);
-
-                if (row < budgetDataAccess.getAll().size()) {
-                    use_case2.entity.Budget budget = budgetDataAccess.getAll().get(row);
-                    String warningLevel = budget.getWarningLevel();
-
-                    if (!isSelected) {
-                        if ("EXCEEDED".equals(warningLevel)) {
-                            c.setBackground(new Color(255, 200, 200));
-                        } else if ("WARNING".equals(warningLevel)) {
-                            c.setBackground(new Color(255, 255, 200));
-                        } else {
-                            c.setBackground(Color.WHITE);
-                        }
-                    }
-                }
-
-                return c;
-            }
-        });
-    }
-
-    private void refreshBudgetTable() {
-        javax.swing.table.DefaultTableModel model =
-            (javax.swing.table.DefaultTableModel) budgetTable.getModel();
-
-        model.setRowCount(0);
-
-        java.time.YearMonth currentMonth = java.time.YearMonth.now();
-        java.util.List<use_case2.entity.Budget> budgets =
-            budgetDataAccess.getAllForMonth(currentMonth);
-
-        for (use_case2.entity.Budget budget : budgets) {
-            Object[] row = new Object[5];
-            row[0] = budget.getCategory();
-            row[1] = budget.getMonthlyLimit();
-            row[2] = budget.getSpent();
-            row[3] = budget.getRemaining();
-
-            String warningLevel = budget.getWarningLevel();
-            if ("EXCEEDED".equals(warningLevel)) {
-                row[4] = "EXCEEDED!";
-            } else if ("WARNING".equals(warningLevel)) {
-                row[4] = String.format("%.0f%% used", budget.getPercentageUsed());
-            } else {
-                row[4] = "OK";
-            }
-
-            model.addRow(row);
-        }
-
-        budgetTable.repaint();
     }
     
    
@@ -225,7 +110,6 @@ public class HomePageView extends javax.swing.JFrame {
         reportButton = new javax.swing.JButton();
         homeButton = new javax.swing.JButton();
         importButton = new javax.swing.JButton();
-        chartButton = new javax.swing.JButton();
         mainPanel = new javax.swing.JPanel();
         cardHome = new javax.swing.JPanel();
         cardTransaction = new javax.swing.JPanel();
@@ -237,7 +121,7 @@ public class HomePageView extends javax.swing.JFrame {
         editTransactionButton = new javax.swing.JButton();
         transactionFilterPanel = new javax.swing.JPanel();
         filterLabel = new javax.swing.JLabel();
-        filterCategoryBox = new javax.swing.JComboBox<>();
+        transactionFilterCategorySelect = new javax.swing.JComboBox<>();
         editCategoryButton = new javax.swing.JButton();
         transactionScrollPane = new javax.swing.JScrollPane();
         transactionTable = new javax.swing.JTable();
@@ -248,7 +132,6 @@ public class HomePageView extends javax.swing.JFrame {
         editBudgetButton = new javax.swing.JButton();
         budgetScrollPane = new javax.swing.JScrollPane();
         budgetTable = new javax.swing.JTable();
-        cardCharts = new javax.swing.JPanel();
         cardReport = new javax.swing.JPanel();
         reportHeaderPanel = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
@@ -260,46 +143,26 @@ public class HomePageView extends javax.swing.JFrame {
         jComboBox1 = new javax.swing.JComboBox<>();
         jPanel8 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox<>();
+        reportCategorySelected = new javax.swing.JComboBox<>();
         jPanel6 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        cardImport = new javax.swing.JPanel();
-        cardAddTransaction = new javax.swing.JPanel();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jPanel9 = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        jComboBox3 = new javax.swing.JComboBox<>();
-        jComboBox4 = new javax.swing.JComboBox<>();
-        jComboBox5 = new javax.swing.JComboBox<>();
-        jLabel9 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jLabel10 = new javax.swing.JLabel();
-        jLabel11 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
-        jLabel13 = new javax.swing.JLabel();
-        jComboBox6 = new javax.swing.JComboBox<>();
-        cancelAddTransactionButton = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jLabel18 = new javax.swing.JLabel();
-        jTextField4 = new javax.swing.JTextField();
+        generateReportButton = new javax.swing.JButton();
+        reportBodyPanel = new javax.swing.JPanel();
         cardAddBudget = new javax.swing.JPanel();
         jPanel10 = new javax.swing.JPanel();
         jLabel14 = new javax.swing.JLabel();
         jPanel13 = new javax.swing.JPanel();
         jLabel16 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jComboBox8 = new javax.swing.JComboBox<>();
-        JPanel26 = new javax.swing.JPanel();
-        cardEditTransaction = new javax.swing.JPanel();
+        addBudgetAmountEntry = new javax.swing.JTextField();
+        addBudgetCancelButton = new javax.swing.JButton();
+        addBudgetFinishButton = new javax.swing.JButton();
+        addBudgetCategorySelect = new javax.swing.JComboBox<>();
+        cardImport = new javax.swing.JPanel();
+        jPanel17 = new javax.swing.JPanel();
+        jLabel33 = new javax.swing.JLabel();
+        jPanel18 = new javax.swing.JPanel();
+        importFileButton = new javax.swing.JButton();
+        cardAddTransaction = new javax.swing.JPanel();
         jPanel11 = new javax.swing.JPanel();
         jLabel19 = new javax.swing.JLabel();
         jPanel12 = new javax.swing.JPanel();
@@ -307,30 +170,22 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel21 = new javax.swing.JLabel();
         jLabel22 = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
-        jComboBox7 = new javax.swing.JComboBox<>();
-        jComboBox9 = new javax.swing.JComboBox<>();
-        jComboBox10 = new javax.swing.JComboBox<>();
+        addTransactionYearSelect = new javax.swing.JComboBox<>();
+        addTransactionMonthSelect = new javax.swing.JComboBox<>();
+        addTransactionDaySelect = new javax.swing.JComboBox<>();
         jLabel24 = new javax.swing.JLabel();
-        jTextField5 = new javax.swing.JTextField();
+        addTransactionAmountEntry = new javax.swing.JTextField();
         jLabel25 = new javax.swing.JLabel();
         jLabel26 = new javax.swing.JLabel();
-        jTextField6 = new javax.swing.JTextField();
+        addTransactionStoreEntry = new javax.swing.JTextField();
         jLabel27 = new javax.swing.JLabel();
-        jComboBox11 = new javax.swing.JComboBox<>();
-        cancelEditTransactionButton = new javax.swing.JButton();
-        finishEditTransactionButton = new javax.swing.JButton();
+        addTransactionCategorySelect = new javax.swing.JComboBox<>();
+        cancelAdtTransactionButton = new javax.swing.JButton();
+        finishAddTransactionButton = new javax.swing.JButton();
         jLabel28 = new javax.swing.JLabel();
-        jTextField7 = new javax.swing.JTextField();
-        cardEditBudget = new javax.swing.JPanel();
-        jPanel14 = new javax.swing.JPanel();
-        jLabel29 = new javax.swing.JLabel();
-        jPanel15 = new javax.swing.JPanel();
-        jLabel30 = new javax.swing.JLabel();
-        jLabel31 = new javax.swing.JLabel();
-        jTextField8 = new javax.swing.JTextField();
-        cancelEditLimitButton = new javax.swing.JButton();
-        finishEditLimitButton = new javax.swing.JButton();
-        jComboBox12 = new javax.swing.JComboBox<>();
+        addTransactionItemEntry = new javax.swing.JTextField();
+        cardEditCategory = new javax.swing.JPanel();
+        jPanel16 = new javax.swing.JPanel();
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -493,16 +348,6 @@ public class HomePageView extends javax.swing.JFrame {
             }
         });
 
-        chartButton.setBackground(new java.awt.Color(100, 100, 100));
-        chartButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        chartButton.setText("Charts");
-        chartButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        chartButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chartButtonActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout buttonPanelLayout = new javax.swing.GroupLayout(buttonPanel);
         buttonPanel.setLayout(buttonPanelLayout);
         buttonPanelLayout.setHorizontalGroup(
@@ -512,7 +357,6 @@ public class HomePageView extends javax.swing.JFrame {
             .addComponent(reportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(importButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(homeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(chartButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         buttonPanelLayout.setVerticalGroup(
             buttonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -527,9 +371,7 @@ public class HomePageView extends javax.swing.JFrame {
                 .addComponent(reportButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(importButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(chartButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(276, Short.MAX_VALUE))
+                .addContainerGap(320, Short.MAX_VALUE))
         );
 
         sidebarPanel.add(buttonPanel, java.awt.BorderLayout.CENTER);
@@ -611,7 +453,7 @@ public class HomePageView extends javax.swing.JFrame {
         filterLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         filterLabel.setText("Filter by Category:");
 
-        filterCategoryBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Category...", "Software & Tools", "Cloud Infrastructure", "Marketing & Advertising", "Office Supplies", "Professional Services", "Travel & Entertainment", "Hardware & Equipment", "Training & Development", "Subscriptions", "Other" }));
+        transactionFilterCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Category...", "Dining", "Leisure", "Gifts", "School" }));
 
         editCategoryButton.setText("Edit Category [+]");
         editCategoryButton.addActionListener(new java.awt.event.ActionListener() {
@@ -628,7 +470,7 @@ public class HomePageView extends javax.swing.JFrame {
                 .addGap(41, 41, 41)
                 .addComponent(filterLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(filterCategoryBox, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(transactionFilterCategorySelect, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(65, 65, 65)
                 .addComponent(editCategoryButton)
                 .addContainerGap(79, Short.MAX_VALUE))
@@ -638,7 +480,7 @@ public class HomePageView extends javax.swing.JFrame {
             .addGroup(transactionFilterPanelLayout.createSequentialGroup()
                 .addGroup(transactionFilterPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(filterLabel)
-                    .addComponent(filterCategoryBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(transactionFilterCategorySelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(editCategoryButton))
                 .addGap(0, 7, Short.MAX_VALUE))
         );
@@ -659,7 +501,6 @@ public class HomePageView extends javax.swing.JFrame {
         ) {
             Class[] types = new Class [] {
                 java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Double.class, java.lang.String.class
-                java.lang.String.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false
@@ -746,7 +587,6 @@ public class HomePageView extends javax.swing.JFrame {
         ) {
             Class[] types = new Class [] {
                 java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class
-                java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false
@@ -771,9 +611,6 @@ public class HomePageView extends javax.swing.JFrame {
         cardBudget.add(budgetScrollPane, java.awt.BorderLayout.CENTER);
 
         mainPanel.add(cardBudget, "card4");
-
-        cardCharts.setLayout(new java.awt.BorderLayout());
-        mainPanel.add(cardCharts, "card5");
 
         cardReport.setLayout(new java.awt.BorderLayout());
 
@@ -843,7 +680,7 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel3.setText("Select Category:");
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Software & Tools", "Cloud Infrastructure", "Marketing & Advertising", "Office Supplies", "Professional Services", "Travel & Entertainment", "Hardware & Equipment", "Training & Development", "Subscriptions", "Other" }));
+        reportCategorySelected.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Dining", "Leisure", "Work", "School" }));
 
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
@@ -853,7 +690,7 @@ public class HomePageView extends javax.swing.JFrame {
                 .addContainerGap(76, Short.MAX_VALUE)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(reportCategorySelected, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(50, 50, 50))
         );
         jPanel8Layout.setVerticalGroup(
@@ -862,7 +699,7 @@ public class HomePageView extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(reportCategorySelected, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(8, Short.MAX_VALUE))
         );
 
@@ -872,9 +709,9 @@ public class HomePageView extends javax.swing.JFrame {
 
         jPanel6.setPreferredSize(new java.awt.Dimension(462, 62));
 
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 22)); // NOI18N
-        jButton1.setText("Generate Report");
-        jButton1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        generateReportButton.setFont(new java.awt.Font("Segoe UI", 1, 22)); // NOI18N
+        generateReportButton.setText("Generate Report");
+        generateReportButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
@@ -882,14 +719,14 @@ public class HomePageView extends javax.swing.JFrame {
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
                 .addContainerGap(172, Short.MAX_VALUE)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(generateReportButton, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(167, 167, 167))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
                 .addContainerGap(12, Short.MAX_VALUE)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(generateReportButton, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -899,216 +736,20 @@ public class HomePageView extends javax.swing.JFrame {
 
         cardReport.add(reportHeaderPanel, java.awt.BorderLayout.PAGE_START);
 
-        jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Report", "Action"
-            }
-        ));
-        jScrollPane1.setViewportView(jTable1);
-
-        cardReport.add(jScrollPane1, java.awt.BorderLayout.CENTER);
-
-        mainPanel.add(cardReport, "card6");
-
-        javax.swing.GroupLayout cardImportLayout = new javax.swing.GroupLayout(cardImport);
-        cardImport.setLayout(cardImportLayout);
-        cardImportLayout.setHorizontalGroup(
-            cardImportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout reportBodyPanelLayout = new javax.swing.GroupLayout(reportBodyPanel);
+        reportBodyPanel.setLayout(reportBodyPanelLayout);
+        reportBodyPanelLayout.setHorizontalGroup(
+            reportBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 551, Short.MAX_VALUE)
         );
-        cardImportLayout.setVerticalGroup(
-            cardImportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 604, Short.MAX_VALUE)
+        reportBodyPanelLayout.setVerticalGroup(
+            reportBodyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 454, Short.MAX_VALUE)
         );
 
-        mainPanel.add(cardImport, "card8");
+        cardReport.add(reportBodyPanel, java.awt.BorderLayout.CENTER);
 
-        cardAddTransaction.setLayout(new java.awt.BorderLayout());
-
-        jPanel1.setBackground(new java.awt.Color(200, 200, 200));
-        jPanel1.setPreferredSize(new java.awt.Dimension(551, 50));
-
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel1.setText("Add Transaction");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(162, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(157, 157, 157))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        cardAddTransaction.add(jPanel1, java.awt.BorderLayout.PAGE_START);
-
-        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel4.setText("Date:");
-
-        jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel6.setText("Year:");
-
-        jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel7.setText("Month:");
-
-        jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel8.setText("Day:");
-
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016" }));
-
-        jComboBox4.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }));
-
-        jComboBox5.setMaximumRowCount(32);
-        jComboBox5.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31" }));
-
-        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel9.setText("Amount:");
-
-        jTextField1.setText("0.00");
-
-        jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-
-        jLabel11.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel11.setText("Store Name:");
-
-        jTextField2.setText("Store");
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
-            }
-        });
-
-        jLabel13.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel13.setText("Category:");
-
-        jComboBox6.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Software & Tools", "Cloud Infrastructure", "Marketing & Advertising", "Office Supplies", "Professional Services", "Travel & Entertainment", "Hardware & Equipment", "Training & Development", "Subscriptions", "Other" }));
-
-        cancelAddTransactionButton.setBackground(new java.awt.Color(255, 0, 0));
-        cancelAddTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        cancelAddTransactionButton.setText("Cancel");
-        cancelAddTransactionButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cancelAddTransactionButtonActionPerformed(evt);
-            }
-        });
-
-        jButton3.setBackground(new java.awt.Color(0, 255, 0));
-        jButton3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButton3.setText("Add Transaction");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
-            }
-        });
-
-        jLabel18.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel18.setText("Item Name:");
-
-        jTextField4.setText("Item");
-
-        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
-        jPanel9.setLayout(jPanel9Layout);
-        jPanel9Layout.setHorizontalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel9Layout.createSequentialGroup()
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel9Layout.createSequentialGroup()
-                        .addGap(116, 116, 116)
-                        .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel9Layout.createSequentialGroup()
-                        .addGap(38, 38, 38)
-                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel9Layout.createSequentialGroup()
-                                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(jPanel9Layout.createSequentialGroup()
-                                        .addComponent(jLabel11)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(cancelAddTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel9Layout.createSequentialGroup()
-                                        .addGap(93, 93, 93)
-                                        .addComponent(jButton3))
-                                    .addGroup(jPanel9Layout.createSequentialGroup()
-                                        .addGap(70, 70, 70)
-                                        .addComponent(jLabel18)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addGroup(jPanel9Layout.createSequentialGroup()
-                                .addComponent(jLabel9)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel9Layout.createSequentialGroup()
-                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel7)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(12, 12, 12)
-                                .addComponent(jLabel8)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel9Layout.createSequentialGroup()
-                                .addComponent(jLabel13)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jComboBox6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(82, Short.MAX_VALUE))
-        );
-        jPanel9Layout.setVerticalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel9Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel6)
-                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel7)
-                    .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8)
-                    .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel10)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel18)
-                    .addComponent(jLabel11)
-                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel13)
-                    .addComponent(jComboBox6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(28, 28, 28)
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cancelAddTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(361, Short.MAX_VALUE))
-        );
-
-        cardAddTransaction.add(jPanel9, java.awt.BorderLayout.CENTER);
-
-        mainPanel.add(cardAddTransaction, "card8");
+        mainPanel.add(cardReport, "card6");
 
         cardAddBudget.setLayout(new java.awt.BorderLayout());
 
@@ -1145,32 +786,32 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel17.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel17.setText("Amount:");
 
-        jTextField3.setText("0.00");
-        jTextField3.addActionListener(new java.awt.event.ActionListener() {
+        addBudgetAmountEntry.setText("0.00");
+        addBudgetAmountEntry.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField3ActionPerformed(evt);
+                addBudgetAmountEntryActionPerformed(evt);
             }
         });
 
-        jButton2.setBackground(new java.awt.Color(255, 0, 0));
-        jButton2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButton2.setText("Cancel");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        addBudgetCancelButton.setBackground(new java.awt.Color(255, 0, 0));
+        addBudgetCancelButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        addBudgetCancelButton.setText("Cancel");
+        addBudgetCancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                addBudgetCancelButtonActionPerformed(evt);
             }
         });
 
-        jButton4.setBackground(new java.awt.Color(0, 255, 0));
-        jButton4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButton4.setText("Set Limit");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
+        addBudgetFinishButton.setBackground(new java.awt.Color(0, 255, 0));
+        addBudgetFinishButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        addBudgetFinishButton.setText("Set Limit");
+        addBudgetFinishButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
+                addBudgetFinishButtonActionPerformed(evt);
             }
         });
 
-        jComboBox8.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        addBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
@@ -1182,15 +823,15 @@ public class HomePageView extends javax.swing.JFrame {
                     .addGroup(jPanel13Layout.createSequentialGroup()
                         .addComponent(jLabel16)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(addBudgetCategorySelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(addBudgetCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(73, 73, 73)
                 .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel13Layout.createSequentialGroup()
                         .addComponent(jLabel17)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(addBudgetAmountEntry, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(addBudgetFinishButton, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(87, Short.MAX_VALUE))
         );
         jPanel13Layout.setVerticalGroup(
@@ -1199,13 +840,13 @@ public class HomePageView extends javax.swing.JFrame {
                 .addGap(37, 37, 37)
                 .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel17)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(addBudgetAmountEntry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel16)
-                    .addComponent(jComboBox8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(addBudgetCategorySelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(38, 38, 38)
                 .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(addBudgetCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(addBudgetFinishButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(414, Short.MAX_VALUE))
         );
 
@@ -1213,35 +854,74 @@ public class HomePageView extends javax.swing.JFrame {
 
         mainPanel.add(cardAddBudget, "card9");
 
-        javax.swing.GroupLayout JPanel26Layout = new javax.swing.GroupLayout(JPanel26);
-        JPanel26.setLayout(JPanel26Layout);
-        JPanel26Layout.setHorizontalGroup(
-            JPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 551, Short.MAX_VALUE)
+        cardImport.setLayout(new java.awt.BorderLayout());
+
+        jPanel17.setBackground(new java.awt.Color(200, 200, 200));
+        jPanel17.setPreferredSize(new java.awt.Dimension(551, 50));
+
+        jLabel33.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel33.setText("Import File");
+
+        javax.swing.GroupLayout jPanel17Layout = new javax.swing.GroupLayout(jPanel17);
+        jPanel17.setLayout(jPanel17Layout);
+        jPanel17Layout.setHorizontalGroup(
+            jPanel17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel17Layout.createSequentialGroup()
+                .addGap(203, 203, 203)
+                .addComponent(jLabel33)
+                .addContainerGap(223, Short.MAX_VALUE))
         );
-        JPanel26Layout.setVerticalGroup(
-            JPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 604, Short.MAX_VALUE)
+        jPanel17Layout.setVerticalGroup(
+            jPanel17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel17Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel33, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
-        mainPanel.add(JPanel26, "card11");
+        cardImport.add(jPanel17, java.awt.BorderLayout.PAGE_START);
 
-        cardEditTransaction.setLayout(new java.awt.BorderLayout());
+        importFileButton.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        importFileButton.setText("Import");
+        importFileButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
+        javax.swing.GroupLayout jPanel18Layout = new javax.swing.GroupLayout(jPanel18);
+        jPanel18.setLayout(jPanel18Layout);
+        jPanel18Layout.setHorizontalGroup(
+            jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel18Layout.createSequentialGroup()
+                .addGap(224, 224, 224)
+                .addComponent(importFileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(244, Short.MAX_VALUE))
+        );
+        jPanel18Layout.setVerticalGroup(
+            jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel18Layout.createSequentialGroup()
+                .addGap(193, 193, 193)
+                .addComponent(importFileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(320, Short.MAX_VALUE))
+        );
+
+        cardImport.add(jPanel18, java.awt.BorderLayout.CENTER);
+
+        mainPanel.add(cardImport, "card11");
+
+        cardAddTransaction.setLayout(new java.awt.BorderLayout());
 
         jPanel11.setBackground(new java.awt.Color(200, 200, 200));
         jPanel11.setPreferredSize(new java.awt.Dimension(551, 50));
 
         jLabel19.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel19.setText("Edit Transaction");
+        jLabel19.setText("Add Transaction");
 
         javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
         jPanel11.setLayout(jPanel11Layout);
         jPanel11Layout.setHorizontalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
-                .addContainerGap(162, Short.MAX_VALUE)
-                .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(157, 157, 157))
+                .addContainerGap(161, Short.MAX_VALUE)
+                .addComponent(jLabel19)
+                .addGap(205, 205, 205))
         );
         jPanel11Layout.setVerticalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1251,7 +931,7 @@ public class HomePageView extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        cardEditTransaction.add(jPanel11, java.awt.BorderLayout.PAGE_START);
+        cardAddTransaction.add(jPanel11, java.awt.BorderLayout.PAGE_START);
 
         jLabel20.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel20.setText("Date:");
@@ -1265,57 +945,57 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel23.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel23.setText("Day:");
 
-        jComboBox7.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016" }));
+        addTransactionYearSelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016" }));
 
-        jComboBox9.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }));
+        addTransactionMonthSelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }));
 
-        jComboBox10.setMaximumRowCount(32);
-        jComboBox10.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31" }));
+        addTransactionDaySelect.setMaximumRowCount(32);
+        addTransactionDaySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31" }));
 
         jLabel24.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel24.setText("Amount:");
 
-        jTextField5.setText("0.00");
+        addTransactionAmountEntry.setText("0.00");
 
         jLabel25.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
 
         jLabel26.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel26.setText("Store Name:");
 
-        jTextField6.setText("Store");
-        jTextField6.addActionListener(new java.awt.event.ActionListener() {
+        addTransactionStoreEntry.setText("Store");
+        addTransactionStoreEntry.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField6ActionPerformed(evt);
+                addTransactionStoreEntryActionPerformed(evt);
             }
         });
 
         jLabel27.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel27.setText("Category:");
 
-        jComboBox11.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
+        addTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
 
-        cancelEditTransactionButton.setBackground(new java.awt.Color(255, 0, 0));
-        cancelEditTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        cancelEditTransactionButton.setText("Cancel");
-        cancelEditTransactionButton.addActionListener(new java.awt.event.ActionListener() {
+        cancelAdtTransactionButton.setBackground(new java.awt.Color(255, 0, 0));
+        cancelAdtTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        cancelAdtTransactionButton.setText("Cancel");
+        cancelAdtTransactionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cancelEditTransactionButtonActionPerformed(evt);
+                cancelAdtTransactionButtonActionPerformed(evt);
             }
         });
 
-        finishEditTransactionButton.setBackground(new java.awt.Color(0, 255, 0));
-        finishEditTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        finishEditTransactionButton.setText("Edit Transaction");
-        finishEditTransactionButton.addActionListener(new java.awt.event.ActionListener() {
+        finishAddTransactionButton.setBackground(new java.awt.Color(0, 255, 0));
+        finishAddTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        finishAddTransactionButton.setText("Add");
+        finishAddTransactionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                finishEditTransactionButtonActionPerformed(evt);
+                finishAddTransactionButtonActionPerformed(evt);
             }
         });
 
         jLabel28.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel28.setText("Item Name:");
 
-        jTextField7.setText("Item");
+        addTransactionItemEntry.setText("Item");
 
         javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
         jPanel12.setLayout(jPanel12Layout);
@@ -1334,39 +1014,39 @@ public class HomePageView extends javax.swing.JFrame {
                                     .addGroup(jPanel12Layout.createSequentialGroup()
                                         .addComponent(jLabel26)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(cancelEditTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(addTransactionStoreEntry, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(cancelAdtTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel12Layout.createSequentialGroup()
-                                        .addGap(93, 93, 93)
-                                        .addComponent(finishEditTransactionButton))
                                     .addGroup(jPanel12Layout.createSequentialGroup()
                                         .addGap(70, 70, 70)
                                         .addComponent(jLabel28)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                        .addComponent(addTransactionItemEntry, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(jPanel12Layout.createSequentialGroup()
+                                        .addGap(115, 115, 115)
+                                        .addComponent(finishAddTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(jPanel12Layout.createSequentialGroup()
                                 .addComponent(jLabel24)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(addTransactionAmountEntry, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel12Layout.createSequentialGroup()
                                 .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jLabel21)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(addTransactionYearSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jLabel22)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(addTransactionMonthSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(12, 12, 12)
                                 .addComponent(jLabel23)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(addTransactionDaySelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel12Layout.createSequentialGroup()
                                 .addComponent(jLabel27)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jComboBox11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addComponent(addTransactionCategorySelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap(82, Short.MAX_VALUE))
         );
         jPanel12Layout.setVerticalGroup(
@@ -1376,140 +1056,63 @@ public class HomePageView extends javax.swing.JFrame {
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel20)
                     .addComponent(jLabel21)
-                    .addComponent(jComboBox7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(addTransactionYearSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel22)
-                    .addComponent(jComboBox9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(addTransactionMonthSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel23)
-                    .addComponent(jComboBox10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(addTransactionDaySelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel24)
-                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(addTransactionAmountEntry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel25)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(addTransactionStoreEntry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel28)
                     .addComponent(jLabel26)
-                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(addTransactionItemEntry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel27)
-                    .addComponent(jComboBox11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(addTransactionCategorySelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(28, 28, 28)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cancelEditTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(finishEditTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cancelAdtTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(finishAddTransactionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(361, Short.MAX_VALUE))
         );
 
-        cardEditTransaction.add(jPanel12, java.awt.BorderLayout.CENTER);
+        cardAddTransaction.add(jPanel12, java.awt.BorderLayout.CENTER);
 
-        mainPanel.add(cardEditTransaction, "card8");
+        mainPanel.add(cardAddTransaction, "card8");
 
-        cardEditBudget.setLayout(new java.awt.BorderLayout());
-
-        jPanel14.setBackground(new java.awt.Color(200, 200, 200));
-        jPanel14.setPreferredSize(new java.awt.Dimension(551, 50));
-
-        jLabel29.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel29.setText("Edit Budget Limit");
-
-        javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
-        jPanel14.setLayout(jPanel14Layout);
-        jPanel14Layout.setHorizontalGroup(
-            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel14Layout.createSequentialGroup()
-                .addContainerGap(177, Short.MAX_VALUE)
-                .addComponent(jLabel29)
-                .addGap(176, 176, 176))
+        javax.swing.GroupLayout cardEditCategoryLayout = new javax.swing.GroupLayout(cardEditCategory);
+        cardEditCategory.setLayout(cardEditCategoryLayout);
+        cardEditCategoryLayout.setHorizontalGroup(
+            cardEditCategoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 551, Short.MAX_VALUE)
         );
-        jPanel14Layout.setVerticalGroup(
-            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel14Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel29)
-                .addGap(16, 16, 16))
+        cardEditCategoryLayout.setVerticalGroup(
+            cardEditCategoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 604, Short.MAX_VALUE)
         );
 
-        cardEditBudget.add(jPanel14, java.awt.BorderLayout.PAGE_START);
+        mainPanel.add(cardEditCategory, "card13");
 
-        jPanel15.setPreferredSize(new java.awt.Dimension(551, 250));
-
-        jLabel30.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel30.setText("Category:");
-
-        jLabel31.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel31.setText("Amount:");
-
-        jTextField8.setText("0.00");
-        jTextField8.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField8ActionPerformed(evt);
-            }
-        });
-
-        cancelEditLimitButton.setBackground(new java.awt.Color(255, 0, 0));
-        cancelEditLimitButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        cancelEditLimitButton.setText("Cancel");
-        cancelEditLimitButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cancelEditLimitButtonActionPerformed(evt);
-            }
-        });
-
-        finishEditLimitButton.setBackground(new java.awt.Color(0, 255, 0));
-        finishEditLimitButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        finishEditLimitButton.setText("Edit Limit");
-        finishEditLimitButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                finishEditLimitButtonActionPerformed(evt);
-            }
-        });
-
-        jComboBox12.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        javax.swing.GroupLayout jPanel15Layout = new javax.swing.GroupLayout(jPanel15);
-        jPanel15.setLayout(jPanel15Layout);
-        jPanel15Layout.setHorizontalGroup(
-            jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel15Layout.createSequentialGroup()
-                .addGap(79, 79, 79)
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel15Layout.createSequentialGroup()
-                        .addComponent(jLabel30)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(cancelEditLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(73, 73, 73)
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel15Layout.createSequentialGroup()
-                        .addComponent(jLabel31)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(finishEditLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(87, Short.MAX_VALUE))
+        javax.swing.GroupLayout jPanel16Layout = new javax.swing.GroupLayout(jPanel16);
+        jPanel16.setLayout(jPanel16Layout);
+        jPanel16Layout.setHorizontalGroup(
+            jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 551, Short.MAX_VALUE)
         );
-        jPanel15Layout.setVerticalGroup(
-            jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel15Layout.createSequentialGroup()
-                .addGap(37, 37, 37)
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel31)
-                    .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel30)
-                    .addComponent(jComboBox12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(38, 38, 38)
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cancelEditLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(finishEditLimitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(414, Short.MAX_VALUE))
+        jPanel16Layout.setVerticalGroup(
+            jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 604, Short.MAX_VALUE)
         );
 
-        cardEditBudget.add(jPanel15, java.awt.BorderLayout.CENTER);
-
-        mainPanel.add(cardEditBudget, "card9");
+        mainPanel.add(jPanel16, "card13");
 
         getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
 
@@ -1524,8 +1127,7 @@ public class HomePageView extends javax.swing.JFrame {
         showCard(CARD_IMPORT);
     }                                            
 
-    private void budgetButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        refreshBudgetTable();
+    private void budgetButtonActionPerformed(java.awt.event.ActionEvent evt) {                                             
         showCard(CARD_BUDGET);
     }                                            
 
@@ -1615,208 +1217,40 @@ public class HomePageView extends javax.swing.JFrame {
         importButton.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
     }                                        
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {                                            
+    private void addBudgetAmountEntryActionPerformed(java.awt.event.ActionEvent evt) {                                                     
         // TODO add your handling code here:
-    }                                           
+    }                                                    
 
-    private void cancelAddTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                           
-        showCard(CARD_TRANS);
-    }                                                          
-
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {
-        try {
-            String yearStr = (String) jComboBox3.getSelectedItem();
-            String monthStr = (String) jComboBox4.getSelectedItem();
-            String dayStr = (String) jComboBox5.getSelectedItem();
-
-            if ("Select".equals(yearStr) || "Select".equals(monthStr) || "Select".equals(dayStr)) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                    "Please select a complete date",
-                    "Validation Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            int year = Integer.parseInt(yearStr);
-            int month = getMonthNumber(monthStr);
-            int day = Integer.parseInt(dayStr);
-            java.time.LocalDate date = java.time.LocalDate.of(year, month, day);
-
-            String amountText = jTextField1.getText().trim();
-            double amount;
-            try {
-                amount = Double.parseDouble(amountText);
-            } catch (NumberFormatException e) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                    "Please enter a valid amount",
-                    "Validation Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            String storeName = jTextField2.getText().trim();
-            if (storeName.isEmpty() || "Store".equals(storeName)) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                    "Please enter a store name",
-                    "Validation Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            String category = (String) jComboBox6.getSelectedItem();
-            if ("Select...".equals(category)) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                    "Please select a category",
-                    "Validation Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            use_case2.use_case.UpdateBudgetSpendingInputData budgetInputData =
-                new use_case2.use_case.UpdateBudgetSpendingInputData(category, amount, date);
-            updateBudgetSpendingInteractor.execute(budgetInputData);
-
-            javax.swing.JOptionPane.showMessageDialog(this,
-                "Transaction added successfully!",
-                "Success",
-                javax.swing.JOptionPane.INFORMATION_MESSAGE);
-
-            jComboBox3.setSelectedIndex(0);
-            jComboBox4.setSelectedIndex(0);
-            jComboBox5.setSelectedIndex(0);
-            jTextField1.setText("0.00");
-            jTextField2.setText("Store");
-            jComboBox6.setSelectedIndex(0);
-
-            showCard(CARD_TRANS);
-
-        } catch (Exception ex) {
-            javax.swing.JOptionPane.showMessageDialog(this,
-                "An error occurred: " + ex.getMessage(),
-                "Error",
-                javax.swing.JOptionPane.ERROR_MESSAGE);
-            logger.log(java.util.logging.Level.SEVERE, "Error adding transaction", ex);
-        }
-    }
-
-    private int getMonthNumber(String monthName) {
-        switch (monthName) {
-            case "January": return 1;
-            case "February": return 2;
-            case "March": return 3;
-            case "April": return 4;
-            case "May": return 5;
-            case "June": return 6;
-            case "July": return 7;
-            case "August": return 8;
-            case "September": return 9;
-            case "October": return 10;
-            case "November": return 11;
-            case "December": return 12;
-            default: return 1;
-        }
-    }                                        
-
-    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {                                            
-        // TODO add your handling code here:
-    }                                           
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+    private void addBudgetCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                      
         showCard(CARD_BUDGET);
-    }                                        
+    }                                                     
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {
-        try {
-            String category = (String) jComboBox8.getSelectedItem();
-            String amountText = jTextField3.getText().trim();
-
-            if (category == null || category.isEmpty()) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                    "Please select a category",
-                    "Validation Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            double amount;
-            try {
-                amount = Double.parseDouble(amountText);
-            } catch (NumberFormatException e) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                    "Please enter a valid amount",
-                    "Validation Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            java.time.YearMonth currentMonth = java.time.YearMonth.now();
-            addBudgetController.execute(category, amount, currentMonth);
-
-            if (budgetState.getBudgetError() != null) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                    budgetState.getBudgetError(),
-                    "Error",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-            } else if (budgetState.getBudgetSuccess() != null) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                    budgetState.getBudgetSuccess(),
-                    "Success",
-                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
-
-                jTextField3.setText("0.00");
-                jComboBox8.setSelectedIndex(0);
-
-                refreshBudgetTable();
-
-                showCard(CARD_BUDGET);
-            }
-        } catch (Exception ex) {
-            javax.swing.JOptionPane.showMessageDialog(this,
-                "An error occurred: " + ex.getMessage(),
-                "Error",
-                javax.swing.JOptionPane.ERROR_MESSAGE);
-            logger.log(java.util.logging.Level.SEVERE, "Error adding budget", ex);
-        }
-    }                                        
-
-    private void chartButtonActionPerformed(java.awt.event.ActionEvent evt) {                                            
-        showCard(CARD_CHARTS);
-    }                                           
+    private void addBudgetFinishButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                      
+        // TODO add your handling code here:
+    }                                                     
 
     private void editBudgetButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                 
         showCard(CARD_EDIT_BUDGET);
     }                                                
 
-    private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {                                            
+    private void addTransactionStoreEntryActionPerformed(java.awt.event.ActionEvent evt) {                                                         
         // TODO add your handling code here:
-    }                                           
+    }                                                        
 
-    private void cancelEditTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                            
+    private void cancelAdtTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                           
         showCard(CARD_TRANS);
-    }                                                           
+    }                                                          
 
-    private void finishEditTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                            
+    private void finishAddTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                           
         // TODO add your handling code here:
-    }                                                           
-
-    private void jTextField8ActionPerformed(java.awt.event.ActionEvent evt) {                                            
-        // TODO add your handling code here:
-    }                                           
-
-    private void cancelEditLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                      
-        showCard(CARD_BUDGET);
-    }                                                     
-
-    private void finishEditLimitButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                      
-        // TODO add your handling code here:
-    }                                                     
+    }                                                          
 
     private void editTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                      
-        showCard(CARD_EDIT_TRANS);
+        
     }                                                     
 
     private void editCategoryButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                   
-        // TODO add your handling code here:
+        showCard(CARD_EDIT_CATEGORY);
     }                                                  
 
     private void addTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                     
@@ -1849,64 +1283,49 @@ public class HomePageView extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify                     
-    private javax.swing.JPanel JPanel26;
+    private javax.swing.JTextField addBudgetAmountEntry;
     private javax.swing.JButton addBudgetButton;
+    private javax.swing.JButton addBudgetCancelButton;
+    private javax.swing.JComboBox<String> addBudgetCategorySelect;
+    private javax.swing.JButton addBudgetFinishButton;
+    private javax.swing.JTextField addTransactionAmountEntry;
     private javax.swing.JButton addTransactionButton;
+    private javax.swing.JComboBox<String> addTransactionCategorySelect;
+    private javax.swing.JComboBox<String> addTransactionDaySelect;
+    private javax.swing.JTextField addTransactionItemEntry;
+    private javax.swing.JComboBox<String> addTransactionMonthSelect;
+    private javax.swing.JTextField addTransactionStoreEntry;
+    private javax.swing.JComboBox<String> addTransactionYearSelect;
     private javax.swing.JButton budgetButton;
     private javax.swing.JLabel budgetHeader;
     private javax.swing.JPanel budgetHeaderPanel;
     private javax.swing.JScrollPane budgetScrollPane;
     private javax.swing.JTable budgetTable;
     private javax.swing.JPanel buttonPanel;
-    private javax.swing.JButton cancelAddTransactionButton;
-    private javax.swing.JButton cancelEditLimitButton;
-    private javax.swing.JButton cancelEditTransactionButton;
+    private javax.swing.JButton cancelAdtTransactionButton;
     private javax.swing.JPanel cardAddBudget;
     private javax.swing.JPanel cardAddTransaction;
     private javax.swing.JPanel cardBudget;
-    private javax.swing.JPanel cardCharts;
-    private javax.swing.JPanel cardEditBudget;
-    private javax.swing.JPanel cardEditTransaction;
+    private javax.swing.JPanel cardEditCategory;
     private javax.swing.JPanel cardHome;
     private javax.swing.JPanel cardImport;
     private javax.swing.JPanel cardReport;
     private javax.swing.JPanel cardTransaction;
-    private javax.swing.JButton chartButton;
     private javax.swing.JButton editBudgetButton;
     private javax.swing.JButton editCategoryButton;
     private javax.swing.JButton editTransactionButton;
-    private javax.swing.JComboBox<String> filterCategoryBox;
     private javax.swing.JLabel filterLabel;
-    private javax.swing.JButton finishEditLimitButton;
-    private javax.swing.JButton finishEditTransactionButton;
+    private javax.swing.JButton finishAddTransactionButton;
+    private javax.swing.JButton generateReportButton;
     private javax.swing.JButton homeButton;
     private javax.swing.JButton importButton;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
+    private javax.swing.JButton importFileButton;
     private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox10;
-    private javax.swing.JComboBox<String> jComboBox11;
-    private javax.swing.JComboBox<String> jComboBox12;
-    private javax.swing.JComboBox<String> jComboBox2;
-    private javax.swing.JComboBox<String> jComboBox3;
-    private javax.swing.JComboBox<String> jComboBox4;
-    private javax.swing.JComboBox<String> jComboBox5;
-    private javax.swing.JComboBox<String> jComboBox6;
-    private javax.swing.JComboBox<String> jComboBox7;
-    private javax.swing.JComboBox<String> jComboBox8;
-    private javax.swing.JComboBox<String> jComboBox9;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
-    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
@@ -1918,24 +1337,17 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel28;
-    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel30;
-    private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
-    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel13;
-    private javax.swing.JPanel jPanel14;
-    private javax.swing.JPanel jPanel15;
+    private javax.swing.JPanel jPanel16;
+    private javax.swing.JPanel jPanel17;
+    private javax.swing.JPanel jPanel18;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -1943,24 +1355,16 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
-    private javax.swing.JPanel jPanel9;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
-    private javax.swing.JTextField jTextField6;
-    private javax.swing.JTextField jTextField7;
-    private javax.swing.JTextField jTextField8;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JLabel projectLabel;
+    private javax.swing.JPanel reportBodyPanel;
     private javax.swing.JButton reportButton;
+    private javax.swing.JComboBox<String> reportCategorySelected;
     private javax.swing.JPanel reportHeaderPanel;
     private javax.swing.JPanel sidebarPanel;
     private javax.swing.JPanel titlePanel;
     private javax.swing.JButton transactionButton;
+    private javax.swing.JComboBox<String> transactionFilterCategorySelect;
     private javax.swing.JPanel transactionFilterPanel;
     private javax.swing.JPanel transactionHeader;
     private javax.swing.JPanel transactionHeaderButton;
@@ -1968,64 +1372,5 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JScrollPane transactionScrollPane;
     private javax.swing.JTable transactionTable;
     // End of variables declaration                   
-    /** Dotted/dashed rounded rectangle border (upload drop-zone style). */
-    static final class DashedRoundBorder implements javax.swing.border.Border {
-        private final java.awt.Color color;
-        private final float thickness;
-        private final float arc;     // corner radius
-        private final float dash;    // dash length
-        private final float gap;     // gap length
-        private final int   pad;     // inner padding
-
-        DashedRoundBorder(java.awt.Color color, float thickness, float arc,
-                          float dash, float gap, int pad) {
-            this.color = color;
-            this.thickness = thickness;
-            this.arc = arc;
-            this.dash = dash;
-            this.gap = gap;
-            this.pad = pad;
-        }
-
-        @Override
-        public void paintBorder(java.awt.Component c, java.awt.Graphics g,
-                                int x, int y, int w, int h) {
-            java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
-            try {
-                g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
-                                    java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(color);
-                g2.setStroke(new java.awt.BasicStroke(
-                        thickness,
-                        java.awt.BasicStroke.CAP_ROUND,
-                        java.awt.BasicStroke.JOIN_ROUND,
-                        10f,
-                        new float[]{dash, gap},
-                        0f));
-
-                float inset = thickness / 2f;
-                float rx = x + pad + inset;
-                float ry = y + pad + inset;
-                float rw = w - 2f * (pad + inset);
-                float rh = h - 2f * (pad + inset);
-
-                g2.draw(new java.awt.geom.RoundRectangle2D.Float(rx, ry, rw, rh, arc, arc));
-            } finally {
-                g2.dispose();
-            }
-        }
-
-        @Override
-        public java.awt.Insets getBorderInsets(java.awt.Component c) {
-            int p = pad + Math.round(thickness);
-            return new java.awt.Insets(p, p, p, p);
-        }
-
-        @Override
-        public boolean isBorderOpaque() {
-            return false;
-        }
-    }
 }
 
-    
