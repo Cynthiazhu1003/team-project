@@ -66,7 +66,7 @@ public class HomePageView extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(HomePageView.class.getName());
 
     /**
-     * Creates new form HomePage
+     * Creates new form HomePage 
      */
     public HomePageView() {
         initComponents();
