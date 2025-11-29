@@ -1,3 +1,8 @@
+package use_case3.interface_adapter.categorize;
+
+import use_case3.use_case.categorize.CategorizeOutputBoundary;
+import use_case3.use_case.categorize.CategorizeOutputData;
+
 public class CategorizePresenter implements CategorizeOutputBoundary {
 
     private final CategorizeViewModel viewModel;

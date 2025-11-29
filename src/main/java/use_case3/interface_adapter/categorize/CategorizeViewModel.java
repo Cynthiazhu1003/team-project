@@ -1,3 +1,5 @@
+package use_case3.interface_adapter.categorize;
+
 import java.util.HashMap;
 import java.util.Map;
 
