@@ -35,9 +35,11 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.*;
 import java.awt.geom.RoundRectangle2D;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
+import java.util.stream.Collectors;
+import javax.swing.*;
 import javax.swing.border.Border;
 
 /**
@@ -1116,8 +1118,85 @@ public class HomePageView extends javax.swing.JFrame {
 
         getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
 
+        importFileButton.addActionListener(e-> handleImportFileButtonClick());
+
         pack();
-    }// </editor-fold>                        
+    }// </editor-fold>
+
+    private void handleImportFileButtonClick() {
+        JFileChooser chooser = new JFileChooser();
+        int result = chooser.showOpenDialog(this);
+
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File file = chooser.getSelectedFile();
+
+        if (!file.getName().endsWith(".csv")) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Invalid file type. File must be .csv",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        File selectedFile = file;
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Selected file:\n" + selectedFile.getName(),
+                "File chosen",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+        List<String> data;
+        try {
+            data = Files.readAllLines(selectedFile.toPath());
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Could not read file: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        if (data.size() <= 1) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "File has no data rows.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        //
+        boolean isFormatCorrect = data.stream()
+                .skip(1)
+                .allMatch(s -> s.matches(
+                        "\\d{4}-\\d{2}-\\d{2}\\s*,\\s*[^,]+\\s*,\\s*[^,]+\\s*,-?[0-9]+(\\.[0-9]+)?"
+                ));
+
+        if (!isFormatCorrect) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "CSV format is not correct.\n" +
+                            "Expected: date, description, merchant, -amount.decimals",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        List<Transaction> transactions = data.stream()
+                .skip(1)
+                .map(Transaction::of)
+                .collect(Collectors.toList()); //imported csv in list format
+    }
 
     private void homeButtonActionPerformed(java.awt.event.ActionEvent evt) {                                           
         showCard(CARD_HOME);
