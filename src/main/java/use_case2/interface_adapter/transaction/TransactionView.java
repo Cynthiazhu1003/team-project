@@ -2,6 +2,7 @@ package use_case2.interface_adapter.transaction;
 
 
 import use_case2.interface_adapter.add_transaction.AddTransactionController;
+import use_case2.interface_adapter.edit_transaction.EditTransactionController;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +16,7 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
     public final String viewName = "transaction";
     private final TransactionViewModel transactionViewModel;
     private final AddTransactionController addTransactionController;
+    private final EditTransactionController editTransactionController;
 
     // UI Components
     private final JLabel titleLabel = new JLabel(TransactionViewModel.TITLE_LABEL);
@@ -32,10 +34,13 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
     private final JLabel successLabel = new JLabel();
 
     public TransactionView(TransactionViewModel transactionViewModel,
-                           AddTransactionController addTransactionController) {
+                           AddTransactionController addTransactionController, EditTransactionController
+                                   editTransactionController) {
         this.transactionViewModel = transactionViewModel;
         this.addTransactionController = addTransactionController;
+        this.editTransactionController = editTransactionController;
         this.transactionViewModel.addPropertyChangeListener(this);
+
 
         setupUI();
         layoutComponents();
@@ -118,7 +123,18 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
             double amount = Double.parseDouble(amountField.getText());
             String description = descriptionField.getText();
 
-            addTransactionController.execute(date, category, merchant, amount, description);
+            TransactionState state = transactionViewModel.getState();
+            // Check if we're in edit mode or add mode
+            if (state.getEditingTransactionIndex() >= 0 && editTransactionController != null) {
+                // Edit mode - use EditTransactionController
+                editTransactionController.execute(
+                        state.getEditingTransactionIndex(),
+                        date, description, merchant, amount, category
+                );
+            } else {
+                // Add mode - use AddTransactionController
+                addTransactionController.execute(date, description, merchant, amount, category);
+            }
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Invalid input: " + ex.getMessage(),
@@ -140,13 +156,28 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
 
             // Clear form on success
             if (state.getTransactionSuccess().contains("successfully")) {
-                dateField.setText(LocalDate.now().toString());
-                categoryField.setText("");
-                merchantField.setText("");
-                amountField.setText("");
-                descriptionField.setText("");
-
+                clearForm();
+                if (state.getEditingTransactionIndex() >= 0) {
+                    state.setEditingTransactionIndex(-1);
+                    transactionViewModel.setState(state);
+                    submitButton.setText("Submit"); // Reset button text if changed
+                }
             }
         }
+        // Handle entering edit mode (if you want to support pre-populating form)
+        if (state.getEditingTransactionIndex() >= 0) {
+            // If you want to change UI to indicate edit mode, do it here
+            submitButton.setText("Update Transaction");
+        }
     }
+    private void clearForm() {
+        dateField.setText(LocalDate.now().toString());
+        categoryField.setText("");
+        merchantField.setText("");
+        amountField.setText("");
+        descriptionField.setText("");
+    }
+
 }
+
+
