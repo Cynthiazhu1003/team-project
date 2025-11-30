@@ -4,12 +4,13 @@ import java.time.LocalDate;
 
 public class TransactionState {
     private LocalDate date;
-    private String category = "";
+    private String description = "";
     private String merchant = "";
     private double amount = 0.0;
-    private String description = "";
+    private String category = "";
     private String transactionError;
     private String transactionSuccess;
+    private int editingTransactionIndex = -1; // -1 means not editing, >= 0 means editing specific transaction
 
     public TransactionState() {}
     public TransactionState(TransactionState copy) {
@@ -20,6 +21,7 @@ public class TransactionState {
         this.description = copy.description;
         this.transactionError = copy.transactionError;
         this.transactionSuccess = copy.transactionSuccess;
+        this.editingTransactionIndex = copy.editingTransactionIndex;
     }
 
     // Getters and Setters
@@ -37,4 +39,7 @@ public class TransactionState {
     public void setTransactionError(String transactionError) { this.transactionError = transactionError; }
     public String getTransactionSuccess() { return transactionSuccess; }
     public void setTransactionSuccess(String transactionSuccess) { this.transactionSuccess = transactionSuccess; }
+    public int getEditingTransactionIndex() { return editingTransactionIndex; }
+    public void setEditingTransactionIndex(int editingTransactionIndex) { this.editingTransactionIndex
+            = editingTransactionIndex; }
 }
