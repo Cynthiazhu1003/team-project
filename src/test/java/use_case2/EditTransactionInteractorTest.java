@@ -1,7 +1,7 @@
 package use_case2;
 
+import frontend.Transaction;
 import use_case2.data_access.InMemoryTransactionDataAccessObject;
-import use_case2.entity.Transaction;
 import org.junit.Before;
 import org.junit.Test;
 import use_case2.use_case_edit_transactions.*;

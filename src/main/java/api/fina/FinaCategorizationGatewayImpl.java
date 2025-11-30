@@ -34,7 +34,7 @@ public class FinaCategorizationGatewayImpl implements FinaCategorizationGateway 
                     .addHeader("x-api-key", "fina-api-test")
                     .addHeader("x-partner-id", "your-partner-id")
                     .addHeader("x-api-model", "v2")
-                    .addHeader("x-api-mapping", "false")
+                    .addHeader("x-api-mapping", "true")
                     .build();
 
             Response response = client.newCall(request).execute();

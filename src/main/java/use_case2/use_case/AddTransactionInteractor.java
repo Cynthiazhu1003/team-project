@@ -1,7 +1,7 @@
 package use_case2.use_case;
 
-import use_case2.entity.Transaction;
 
+import frontend.Transaction;
 
 public class AddTransactionInteractor implements AddTransactionInputBoundary {
     private final AddTransactionOutputBoundary presenter;
