@@ -27,11 +27,20 @@ public class InMemoryTransactionDataAccessObject implements TransactionDataAcces
             }
         }
     }
-
-    @Override
-    public void delete(Transaction transaction) {
-        transactions.remove(transaction);
+    /**
+     * Deletes a transaction from the list based on its index.
+     * @param index The zero-based index of the transaction to delete.
+     * @return true if deletion was successful, false otherwise.
+     */
+    public boolean deleteByIndex(int index) { // ⭐️ MUST be public boolean and take an int ⭐️
+        if (index >= 0 && index < transactions.size()) {
+            transactions.remove(index);
+            return true;
+        }
+        return false;
     }
+    @Override
+    public void delete(Transaction transaction) {transactions.remove(transaction);}
 
     public int getTransactionCount() {
         return transactions.size();
