@@ -1,0 +1,47 @@
+@startuml
+!theme plain
+
+package "External" {
+  [Swing UI]
+  [InMemoryDAO]
+}
+
+package "Interface Adapters" {
+  [AddTransaction\nController]
+  [AddTransaction\nPresenter]
+  [EditTransaction\nController]
+  [EditTransaction\nPresenter]
+}
+
+package "Use Cases" {
+  [AddTransaction\nInteractor]
+  [EditTransaction\nInteractor]
+}
+
+package "Entities" {
+  [Transaction]
+}
+
+' Clean Architecture Dependencies
+[Swing UI] --> [AddTransaction\nController]
+[Swing UI] --> [EditTransaction\nController]
+
+[AddTransaction\nController] --> [AddTransaction\nInteractor]
+[EditTransaction\nController] --> [EditTransaction\nInteractor]
+
+[AddTransaction\nInteractor] --> [AddTransaction\nPresenter]
+[EditTransaction\nInteractor] --> [EditTransaction\nPresenter]
+
+[AddTransaction\nInteractor] --> [InMemoryDAO]
+[EditTransaction\nInteractor] --> [InMemoryDAO]
+
+[InMemoryDAO] --> [Transaction]
+
+note bottom of [AddTransaction\nInteractor]
+  Business Rules
+  - Validate input
+  - Process transaction
+  - Handle errors
+end note
+
+@enduml
