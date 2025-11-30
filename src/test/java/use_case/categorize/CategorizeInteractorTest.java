@@ -1,6 +1,6 @@
 package use_case.categorize;
 
-import use_case3.entity.Transaction;
+import frontend.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import use_case3.use_case.categorize.CategorizeInputData;
