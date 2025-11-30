@@ -38,6 +38,7 @@ public class HomePageView extends javax.swing.JFrame {
     private static final String CARD_CHOOSE_BUDGET = "cardChooseBudget";
     private static final String CARD_CHOOSE_TRANS = "cardChooseTransaction";
     private int editingRowIndex = -1;
+    private javax.swing.JButton deleteTransactionButton;
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
@@ -226,6 +227,7 @@ public class HomePageView extends javax.swing.JFrame {
         chooseTransactionChooseButton = new javax.swing.JButton();
         chooseTransactionCancelButton = new javax.swing.JButton();
         chooseTransactionSelectScrollPane = new javax.swing.JScrollPane();
+        deleteTransactionButton = new javax.swing.JButton();
         cardChooseBudget = new javax.swing.JPanel();
         jPanel15 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
@@ -497,6 +499,15 @@ public class HomePageView extends javax.swing.JFrame {
             }
         });
 
+        deleteTransactionButton.setBackground(new java.awt.Color(255, 153, 51)); // Orange/Warning color
+        deleteTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        deleteTransactionButton.setText("Delete Transaction");
+        deleteTransactionButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteTransactionButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout transactionHeaderButtonLayout = new javax.swing.GroupLayout(transactionHeaderButton);
         transactionHeaderButton.setLayout(transactionHeaderButtonLayout);
         transactionHeaderButtonLayout.setHorizontalGroup(
@@ -508,6 +519,8 @@ public class HomePageView extends javax.swing.JFrame {
                                 .addComponent(addTransactionButton)
                                 .addGap(18, 18, 18)
                                 .addComponent(editTransactionButton)
+                                .addGap(18, 18, 18)
+                                .addComponent(deleteTransactionButton)
                                 .addContainerGap(58, Short.MAX_VALUE))
         );
         transactionHeaderButtonLayout.setVerticalGroup(
@@ -517,7 +530,8 @@ public class HomePageView extends javax.swing.JFrame {
                                 .addGroup(transactionHeaderButtonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addComponent(jLabel32, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(editTransactionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(addTransactionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addComponent(addTransactionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(deleteTransactionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addContainerGap(12, Short.MAX_VALUE))
         );
 
@@ -1398,7 +1412,6 @@ public class HomePageView extends javax.swing.JFrame {
 
         editTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
 
-//        editTransactionButton.setBackground(new java.awt.Color(255, 0, 0));
         editTransactionCancelButton.setBackground(new java.awt.Color(255, 0, 0));
         editTransactionCancelButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         editTransactionCancelButton.setText("Cancel");
@@ -1447,24 +1460,21 @@ public class HomePageView extends javax.swing.JFrame {
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(editTransactionCategorySelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                         .addGroup(jPanel23Layout.createSequentialGroup()
-                                                .addGroup(jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                                        .addGroup(jPanel23Layout.createSequentialGroup()
-                                                                .addComponent(jLabel29)
-                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                                .addComponent(editTransactionStoreEntry, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                .addGap(33, 33, 33)
-                                                                .addComponent(jLabel30)
-                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                                                        .addGroup(jPanel23Layout.createSequentialGroup()
-                                                                .addGap(44, 44, 44)
-                                                                .addComponent(editTransactionCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                .addGap(135, 135, 135)
-                                                                .addComponent(editTransactionEditButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                                .addGroup(jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addComponent(editTransactionCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(editTransactionItemEntry, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                .addContainerGap(67, Short.MAX_VALUE))
+                                                .addComponent(jLabel29)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(editTransactionStoreEntry, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(33, 33, 33)
+                                                .addComponent(jLabel30)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(editTransactionItemEntry, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(jPanel23Layout.createSequentialGroup()
+                                                .addGap(44, 44, 44)
+                                                .addComponent(editTransactionCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(135, 135, 135)
+                                                .addComponent(editTransactionEditButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addContainerGap(67, Short.MAX_VALUE))
         );
+
         jPanel23Layout.setVerticalGroup(
                 jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel23Layout.createSequentialGroup()
@@ -1994,6 +2004,47 @@ public class HomePageView extends javax.swing.JFrame {
                     "Invalid Input",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
         }
+    }
+    /**
+     * Handles the deletion of a selected transaction row.
+     */
+    private void deleteTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        // 1. Get the index of the selected row
+        int selectedRow = transactionTable.getSelectedRow();
+
+        // 2. Validation: Check if a row is actually selected
+        if (selectedRow == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please select a transaction to delete.",
+                    "No Selection",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 3. Confirmation Dialog (CRITICAL STEP)
+        int confirmResult = javax.swing.JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to permanently delete the selected transaction?",
+                "Confirm Deletion",
+                javax.swing.JOptionPane.YES_NO_OPTION,
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+
+        // Check if the user clicked "Yes"
+        if (confirmResult == javax.swing.JOptionPane.YES_OPTION) {
+
+            // 4. Delete the row from the JTable model
+            javax.swing.table.DefaultTableModel model =
+                    (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+
+            // Use the index to remove the row
+            model.removeRow(selectedRow);
+
+            // 5. Show Success Message
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Transaction successfully deleted.",
+                    "Deleted",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        }
+        // If the user selects "No," the method simply returns, and no action is taken.
     }
 
     /**
