@@ -8,7 +8,7 @@ public class LocalTest {
 
         NewsApiGateway.TopHeadlinesRequest req = new NewsApiGateway.TopHeadlinesRequest();
         req.category = "business";    // optionally filter by category
-        // req.country = "us";        // optionally filter by country
+        req.country = "us";        // optionally filter by country
         // req.query = "inflation";   // optionally keyword search
         // req.pageSize = 20;         // optional
         // req.page = 1;              // optional

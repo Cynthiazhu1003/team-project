@@ -28,6 +28,9 @@ public class NewsApiGatewayImpl implements NewsApiGateway {
 
         this.apiKey = dotenv.get("NEWS_API_KEY");
 
+        // 🔴 DEBUG LINE GOES RIGHT HERE
+        System.out.println("DEBUG: NEWS_API_KEY from .env = " + this.apiKey);
+
         if (apiKey == null || apiKey.isEmpty()) {
             throw new NewsApiException(
                     "Missing NEWS_API_KEY in .env file. Add NEWS_API_KEY=your_key to your .env"
@@ -55,13 +58,27 @@ public class NewsApiGatewayImpl implements NewsApiGateway {
                     .addHeader("Accept", "application/json")
                     .build();
 
+            /*Response response = client.newCall(request).execute();
+
+            if (response.body() == null) {
+                throw new NewsApiException("Empty NewsAPI response body");
+            }
+
+            return parseResponse(response.body().string());*/
             Response response = client.newCall(request).execute();
 
             if (response.body() == null) {
                 throw new NewsApiException("Empty NewsAPI response body");
             }
 
-            return parseResponse(response.body().string());
+            // Read body *once* into a String
+            String body = response.body().string();
+
+            // TEMP: print for debugging
+            System.out.println("HTTP status code = " + response.code());
+            System.out.println("Raw JSON from NewsAPI = " + body);
+
+            return parseResponse(body);
 
         } catch (Exception e) {
             throw new NewsApiException("Failed to fetch headlines from NewsAPI", e);

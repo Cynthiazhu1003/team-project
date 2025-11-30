@@ -1,5 +1,8 @@
 package frontend;
 
+import api.news.NewsApiGateway;
+import api.news.NewsApiGatewayImpl;
+import api.news.NewsApiResponse;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -10,6 +13,11 @@ import java.awt.RenderingHints;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.*;
 import java.awt.geom.RoundRectangle2D;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,6 +25,49 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.border.Border;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+/*public class NewsApiClient {
+
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final String apiKey;
+
+    public NewsApiClient() {
+        this.apiKey = EnvConfig.getNewsApiKey();
+    }
+
+    public List<String> fetchTopHeadlines() throws IOException, InterruptedException {
+        String url = "https://newsapi.org/v2/top-headlines"
+                   + "?country=ca"
+                   + "&category=business"
+                   + "&pageSize=5"
+                   + "&apiKey=" + apiKey;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new IOException("News API error: " + response.statusCode() + " body=" + response.body());
+        }
+
+        JSONObject json = new JSONObject(response.body());
+        JSONArray articles = json.getJSONArray("articles");
+
+        List<String> headlines = new ArrayList<>();
+        for (int i = 0; i < articles.length(); i++) {
+            JSONObject article = articles.getJSONObject(i);
+            String title = article.optString("title", "(no title)");
+            headlines.add("• " + title);
+        }
+
+        return headlines;
+    }
+}*/
 
 /**
  *
@@ -25,7 +76,7 @@ import javax.swing.border.Border;
 public class HomePageView extends javax.swing.JFrame {
 
     // --- Card identifiers ---
-    private static final String CARD_HOME     = "cardHome";
+    private static final String CARD_HOME     = "newsPanel";
     private static final String CARD_TRANS    = "cardTransaction";
     private static final String CARD_BUDGET   = "cardBudget";
     private static final String CARD_REPORT   = "cardReport";
@@ -37,6 +88,10 @@ public class HomePageView extends javax.swing.JFrame {
     private static final String CARD_EDIT_CATEGORY = "cardEditCategory";
     private static final String CARD_CHOOSE_BUDGET = "cardChooseBudget";
     private static final String CARD_CHOOSE_TRANS = "cardChooseTransaction";
+
+    private DefaultListModel<String> newsListModel = new DefaultListModel<>();
+    private JList<String> newsList = new JList<>(newsListModel);
+    private java.util.List<NewsApiResponse.Article> currentArticles = new java.util.ArrayList<>();
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
@@ -50,8 +105,10 @@ public class HomePageView extends javax.swing.JFrame {
      */
     public HomePageView() {
         initComponents();
+        setupNewsPanel();
+        loadNewsAsync();
         // Register each card with its name
-        mainPanel.add(cardHome,        CARD_HOME);
+        mainPanel.add(newsPanel,        CARD_HOME);
         mainPanel.add(cardTransaction, CARD_TRANS);
         mainPanel.add(cardBudget,      CARD_BUDGET);
         mainPanel.add(cardReport,      CARD_REPORT);
@@ -67,6 +124,125 @@ public class HomePageView extends javax.swing.JFrame {
         // Optional: show a default screen when program starts
         showCard(CARD_HOME);
 
+    }
+
+    private void setupNewsPanel() {
+       newsPanel.setLayout(new BorderLayout());
+        newsPanel.setBackground(new Color(245, 245, 245));
+
+        // style list
+        newsList.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 14));
+        newsList.setBackground(new Color(245, 245, 245));
+        newsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        newsList.setFocusable(false);
+
+        // prettier renderer with wrapping (optional but nice)
+        newsList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                    JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+
+                JLabel label = (JLabel) super.getListCellRendererComponent(
+                        list, value, index, isSelected, cellHasFocus);
+
+                String text = (value == null) ? "" : value.toString();
+                label.setText("<html><body style='width:520px; padding:3px 0;'>" +
+                            text + "</body></html>");
+
+                label.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
+                if (isSelected) {
+                    label.setBackground(new Color(220, 235, 255));
+                } else {
+                    label.setBackground(new Color(245, 245, 245));
+                }
+                return label;
+            }
+        });
+
+        // 🔹 double-click to open link
+        newsList.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int index = newsList.locationToIndex(e.getPoint());
+                    if (index >= 0 && index < currentArticles.size()) {
+                        NewsApiResponse.Article article = currentArticles.get(index);
+                        if (article != null && article.url != null && !article.url.isBlank()) {
+                            try {
+                                if (java.awt.Desktop.isDesktopSupported()) {
+                                    java.awt.Desktop.getDesktop().browse(new java.net.URI(article.url));
+                                } else {
+                                    JOptionPane.showMessageDialog(
+                                            HomePageView.this,
+                                            "Opening links is not supported on this platform.",
+                                            "Error",
+                                            JOptionPane.ERROR_MESSAGE
+                                    );
+                                }
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(
+                                        HomePageView.this,
+                                        "Could not open link: " + ex.getMessage(),
+                                        "Error",
+                                        JOptionPane.ERROR_MESSAGE
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(newsList);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        newsPanel.add(scrollPane, BorderLayout.CENTER);
+
+        newsListModel.clear();
+        newsListModel.addElement("Loading latest financial headlines…");
+    }
+
+    private void loadNewsAsync() {
+        javax.swing.SwingWorker<java.util.List<String>, Void> worker =
+                new javax.swing.SwingWorker<>() {
+            @Override
+            protected java.util.List<String> doInBackground() throws Exception {
+                NewsApiGateway gateway = new NewsApiGatewayImpl();
+
+                NewsApiGateway.TopHeadlinesRequest req = new NewsApiGateway.TopHeadlinesRequest();
+                req.country = "us";
+                req.category = "business";
+
+                NewsApiResponse resp = gateway.getTopHeadlines(req);
+
+                java.util.List<String> titles = new java.util.ArrayList<>();
+                if (resp.articles != null) {
+                    for (NewsApiResponse.Article a : resp.articles) {
+                        if (a.title != null) {
+                            titles.add("• " + a.title);
+                        }
+                    }
+                }
+                return titles;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    java.util.List<String> titles = get();
+                    newsListModel.clear();
+                    for (String t : titles) {
+                        newsListModel.addElement(t);
+                    }
+                } catch (Exception e) {
+                    newsListModel.clear();
+                    newsListModel.addElement("Failed to load news: " + e.getMessage());
+                }
+            }
+        };
+
+        worker.execute();
     }
 
 
@@ -93,7 +269,7 @@ public class HomePageView extends javax.swing.JFrame {
         homeButton = new javax.swing.JButton();
         importButton = new javax.swing.JButton();
         mainPanel = new javax.swing.JPanel();
-        cardHome = new javax.swing.JPanel();
+        newsPanel = new javax.swing.JPanel();
         cardTransaction = new javax.swing.JPanel();
         transactionHeader = new javax.swing.JPanel();
         transactionHeaderHeader = new javax.swing.JPanel();
@@ -408,8 +584,8 @@ public class HomePageView extends javax.swing.JFrame {
 
         mainPanel.setLayout(new java.awt.CardLayout());
 
-        javax.swing.GroupLayout cardHomeLayout = new javax.swing.GroupLayout(cardHome);
-        cardHome.setLayout(cardHomeLayout);
+        javax.swing.GroupLayout cardHomeLayout = new javax.swing.GroupLayout(newsPanel);
+        newsPanel.setLayout(cardHomeLayout);
         cardHomeLayout.setHorizontalGroup(
                 cardHomeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGap(0, 551, Short.MAX_VALUE)
@@ -419,7 +595,7 @@ public class HomePageView extends javax.swing.JFrame {
                         .addGap(0, 604, Short.MAX_VALUE)
         );
 
-        mainPanel.add(cardHome, "card2");
+        mainPanel.add(newsPanel, "card2");
 
         cardTransaction.setLayout(new java.awt.BorderLayout());
 
@@ -1906,7 +2082,6 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JPanel cardEditBudget;
     private javax.swing.JPanel cardEditCategory;
     private javax.swing.JPanel cardEditTransaction;
-    private javax.swing.JPanel cardHome;
     private javax.swing.JPanel cardImport;
     private javax.swing.JPanel cardReport;
     private javax.swing.JPanel cardTransaction;
@@ -1997,6 +2172,7 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel9;
     private javax.swing.JLabel label;
     private javax.swing.JPanel mainPanel;
+    private javax.swing.JPanel newsPanel;
     private javax.swing.JLabel projectLabel;
     private javax.swing.JPanel reportBodyPanel;
     private javax.swing.JButton reportButton;
