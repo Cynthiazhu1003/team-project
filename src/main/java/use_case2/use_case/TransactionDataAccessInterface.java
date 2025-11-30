@@ -10,6 +10,3 @@ public interface TransactionDataAccessInterface {
     void delete(Transaction transaction);
 }
 
-//public interface TransactionDataAccessInterface {
-//    void save(Transaction transaction);
-//}
