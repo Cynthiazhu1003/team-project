@@ -37,12 +37,63 @@ public class HomePageView extends javax.swing.JFrame {
     private static final String CARD_EDIT_CATEGORY = "cardEditCategory";
     private static final String CARD_CHOOSE_BUDGET = "cardChooseBudget";
     private static final String CARD_CHOOSE_TRANS = "cardChooseTransaction";
+    private int editingRowIndex = -1;
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
         java.awt.CardLayout layout = (java.awt.CardLayout) mainPanel.getLayout();
         layout.show(mainPanel, cardName);
     }
+
+    /**
+     * Loads the transaction data from the selected row into the Edit Transaction fields
+     * and switches the view.
+     * @param row The index of the selected row in the transactionTable.
+     */
+    private void loadTransactionForEditing(int row) {
+        // We need this variable to know which row to update later when the user clicks 'Save Changes'
+        editingRowIndex = row;
+
+        // 1. Get the data model from the JTable
+        javax.swing.table.DefaultTableModel model =
+                (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+
+        // 2. Extract values based on column index (0=Date, 1=Merchant, 2=Description, 3=Amount, 4=Category)
+        String dateString = model.getValueAt(row, 0).toString();
+        String store = model.getValueAt(row, 1).toString();
+        String description = model.getValueAt(row, 2).toString();
+        // Convert the Double amount back to a string for the JTextField
+        String amount = String.valueOf(model.getValueAt(row, 3));
+        String category = model.getValueAt(row, 4).toString();
+
+        // 3. Split the date string back into components (Assuming format "YYYY-MONTH-DD")
+        try {
+            String[] dateParts = dateString.split("-");
+            String year = dateParts[0];
+            String month = dateParts[1];
+            String day = dateParts[2];
+
+            // Set date ComboBoxes
+            editTransactionYearSelect.setSelectedItem(year);
+            editTransactionMonthSelect.setSelectedItem(month);
+            editTransactionDaySelect.setSelectedItem(day);
+
+        } catch (Exception e) {
+            // Handle cases where the date format might be wrong
+            System.err.println("Error parsing date for editing: " + e.getMessage());
+        }
+
+        // 4. Set the values into the Text Fields and Category ComboBox
+        editTransactionStoreEntry.setText(store);
+        editTransactionItemEntry.setText(description);
+        editTransactionAmountEntry.setText(amount);
+        editTransactionCategorySelect.setSelectedItem(category);
+
+        // 5. Finally, switch the view to the edit screen
+        // This is the line that performs the screen switch.
+        showCard(CARD_EDIT_TRANS);
+    }
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(HomePageView.class.getName());
 
     /**
@@ -1315,17 +1366,17 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel10.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel10.setText("Year:");
 
-        editTransactionYearSelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        editTransactionYearSelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016" }));
 
         jLabel11.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel11.setText("Month:");
 
-        editTransactionMonthSelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        editTransactionMonthSelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}));
 
         jLabel13.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel13.setText("Day:");
 
-        editTransactionDaySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        editTransactionDaySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"  }));
 
         jLabel18.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel18.setText("Amount:");
@@ -1345,20 +1396,21 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel31.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel31.setText("Category:");
 
-        editTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        editTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
 
-        editTransactionCancelButton.setBackground(new java.awt.Color(51, 255, 0));
+//        editTransactionButton.setBackground(new java.awt.Color(255, 0, 0));
+        editTransactionCancelButton.setBackground(new java.awt.Color(255, 0, 0));
         editTransactionCancelButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        editTransactionCancelButton.setText("Edit");
+        editTransactionCancelButton.setText("Cancel");
         editTransactionCancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 editTransactionCancelButtonActionPerformed(evt);
             }
         });
 
-        editTransactionEditButton.setBackground(new java.awt.Color(255, 0, 0));
+        editTransactionEditButton.setBackground(new java.awt.Color(51, 255, 0));
         editTransactionEditButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        editTransactionEditButton.setText("Cancel");
+        editTransactionEditButton.setText("Edit");
         editTransactionEditButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 editTransactionEditButtonActionPerformed(evt);
@@ -1405,8 +1457,9 @@ public class HomePageView extends javax.swing.JFrame {
                                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                                                         .addGroup(jPanel23Layout.createSequentialGroup()
                                                                 .addGap(44, 44, 44)
-                                                                .addComponent(editTransactionEditButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                                .addGap(135, 135, 135)))
+                                                                .addComponent(editTransactionCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addGap(135, 135, 135)
+                                                                .addComponent(editTransactionEditButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                                 .addGroup(jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                         .addComponent(editTransactionCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(editTransactionItemEntry, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))))
@@ -1742,7 +1795,22 @@ public class HomePageView extends javax.swing.JFrame {
     }
 
     private void editTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        showCard(CARD_CHOOSE_TRANS);
+        int selectedRow = transactionTable.getSelectedRow();
+
+        if (selectedRow == -1) {
+            // No row is selected, show an error message.
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please select a transaction from the list to edit.",
+                    "No Selection",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // ⭐️ This is the crucial line: call the data loading method.
+        loadTransactionForEditing(selectedRow);
+
+        // NOTE: Make sure there is NO showCard(CARD_CHOOSE_TRANS) or other showCard() call
+        // after this, as loadTransactionForEditing() handles the switch.
     }
 
     private void editCategoryButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -1774,11 +1842,80 @@ public class HomePageView extends javax.swing.JFrame {
     }
 
     private void editTransactionEditButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        showCard(CARD_TRANS);
+        // 1. Retrieve data from the Edit form fields
+        String store = editTransactionStoreEntry.getText().trim();
+        String description = editTransactionItemEntry.getText().trim();
+        String amountText = editTransactionAmountEntry.getText().trim();
+        String category = (String) editTransactionCategorySelect.getSelectedItem();
+
+        // Construct the date string (e.g., "2024-October-15")
+        String year = (String) editTransactionYearSelect.getSelectedItem();
+        String month = (String) editTransactionMonthSelect.getSelectedItem();
+        String day = (String) editTransactionDaySelect.getSelectedItem();
+        String dateString = year + "-" + month + "-" + day;
+
+        // 2. Validation (Checking for missing/default values)
+        if (store.isEmpty() || amountText.isEmpty() || amountText.equals("0.00")) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please fill in the Store Name and enter a non-zero Amount.",
+                    "Missing Information",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Check for default/placeholder values in JComboBoxes (Fixes the issue where validation is skipped)
+        if (year.contains("Item") || month.contains("Item") || day.contains("Item") ||
+                category.contains("Item")) {
+
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please select a valid Date and Category.",
+                    "Missing Information",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            // 3. Parse the amount and handle NumberFormatException
+            double amount = Double.parseDouble(amountText);
+            if (amount < 0) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Amount cannot be negative. Please enter a positive value.",
+                        "Invalid Amount",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                return; // Stop execution
+            }
+            // 4. Update the JTable Model (Using the stored row index)
+            javax.swing.table.DefaultTableModel model =
+                    (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+
+            // Use the editingRowIndex saved in loadTransactionForEditing()
+            // The column indices must match your table: 0=Date, 1=Merchant, 2=Description, 3=Amount, 4=Category
+            model.setValueAt(dateString, editingRowIndex, 0);
+            model.setValueAt(store, editingRowIndex, 1);
+            model.setValueAt(description, editingRowIndex, 2);
+            model.setValueAt(amount, editingRowIndex, 3);
+            model.setValueAt(category, editingRowIndex, 4);
+
+            // 5. Show Success Message
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Transaction updated successfully!",
+                    "Success",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+            // 6. Return to the main Transaction list view
+            showCard(CARD_TRANS);
+
+        } catch (NumberFormatException e) {
+            // Validation for invalid number input
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please enter a valid number for the amount (e.g., 10.50).",
+                    "Invalid Input",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void editTransactionCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        showCard(CARD_TRANS);
     }
 
     private void finishAddTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -1823,6 +1960,13 @@ public class HomePageView extends javax.swing.JFrame {
         try {
             // 3. Parse the amount to ensure it is a valid number
             double amount = Double.parseDouble(amountText);
+            if (amount < 0) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Amount cannot be negative. Please enter a positive value.",
+                        "Invalid Amount",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                return; // Stop execution
+            }
 
             // 4. Update the JTable (Visual update)
             javax.swing.table.DefaultTableModel model =
