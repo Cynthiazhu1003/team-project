@@ -1,6 +1,6 @@
 package use_case2.use_case_edit_transactions;
 
-import use_case2.entity.Transaction;
+import frontend.Transaction;
 import use_case2.use_case.TransactionDataAccessInterface;
 
 public class EditTransactionInteractor implements EditTransactionInputBoundary {

@@ -1,6 +1,6 @@
 package use_case2.data_access;
 
-import use_case2.entity.Transaction;
+import frontend.Transaction;
 import use_case2.use_case.TransactionDataAccessInterface;
 import java.util.ArrayList;
 import java.util.List;

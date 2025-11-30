@@ -1,6 +1,7 @@
 package use_case2.use_case;
 
-import use_case2.entity.Transaction;
+import frontend.Transaction;
+
 import java.util.List;
 
 public interface TransactionDataAccessInterface {
