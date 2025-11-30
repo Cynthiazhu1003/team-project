@@ -5,11 +5,9 @@ import frontend.Transaction;
 import org.junit.jupiter.api.Test;
 import use_case4.boundary.AutoCategorizeOutputBoundary;
 import use_case4.data.AutoCategorizeRequestModel;
-import use_case4.data.AutoCategorizeResponseModel;
 import use_case4.interface_adapter.viewmodel.AutoCategorizeViewModel;
 import use_case4.use_case.AutoCategorizeInteractor;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +44,7 @@ class AutoCategorizeIntegrationTest {
         assertNotNull(result, "Result should not be null");
         assertEquals(transactions.size(), result.size(), "Result should have same number of transactions");
 
-        // Optional: print out results
+        // Print out results (For ez checking)
         System.out.println("Categorized Transactions:");
         for (Transaction t : result) {
             System.out.println(t);

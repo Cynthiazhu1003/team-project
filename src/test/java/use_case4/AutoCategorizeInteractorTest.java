@@ -1,13 +1,11 @@
 package use_case4;
 
 import api.fina.FinaCategorizationGateway;
-import api.fina.FinaCategorizationGateway.FinaCategorizationException;
 import frontend.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import use_case4.boundary.AutoCategorizeOutputBoundary;
 import use_case4.data.AutoCategorizeRequestModel;
-import use_case4.data.AutoCategorizeResponseModel;
 import use_case4.interface_adapter.viewmodel.AutoCategorizeViewModel;
 import use_case4.use_case.AutoCategorizeInteractor;
 
@@ -22,13 +20,12 @@ class AutoCategorizeInteractorTest {
     private AutoCategorizeInteractor interactor;
     private MockGateway mockGateway;
     private AutoCategorizeViewModel viewModel;
-    private AutoCategorizeOutputBoundary presenter;
 
     @BeforeEach
     void setUp() {
         mockGateway = new MockGateway();
         viewModel = new AutoCategorizeViewModel();
-        presenter = new use_case4.interface_adapter.presenter.AutoCategorizePresenter(viewModel);
+        AutoCategorizeOutputBoundary presenter = new use_case4.interface_adapter.presenter.AutoCategorizePresenter(viewModel);
         interactor = new AutoCategorizeInteractor(mockGateway, presenter);
     }
 
@@ -67,7 +64,7 @@ class AutoCategorizeInteractorTest {
         assertEquals("Gateway failed", viewModel.getError());
     }
 
-    // --- Mock Gateway ---
+    // Mock Gateway
     static class MockGateway implements FinaCategorizationGateway {
 
         private boolean throwException = false;
