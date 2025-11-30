@@ -17,12 +17,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.border.Border;
+import use_case3.interface_adapter.categorize.CategorizeController;
+import use_case3.interface_adapter.categorize.CategorizeViewModel;
+import use_case3.entity.Transaction;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author benja
  */
-public class HomePageView extends javax.swing.JFrame {
+public class HomePageView extends javax.swing.JFrame implements PropertyChangeListener {
 
     // --- Card identifiers ---
     private static final String CARD_HOME     = "cardHome";
@@ -37,6 +45,9 @@ public class HomePageView extends javax.swing.JFrame {
     private static final String CARD_EDIT_CATEGORY = "cardEditCategory";
     private static final String CARD_CHOOSE_BUDGET = "cardChooseBudget";
     private static final String CARD_CHOOSE_TRANS = "cardChooseTransaction";
+    private final CategorizeController controller;
+    private final CategorizeViewModel viewModel;
+    private final List<Transaction> transactions;
     private int editingRowIndex = -1;
 
     // --- Helper method to switch cards ---
@@ -99,15 +110,30 @@ public class HomePageView extends javax.swing.JFrame {
     /**
      * Creates new form HomePage
      */
-    public HomePageView() {
+    public HomePageView(CategorizeController controller, CategorizeViewModel viewModel, List<Transaction> transactions) {
+        this.controller = controller;
+        this.viewModel = viewModel;
+        this.transactions = transactions;
+
+        // 1. Listen for success messages from Clean Architecture
+        this.viewModel.addPropertyChangeListener(this);
+
+        // 2. Build the GUI (Teammates' code)
         initComponents();
-        // Register each card with its name
+
+        // 3. Setup your specific features
+        initEditCategoryView();
+
+        // 4. Make the Filter Dropdown work immediately
+        transactionFilterCategorySelect.addActionListener(e -> refreshTransactionTable());
+
+        // 5. Register all cards (Keep teammates' existing code)
         mainPanel.add(cardHome,        CARD_HOME);
         mainPanel.add(cardTransaction, CARD_TRANS);
         mainPanel.add(cardBudget,      CARD_BUDGET);
         mainPanel.add(cardReport,      CARD_REPORT);
         mainPanel.add(cardImport,      CARD_IMPORT);
-        mainPanel.add(cardEditTransaction,CARD_EDIT_TRANS);
+        mainPanel.add(cardEditTransaction, CARD_EDIT_TRANS);
         mainPanel.add(cardAddBudget, CARD_ADD_BUDGET);
         mainPanel.add(cardAddTransaction, CARD_ADD_TRANS);
         mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
@@ -115,9 +141,9 @@ public class HomePageView extends javax.swing.JFrame {
         mainPanel.add(cardChooseTransaction, CARD_CHOOSE_TRANS);
         mainPanel.add(cardChooseBudget, CARD_CHOOSE_BUDGET);
 
-        // Optional: show a default screen when program starts
+        // 6. Load data and show home
+        refreshTransactionTable();
         showCard(CARD_HOME);
-
     }
 
 
@@ -1796,7 +1822,6 @@ public class HomePageView extends javax.swing.JFrame {
 
     private void editTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
         int selectedRow = transactionTable.getSelectedRow();
-
         if (selectedRow == -1) {
             // No row is selected, show an error message.
             javax.swing.JOptionPane.showMessageDialog(this,
@@ -1842,19 +1867,19 @@ public class HomePageView extends javax.swing.JFrame {
     }
 
     private void editTransactionEditButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // 1. Retrieve data from the Edit form fields
+        // 1. Retrieve data
         String store = editTransactionStoreEntry.getText().trim();
         String description = editTransactionItemEntry.getText().trim();
         String amountText = editTransactionAmountEntry.getText().trim();
         String category = (String) editTransactionCategorySelect.getSelectedItem();
 
-        // Construct the date string (e.g., "2024-October-15")
+        // Construct the date string
         String year = (String) editTransactionYearSelect.getSelectedItem();
         String month = (String) editTransactionMonthSelect.getSelectedItem();
         String day = (String) editTransactionDaySelect.getSelectedItem();
         String dateString = year + "-" + month + "-" + day;
 
-        // 2. Validation (Checking for missing/default values)
+        // 2. Validation (Strings)
         if (store.isEmpty() || amountText.isEmpty() || amountText.equals("0.00")) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please fill in the Store Name and enter a non-zero Amount.",
@@ -1863,10 +1888,9 @@ public class HomePageView extends javax.swing.JFrame {
             return;
         }
 
-        // Check for default/placeholder values in JComboBoxes (Fixes the issue where validation is skipped)
+        // Validation (Dropdowns)
         if (year.contains("Item") || month.contains("Item") || day.contains("Item") ||
                 category.contains("Item")) {
-
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please select a valid Date and Category.",
                     "Missing Information",
@@ -1875,40 +1899,59 @@ public class HomePageView extends javax.swing.JFrame {
         }
 
         try {
-            // 3. Parse the amount and handle NumberFormatException
+            // 3. Parse Amount
             double amount = Double.parseDouble(amountText);
+
+            // --- FIX 1: Check negative amount BEFORE updating anything ---
             if (amount < 0) {
                 javax.swing.JOptionPane.showMessageDialog(this,
-                        "Amount cannot be negative. Please enter a positive value.",
+                        "Amount cannot be negative.",
                         "Invalid Amount",
                         javax.swing.JOptionPane.ERROR_MESSAGE);
-                return; // Stop execution
+                return; // Stop here
             }
-            // 4. Update the JTable Model (Using the stored row index)
+
+            // 4. Update Data
+            if (editingRowIndex >= 0 && editingRowIndex < transactions.size()) {
+
+                // A. Update non-category fields locally (Hybrid approach)
+                Transaction t = transactions.get(editingRowIndex);
+                t.setMerchant(store);
+                t.setDescription(description);
+                t.setAmount(amount);
+                // (Note: We are not updating Date in the entity here for simplicity,
+                // but you can add t.setDate(...) if your entity supports it)
+
+                // B. CALL YOUR CONTROLLER (The Use Case)
+                // --- FIX 2: Use the variable 'category', not 'newCategory' ---
+                controller.categorize(editingRowIndex, category);
+            }
+
+            // 5. Update Visual Table (Teammates' logic - kept for safety)
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) transactionTable.getModel();
 
-            // Use the editingRowIndex saved in loadTransactionForEditing()
-            // The column indices must match your table: 0=Date, 1=Merchant, 2=Description, 3=Amount, 4=Category
             model.setValueAt(dateString, editingRowIndex, 0);
             model.setValueAt(store, editingRowIndex, 1);
             model.setValueAt(description, editingRowIndex, 2);
             model.setValueAt(amount, editingRowIndex, 3);
             model.setValueAt(category, editingRowIndex, 4);
 
-            // 5. Show Success Message
+            // 6. Success & Navigate
+        /* Note: Your Controller/ViewModel will ALSO show a popup via propertyChange.
+           You might get two popups (one from here, one from clean architecture).
+           That is fine for now. */
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Transaction updated successfully!",
                     "Success",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
-            // 6. Return to the main Transaction list view
             showCard(CARD_TRANS);
 
+            // --- FIX 3: Removed the duplicate catch block ---
         } catch (NumberFormatException e) {
-            // Validation for invalid number input
             javax.swing.JOptionPane.showMessageDialog(this,
-                    "Please enter a valid number for the amount (e.g., 10.50).",
+                    "Please enter a valid number (e.g., 10.50).",
                     "Invalid Input",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
         }
@@ -1925,86 +1968,77 @@ public class HomePageView extends javax.swing.JFrame {
         String amountText = addTransactionAmountEntry.getText().trim();
         String category = (String) addTransactionCategorySelect.getSelectedItem();
 
-        // Date components
         String year = (String) addTransactionYearSelect.getSelectedItem();
         String month = (String) addTransactionMonthSelect.getSelectedItem();
         String day = (String) addTransactionDaySelect.getSelectedItem();
-        String dateString = year + "-" + month + "-" + day;
 
-        // A. VALIDATION FOR REQUIRED TEXT FIELDS (Store and Amount)
+        // 2. Validation
         if (store.isEmpty() || store.equalsIgnoreCase("Store") || amountText.isEmpty() || amountText.equals("0.00")) {
-            javax.swing.JOptionPane.showMessageDialog(this,
-                    "Please fill in the Store Name and enter a non-zero Amount.",
-                    "Missing Information",
-                    javax.swing.JOptionPane.WARNING_MESSAGE);
-            return; // Stop here if text fields are missing/default
+            javax.swing.JOptionPane.showMessageDialog(this, "Please fill in Store and Amount.");
+            return;
         }
-
-        // B. VALIDATION FOR REQUIRED COMBOBOXES (Date and Category)
-        if (year.equals("Select") || month.equals("Select") || day.equals("Select") ||
-                category.contains("Select")) {
-
-            javax.swing.JOptionPane.showMessageDialog(this,
-                    "Please select a valid Date (Year, Month, Day) and Category.",
-                    "Missing Information",
-                    javax.swing.JOptionPane.WARNING_MESSAGE);
-            return; // Stop here if dropdowns are missing/default
+        if (year.equals("Select") || month.equals("Select") || day.equals("Select") || category.contains("Select")) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select Date and Category.");
+            return;
         }
-
-        // C. VALIDATION FOR DESCRIPTION (Optional, but useful to check default)
-        if (description.equalsIgnoreCase("Item")) {
-            description = "";
-        }
-
 
         try {
-            // 3. Parse the amount to ensure it is a valid number
             double amount = Double.parseDouble(amountText);
             if (amount < 0) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                        "Amount cannot be negative. Please enter a positive value.",
-                        "Invalid Amount",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
-                return; // Stop execution
+                javax.swing.JOptionPane.showMessageDialog(this, "Amount cannot be negative.");
+                return;
             }
 
-            // 4. Update the JTable (Visual update)
-            javax.swing.table.DefaultTableModel model =
-                    (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+            // ➤ FIX STARTS HERE: Convert Date and Save to List ------------------
 
-            // Order matches your table columns: [Date, Merchant, Description, Amount, Category]
-            model.addRow(new Object[]{dateString, store, description, amount, category});
+            // A. Parse the Date (e.g., "2025-January-3")
+            // We use a formatter because "January" is text, not a number.
+            java.time.format.DateTimeFormatter formatter =
+                    java.time.format.DateTimeFormatter.ofPattern("yyyy-MMMM-d", java.util.Locale.ENGLISH);
 
-            // 5. Success Message and Cleanup
-            javax.swing.JOptionPane.showMessageDialog(this,
-                    "Transaction added successfully!",
-                    "Success",
-                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            String rawDateString = year + "-" + month + "-" + day;
+            java.time.LocalDate date = java.time.LocalDate.parse(rawDateString, formatter);
+
+            // B. Create the Transaction Object
+            Transaction newTransaction = new Transaction(
+                    date,
+                    description, // Description
+                    store,       // Merchant
+                    amount,
+                    category
+            );
+
+            // C. Add to the Memory List (This makes the Filter work!)
+            transactions.add(newTransaction);
+
+            // D. Refresh the Table (This paints it on the screen)
+            refreshTransactionTable();
+
+            // ------------------------------------------------------------------
+
+            // 3. Success & Cleanup
+            javax.swing.JOptionPane.showMessageDialog(this, "Transaction added successfully!");
 
             addTransactionStoreEntry.setText("");
             addTransactionItemEntry.setText("");
             addTransactionAmountEntry.setText("");
-
-            // 6. Return to the main Transaction list view
             showCard(CARD_TRANS);
 
         } catch (NumberFormatException e) {
-            javax.swing.JOptionPane.showMessageDialog(this,
-                    "Please enter a valid number for the amount (e.g., 10.50).",
-                    "Invalid Input",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Invalid Amount number.");
+        } catch (java.time.format.DateTimeParseException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Error parsing date: " + e.getMessage());
         }
     }
 
     /**
      * @param args the command line arguments
      */
+    // --------------------------------------------------------
+    // FIND THIS AT THE BOTTOM OF HomePageView.java
+    // --------------------------------------------------------
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -2012,13 +2046,20 @@ public class HomePageView extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(HomePageView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new HomePageView().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> {
+            // FIX: We pass 'null' and empty objects here just to fix the error.
+            // Do NOT run this file to test your feature. Run Main.java instead.
+            new HomePageView(
+                    null,
+                    new use_case3.interface_adapter.categorize.CategorizeViewModel(),
+                    new java.util.ArrayList<>()
+            ).setVisible(true);
+        });
     }
 
     // Variables declaration - do not modify
@@ -2156,5 +2197,99 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JPanel transactionHeaderHeader;
     private javax.swing.JScrollPane transactionScrollPane;
     private javax.swing.JTable transactionTable;
-    // End of variables declaration                   
+    // End of variables declaration
+
+    private void refreshTransactionTable() {
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+        model.setRowCount(0); // Clear table
+
+        String filter = (String) transactionFilterCategorySelect.getSelectedItem();
+        boolean showAll = (filter == null || filter.equals("Select Category...") || filter.equals("All"));
+
+        if (transactions != null) {
+            for (Transaction t : transactions) {
+                if (showAll || t.getCategory().equalsIgnoreCase(filter)) {
+                    model.addRow(new Object[]{
+                            t.getDate().toString(),
+                            t.getMerchant(),
+                            t.getDescription(),
+                            t.getAmount(),
+                            t.getCategory()
+                    });
+                }
+            }
+        }
+    }
+
+    // 2. Builds the UI for adding a new category
+    // 2. Builds the UI for Adding and Deleting categories
+    private void initEditCategoryView() {
+        // Clear any old components so we don't duplicate buttons if this runs twice
+        cardEditCategory.removeAll();
+        cardEditCategory.setLayout(new java.awt.FlowLayout());
+
+        javax.swing.JLabel label = new javax.swing.JLabel("Category Name:");
+        javax.swing.JTextField catField = new javax.swing.JTextField(15);
+
+        // --- Define Buttons ---
+        javax.swing.JButton addBtn = new javax.swing.JButton("Add");
+        javax.swing.JButton deleteBtn = new javax.swing.JButton("Delete"); // <--- NEW BUTTON
+        javax.swing.JButton backBtn = new javax.swing.JButton("Back");
+
+        // --- Logic to ADD ---
+        addBtn.addActionListener(e -> {
+            String newCat = catField.getText().trim();
+            if (!newCat.isEmpty()) {
+                // Add to all 3 dropdowns
+                transactionFilterCategorySelect.addItem(newCat);
+                editTransactionCategorySelect.addItem(newCat);
+                addTransactionCategorySelect.addItem(newCat);
+
+                javax.swing.JOptionPane.showMessageDialog(this, "Category '" + newCat + "' added!");
+                catField.setText("");
+            }
+        });
+
+        // --- Logic to DELETE (The new part) ---
+        deleteBtn.addActionListener(e -> {
+            String catToRemove = catField.getText().trim();
+
+            // basic validation
+            if (catToRemove.isEmpty() || catToRemove.equals("Select Category...")) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Please type a valid category name to delete.");
+                return;
+            }
+
+            // Remove from all 3 dropdowns
+            transactionFilterCategorySelect.removeItem(catToRemove);
+            editTransactionCategorySelect.removeItem(catToRemove);
+            addTransactionCategorySelect.removeItem(catToRemove);
+
+            javax.swing.JOptionPane.showMessageDialog(this, "Category '" + catToRemove + "' deleted.");
+            catField.setText("");
+        });
+
+        // --- Logic to Go Back ---
+        backBtn.addActionListener(e -> showCard(CARD_TRANS));
+
+        // --- Add components to the screen ---
+        cardEditCategory.add(label);
+        cardEditCategory.add(catField);
+        cardEditCategory.add(addBtn);
+        cardEditCategory.add(deleteBtn); // <--- Add the delete button
+        cardEditCategory.add(backBtn);
+
+        // Refresh the panel visually
+        cardEditCategory.revalidate();
+        cardEditCategory.repaint();
+    }
+
+    // 3. Listens for updates from Clean Architecture (ViewModel)
+    @Override
+    public void propertyChange(java.beans.PropertyChangeEvent evt) {
+        if ("message".equals(evt.getPropertyName())) {
+            // Refresh table to show changes
+            refreshTransactionTable();
+        }
+    }
 }

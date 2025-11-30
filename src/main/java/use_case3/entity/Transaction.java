@@ -98,4 +98,29 @@ public class Transaction {
                 ", category='" + category + '\'' +
                 '}';
     }
+    /**
+     * Factory method to create a Transaction from a CSV line.
+     * Expected format: "YYYY-MM-DD, Description, Merchant, Amount"
+     */
+    public static Transaction of(String csvLine) {
+        // Split the line by commas
+        String[] parts = csvLine.split(",");
+
+        // Parse the parts (and trim whitespace)
+        LocalDate date = LocalDate.parse(parts[0].trim());
+        String description = parts[1].trim();
+        String merchant = parts[2].trim();
+        double amount = Double.parseDouble(parts[3].trim());
+
+        // Default category is "Uncategorized" since the CSV format
+        // in HomePageView only expects 4 columns.
+        String category = "Uncategorized";
+
+        // If the CSV happens to have a 5th column, use it as category
+        if (parts.length > 4) {
+            category = parts[4].trim();
+        }
+
+        return new Transaction(date, description, merchant, amount, category);
+    }
 }
