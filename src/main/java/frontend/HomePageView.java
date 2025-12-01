@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.border.Border;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -90,6 +91,7 @@ public class HomePageView extends javax.swing.JFrame {
     private static final String CARD_CHOOSE_TRANS = "cardChooseTransaction";
     private int editingRowIndex = -1;
     private javax.swing.JButton deleteTransactionButton;
+    private javax.swing.table.TableRowSorter<javax.swing.table.DefaultTableModel> transactionSorter;
 
     private DefaultListModel<String> newsListModel = new DefaultListModel<>();
     private JList<String> newsList = new JList<>(newsListModel);
@@ -722,7 +724,14 @@ public class HomePageView extends javax.swing.JFrame {
         filterLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         filterLabel.setText("Filter by Category:");
 
-        transactionFilterCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Category...", "Dining", "Leisure", "Gifts", "School" }));
+        transactionFilterCategorySelect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                transactionFilterCategorySelectActionPerformed(evt); // <--- This calls your filter logic
+            }
+        });
+        // Use getFilterCategories() which includes the "All Categories"/default option
+        List<String> filterList = frontend.CategoryList.getFilterCategories();
+        transactionFilterCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(filterList.toArray(new String[0])));
 
         editCategoryButton.setText("Edit Category [+]");
         editCategoryButton.addActionListener(new java.awt.event.ActionListener() {
@@ -1241,7 +1250,11 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel27.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel27.setText("Category:");
 
-        addTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
+        // Use getFormCategories() which includes the "Select..." option
+        List<String> formList = frontend.CategoryList.getFormCategories();
+        addTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(formList.toArray(new String[0])));
+
+        editTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(formList.toArray(new String[0])));
 
         cancelAdtTransactionButton.setBackground(new java.awt.Color(255, 0, 0));
         cancelAdtTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -1586,7 +1599,7 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel31.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel31.setText("Category:");
 
-        editTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
+//        editTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
 
         editTransactionCancelButton.setBackground(new java.awt.Color(255, 0, 0));
         editTransactionCancelButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -1876,6 +1889,43 @@ public class HomePageView extends javax.swing.JFrame {
 
     private void transactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
         showCard(CARD_TRANS);
+
+        // 1. Initialize the TableSorter if it hasn't been done already
+        if (transactionSorter == null) {
+            javax.swing.table.DefaultTableModel model =
+                    (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+            transactionSorter = new javax.swing.table.TableRowSorter<>(model);
+            transactionTable.setRowSorter(transactionSorter);
+        }
+
+        // 2. Clear any existing filter when the screen is first opened/reopened
+        transactionSorter.setRowFilter(null);
+
+        // Optional: Reset the filter selection to show all
+        transactionFilterCategorySelect.setSelectedItem("Select Category...");
+    }
+    private void transactionFilterCategorySelectActionPerformed(java.awt.event.ActionEvent evt) {
+        String selectedCategory = (String) transactionFilterCategorySelect.getSelectedItem();
+
+        if (selectedCategory == null || selectedCategory.equals("Select Category...")
+        ||selectedCategory.equals("All Categories")) {
+            // If the default item is selected, clear the filter to show all rows.
+            transactionSorter.setRowFilter(null);
+        } else {
+            // Create a RowFilter to only keep rows where the Category column (index 4)
+            // matches the selected category string.
+
+            // Column index 4 corresponds to the "Category" column in transactionTable
+            int categoryColumnIndex = 4;
+
+            javax.swing.RowFilter<Object, Object> categoryFilter =
+                    javax.swing.RowFilter.regexFilter(
+                            "^" + java.util.regex.Pattern.quote(selectedCategory) + "$",
+                            categoryColumnIndex
+                    );
+
+            transactionSorter.setRowFilter(categoryFilter);
+        }
     }
 
     private void addBudgetButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -2000,7 +2050,55 @@ public class HomePageView extends javax.swing.JFrame {
     }
 
     private void editCategoryButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        showCard(CARD_EDIT_CATEGORY);
+        // 1. Prompt the user for a new category name
+        String newCategory = javax.swing.JOptionPane.showInputDialog(this,
+                "Enter the name of the new category:",
+                "Add New Category",
+                javax.swing.JOptionPane.PLAIN_MESSAGE);
+
+        // Check if the user clicked Cancel or entered an empty string
+        if (newCategory == null || newCategory.trim().isEmpty()) {
+            return;
+        }
+
+        newCategory = newCategory.trim();
+
+        // 2. Prevent duplicate entries by checking one of the models (e.g., transaction filter)
+        // We must explicitly cast to DefaultComboBoxModel to use methods like getElementAt() and addElement().
+        javax.swing.DefaultComboBoxModel<String> filterModel =
+                (javax.swing.DefaultComboBoxModel<String>) transactionFilterCategorySelect.getModel();
+
+        for (int i = 0; i < filterModel.getSize(); i++) {
+            if (filterModel.getElementAt(i).equalsIgnoreCase(newCategory)) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Category '" + newCategory + "' already exists.",
+                        "Duplicate Category",
+                        javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        }
+
+        // 3. Add the new category to ALL SIX relevant JComboBox models
+
+        // a. Transaction Filter ComboBox (Already retrieved for validation)
+        filterModel.addElement(newCategory);
+
+        // b. Add Transaction ComboBox
+        javax.swing.DefaultComboBoxModel<String> addTransModel =
+                (javax.swing.DefaultComboBoxModel<String>) addTransactionCategorySelect.getModel();
+        addTransModel.addElement(newCategory);
+
+        // c. Edit Transaction ComboBox
+        javax.swing.DefaultComboBoxModel<String> editTransModel =
+                (javax.swing.DefaultComboBoxModel<String>) editTransactionCategorySelect.getModel();
+        editTransModel.addElement(newCategory);
+
+
+        // 4. Success Message
+        javax.swing.JOptionPane.showMessageDialog(this,
+                "Category '" + newCategory + "' added successfully and available in all forms!",
+                "Success",
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void addTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -2050,8 +2148,8 @@ public class HomePageView extends javax.swing.JFrame {
         }
 
         // Check for default/placeholder values in JComboBoxes (Fixes the issue where validation is skipped)
-        if (year.contains("Item") || month.contains("Item") || day.contains("Item") ||
-                category.contains("Item")) {
+        if (year.contains("Select") || month.contains("Select") || day.contains("Select") ||
+                category.contains("Select")) {
 
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please select a valid Date and Category.",
@@ -2061,6 +2159,20 @@ public class HomePageView extends javax.swing.JFrame {
         }
 
         try {
+            try {
+                java.time.Month monthEnum = java.time.Month.valueOf(month.toUpperCase());
+                java.time.LocalDate.of(
+                        Integer.parseInt(year),
+                        monthEnum,
+                        Integer.parseInt(day)
+                );
+            } catch (java.time.DateTimeException | NumberFormatException e) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "The date you selected (" + dateString + ") is not a valid calendar date.",
+                        "Invalid Date",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             // 3. Parse the amount and handle NumberFormatException
             double amount = Double.parseDouble(amountText);
             if (amount < 0) {
@@ -2144,6 +2256,23 @@ public class HomePageView extends javax.swing.JFrame {
 
 
         try {
+            try {
+                // Convert month name to enum for parsing
+                java.time.Month monthEnum = java.time.Month.valueOf(month.toUpperCase());
+
+                // This line throws an exception if the combination is invalid (e.g., day 31 in April)
+                java.time.LocalDate.of(
+                        Integer.parseInt(year),
+                        monthEnum,
+                        Integer.parseInt(day)
+                );
+            } catch (java.time.DateTimeException | NumberFormatException e) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "The date you selected (" + dateString + ") is not a valid calendar date.",
+                        "Invalid Date",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                return; // Stop execution if the date is invalid
+            }
             // 3. Parse the amount to ensure it is a valid number
             double amount = Double.parseDouble(amountText);
             if (amount < 0) {
