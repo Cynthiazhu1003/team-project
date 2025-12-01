@@ -11,6 +11,7 @@ public class InMemoryTransactionDataAccessObject implements TransactionDataAcces
     @Override
     public void save(Transaction transaction) {
         transactions.add(transaction);
+        System.out.println("Saving to DB: " + transaction);
     }
 
     @Override

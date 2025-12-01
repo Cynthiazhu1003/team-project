@@ -17,6 +17,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +29,14 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import use_case2.data_access.InMemoryTransactionDataAccessObject;
+import use_case2.interface_adapter.ViewManagerModel;
+import use_case2.interface_adapter.add_transaction.AddTransactionPresenter;
+import use_case2.interface_adapter.transaction.TransactionViewModel;
+import use_case2.use_case.AddTransactionInputBoundary;
+import use_case2.use_case.AddTransactionInputData;
+import use_case2.use_case.AddTransactionInteractor;
+import use_case2.use_case.TransactionDataAccessInterface;
 
 /*public class NewsApiClient {
 
@@ -95,6 +105,8 @@ public class HomePageView extends javax.swing.JFrame {
     private JList<String> newsList = new JList<>(newsListModel);
     private java.util.List<NewsApiResponse.Article> currentArticles = new java.util.ArrayList<>();
 
+    private final AddTransactionInputBoundary transactionInteractor;
+
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
         java.awt.CardLayout layout = (java.awt.CardLayout) mainPanel.getLayout();
@@ -155,8 +167,11 @@ public class HomePageView extends javax.swing.JFrame {
     /**
      * Creates new form HomePage
      */
-    public HomePageView() {
+    public HomePageView(AddTransactionInputBoundary transactionInteractor) {
         initComponents();
+
+        this.transactionInteractor = transactionInteractor;
+
         setupNewsPanel();
         loadNewsAsync();
         // Register each card with its name
@@ -2123,25 +2138,23 @@ public class HomePageView extends javax.swing.JFrame {
                     "Please fill in the Store Name and enter a non-zero Amount.",
                     "Missing Information",
                     javax.swing.JOptionPane.WARNING_MESSAGE);
-            return; // Stop here if text fields are missing/default
+            return;
         }
 
         // B. VALIDATION FOR REQUIRED COMBOBOXES (Date and Category)
         if (year.equals("Select") || month.equals("Select") || day.equals("Select") ||
                 category.contains("Select")) {
-
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please select a valid Date (Year, Month, Day) and Category.",
                     "Missing Information",
                     javax.swing.JOptionPane.WARNING_MESSAGE);
-            return; // Stop here if dropdowns are missing/default
+            return;
         }
 
         // C. VALIDATION FOR DESCRIPTION (Optional, but useful to check default)
         if (description.equalsIgnoreCase("Item")) {
             description = "";
         }
-
 
         try {
             // 3. Parse the amount to ensure it is a valid number
@@ -2151,17 +2164,47 @@ public class HomePageView extends javax.swing.JFrame {
                         "Amount cannot be negative. Please enter a positive value.",
                         "Invalid Amount",
                         javax.swing.JOptionPane.ERROR_MESSAGE);
-                return; // Stop execution
+                return;
             }
 
-            // 4. Update the JTable (Visual update)
+            // 4. Convert month name to Month enum
+            Month monthEnum;
+            try {
+                monthEnum = Month.valueOf(month.toUpperCase()); // "April" -> Month.APRIL
+            } catch (IllegalArgumentException ex) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Invalid month selected.",
+                        "Invalid Input",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int yearInt = Integer.parseInt(year);
+            int dayInt = Integer.parseInt(day);
+
+            LocalDate date;
+            try {
+                date = LocalDate.of(yearInt, monthEnum, dayInt);
+            } catch (Exception ex) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Invalid date. Please check Year, Month, and Day.",
+                        "Invalid Date",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // 5. Update the JTable (Visual update)
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) transactionTable.getModel();
-
-            // Order matches your table columns: [Date, Merchant, Description, Amount, Category]
             model.addRow(new Object[]{dateString, store, description, amount, category});
 
-            // 5. Success Message and Cleanup
+            // 6. Execute interactor
+            AddTransactionInputData inputData = new AddTransactionInputData(
+                    date, description, store, amount, category
+            );
+            transactionInteractor.execute(inputData);
+
+            // 7. Success Message and Cleanup
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Transaction added successfully!",
                     "Success",
@@ -2171,7 +2214,7 @@ public class HomePageView extends javax.swing.JFrame {
             addTransactionItemEntry.setText("");
             addTransactionAmountEntry.setText("");
 
-            // 6. Return to the main Transaction list view
+            // 8. Return to the main Transaction list view
             showCard(CARD_TRANS);
 
         } catch (NumberFormatException e) {
@@ -2244,8 +2287,14 @@ public class HomePageView extends javax.swing.JFrame {
         }
         //</editor-fold>
 
+        ViewManagerModel viewManagerModel = new ViewManagerModel();
+        TransactionViewModel transactionViewModel = new TransactionViewModel();
+        TransactionDataAccessInterface dao = new InMemoryTransactionDataAccessObject();
+        AddTransactionPresenter presenter = new AddTransactionPresenter(viewManagerModel, transactionViewModel);
+        AddTransactionInputBoundary interactor = new AddTransactionInteractor(presenter, dao);
+
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new HomePageView().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new HomePageView(interactor).setVisible(true));
     }
 
     // Variables declaration - do not modify
