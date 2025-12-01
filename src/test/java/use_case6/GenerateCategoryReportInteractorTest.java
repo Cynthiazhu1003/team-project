@@ -84,7 +84,6 @@ class GenerateCategoryReportInteractorTest {
         }
     }
 
-    // ---------- Setup ----------
 
     @BeforeEach
     void setUp() {
@@ -98,7 +97,6 @@ class GenerateCategoryReportInteractorTest {
         return new GenerateCategoryReportRequestModel(category, daysBack, today);
     }
 
-    // ---------- Tests ----------
 
     @Test
     void emptyCategoryProducesError() {
@@ -157,28 +155,23 @@ class GenerateCategoryReportInteractorTest {
 
     @Test
     void filtersByCategoryAndInclusiveDateRange() {
-        LocalDate today = LocalDate.of(2025, 12, 1);       // endDate
-        int daysBack = 30;                                 // startDate = 2025-11-01
+        LocalDate today = LocalDate.of(2025, 12, 1);      
+        int daysBack = 30;                                
 
-        // In-range, correct category
         gateway.add(new Transaction(LocalDate.of(2025, 11, 2),
                 "Milk", "Store A", 20.0, "groceries"));
         gateway.add(new Transaction(LocalDate.of(2025, 11, 30),
                 "Rice", "Store B", 40.0, "groceries"));
 
-        // Boundary: exactly on startDate
         gateway.add(new Transaction(LocalDate.of(2025, 11, 1),
                 "Boundary", "Store C", 10.0, "groceries"));
 
-        // Boundary: exactly on endDate (today)
         gateway.add(new Transaction(LocalDate.of(2025, 12, 1),
                 "Today", "Store D", 5.0, "groceries"));
 
-        // Too old: before startDate
         gateway.add(new Transaction(LocalDate.of(2025, 10, 31),
                 "Too old", "Store E", 50.0, "groceries"));
 
-        // Wrong category
         gateway.add(new Transaction(LocalDate.of(2025, 11, 15),
                 "Dinner", "Some Restaurant", 15.0, "restaurants & other"));
 
@@ -189,19 +182,13 @@ class GenerateCategoryReportInteractorTest {
 
         GenerateCategoryReportResponseModel resp = presenter.lastResponse;
 
-        // Bounds
         assertEquals(LocalDate.of(2025, 11, 1), resp.getStartDate());
         assertEquals(LocalDate.of(2025, 12, 1), resp.getEndDate());
         assertEquals("groceries", resp.getCategory());
 
-        // Count & total
         assertEquals(4, resp.getTransactionCount());
         assertEquals(75.0, resp.getTotalAmount(), 1e-9);
-
-        // Details: each transaction summary should correspond to one of the 4 included ones
         assertEquals(4, resp.getTransactions().size());
-        // you can be more specific if you want deterministic ordering:
-        // e.g. check that amounts contain 20,40,10,5 in some order.
         double sumFromSummaries = resp.getTransactions()
                 .stream()
                 .mapToDouble(GenerateCategoryReportResponseModel.TransactionSummary::getAmount)
