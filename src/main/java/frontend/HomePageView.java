@@ -34,6 +34,17 @@ import use_case5.data.InMemoryBudgetRepository;
 import use_case5.interface_adapter.BudgetPresenter;
 import use_case5.interface_adapter.BudgetViewModel;
 import use_case5.use_case.BudgetInteractor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.border.Border;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import use_case2.use_case.TransactionDataAccessInterface;
+import use_case6.boundary.GenerateCategoryReportResponseModel;
+import use_case6.interface_adapter.CategoryReportViewBoundary;
+import use_case6.interface_adapter.GenerateCategoryReportController;
+import use_case6.interface_adapter.GenerateCategoryReportPresenter;
+import use_case6.interface_adapter.TableBackedTransactionDataAccess;
+import use_case6.use_case.GenerateCategoryReportInteractor;
 
 /*public class NewsApiClient {
 
@@ -80,7 +91,7 @@ import use_case5.use_case.BudgetInteractor;
  *
  * @author benja
  */
-public class HomePageView extends javax.swing.JFrame {
+public class HomePageView extends javax.swing.JFrame implements CategoryReportViewBoundary {
 
     // --- Card identifiers ---
     private static final String CARD_HOME     = "newsPanel";
@@ -97,6 +108,11 @@ public class HomePageView extends javax.swing.JFrame {
     private int editingRowIndex = -1;
     private javax.swing.JButton deleteTransactionButton;
     private javax.swing.JButton deleteBudgetButton;
+    private GenerateCategoryReportController categoryReportController;
+    private javax.swing.JTable reportTable;
+    private javax.swing.table.DefaultTableModel reportTableModel;
+    private javax.swing.JLabel reportSummaryLabel;
+    private javax.swing.table.TableRowSorter<javax.swing.table.DefaultTableModel> transactionSorter;
 
     private DefaultListModel<String> newsListModel = new DefaultListModel<>();
     private JList<String> newsList = new JList<>(newsListModel);
@@ -176,6 +192,8 @@ public class HomePageView extends javax.swing.JFrame {
         this.BudgetInteractor = BudgetInteractor;
 
         setupNewsPanel();
+        setupReportBody();
+        setupCategoryReportUseCase();
         loadNewsAsync();
         // Register each card with its name
         mainPanel.add(newsPanel,        CARD_HOME);
@@ -270,6 +288,75 @@ public class HomePageView extends javax.swing.JFrame {
 
         newsListModel.clear();
         newsListModel.addElement("Loading latest financial headlines…");
+    }
+
+    private void setupReportBody() {
+        reportBodyPanel.setLayout(new java.awt.BorderLayout());
+
+        // Summary at top
+        reportSummaryLabel = new javax.swing.JLabel("No report generated yet.");
+        reportSummaryLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        reportSummaryLabel.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 14));
+        reportBodyPanel.add(reportSummaryLabel, java.awt.BorderLayout.PAGE_START);
+
+        // Table in center
+        reportTableModel = new javax.swing.table.DefaultTableModel(
+                new Object[][]{},
+                new String[]{"Date", "Description", "Amount"}
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 2) return Double.class;
+                return String.class;
+            }
+        };
+
+        reportTable = new javax.swing.JTable(reportTableModel);
+        javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(reportTable);
+        reportBodyPanel.add(scrollPane, java.awt.BorderLayout.CENTER);
+    }
+
+    private void setupCategoryReportUseCase() {
+        // Use the existing transactionTable as the data source
+        TransactionDataAccessInterface transactionGateway =
+                new TableBackedTransactionDataAccess(transactionTable);
+
+        GenerateCategoryReportPresenter presenter =
+                new GenerateCategoryReportPresenter(this);
+
+        GenerateCategoryReportInteractor interactor =
+                new GenerateCategoryReportInteractor(transactionGateway, presenter);
+
+        categoryReportController = new GenerateCategoryReportController(interactor);
+
+        // Hook up the "Generate Report" button
+        generateReportButton.addActionListener(e -> {
+            String category = (String) reportCategorySelected.getSelectedItem();
+            // If you've renamed jComboBox1 to reportDateSelected, use that here instead
+            String periodText = (String) reportDateSelected.getSelectedItem();
+
+            int daysBack = mapPeriodToDays(periodText);
+            categoryReportController.generate(category, daysBack);
+        });
+    }
+
+    private int mapPeriodToDays(String periodText) {
+        if (periodText == null) return 0;
+        String s = periodText.toLowerCase();
+
+        if (s.contains("7"))        return 7;
+        if (s.contains("14"))       return 14;
+        if (s.contains("1 month"))  return 30;
+        if (s.contains("2 months")) return 60;
+        if (s.contains("6 months")) return 180;
+        if (s.contains("1 year"))   return 365;
+
+        return 0;
     }
 
     private void loadNewsAsync() {
@@ -367,7 +454,7 @@ public class HomePageView extends javax.swing.JFrame {
         jPanel5 = new javax.swing.JPanel();
         jPanel7 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        reportDateSelected = new javax.swing.JComboBox<>();
         jPanel8 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         reportCategorySelected = new javax.swing.JComboBox<>();
@@ -740,7 +827,14 @@ public class HomePageView extends javax.swing.JFrame {
         filterLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         filterLabel.setText("Filter by Category:");
 
-        transactionFilterCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Category...", "Dining", "Leisure", "Gifts", "School" }));
+        transactionFilterCategorySelect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                transactionFilterCategorySelectActionPerformed(evt); // <--- This calls your filter logic
+            }
+        });
+        // Use getFilterCategories() which includes the "All Categories"/default option
+        List<String> filterList = frontend.CategoryList.getFilterCategories();
+        transactionFilterCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(filterList.toArray(new String[0])));
 
         editCategoryButton.setText("Edit Category [+]");
         editCategoryButton.addActionListener(new java.awt.event.ActionListener() {
@@ -951,7 +1045,7 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel5.setText("Time Period:");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "7 days", "14 days", "1 month", "2 months", "6 months", "1 year" }));
+        reportDateSelected.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "7 days", "14 days", "1 month", "2 months", "6 months", "1 year" }));
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -961,7 +1055,7 @@ public class HomePageView extends javax.swing.JFrame {
                                 .addGap(42, 42, 42)
                                 .addComponent(jLabel5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(reportDateSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap(13, Short.MAX_VALUE))
         );
         jPanel7Layout.setVerticalGroup(
@@ -970,7 +1064,7 @@ public class HomePageView extends javax.swing.JFrame {
                                 .addContainerGap()
                                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(jLabel5)
-                                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(reportDateSelected, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap(8, Short.MAX_VALUE))
         );
 
@@ -979,7 +1073,14 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         jLabel3.setText("Select Category:");
 
-        reportCategorySelected.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Dining", "Leisure", "Work", "School" }));
+        reportCategorySelected.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {"home",
+                "bills & utilities","auto & transport","vehicle & repairs","gas","other transportation",
+                "food & drink","groceries","restaurants & other","health & wellness","medical","gym",
+                "other health & wellness","travel & vacation","shopping","clothing","other shopping",
+                "entertainment & lifestyle","education","gifts & donations","loans & financial fees",
+                "family & pets","subscriptions","business & work","investments","taxes","insurance",
+                "other expenses","primary paycheck","business income","repayment from others",
+                "other income","transfer","credit card payment"}));
 
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
@@ -1105,7 +1206,14 @@ public class HomePageView extends javax.swing.JFrame {
             }
         });
 
-        addBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Dining", "Leisure", "Gifts", "School" }));
+        addBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {"home",
+                "bills & utilities","auto & transport","vehicle & repairs","gas","other transportation",
+                "food & drink","groceries","restaurants & other","health & wellness","medical","gym",
+                "other health & wellness","travel & vacation","shopping","clothing","other shopping",
+                "entertainment & lifestyle","education","gifts & donations","loans & financial fees",
+                "family & pets","subscriptions","business & work","investments","taxes","insurance",
+                "other expenses","primary paycheck","business income","repayment from others",
+                "other income","transfer","credit card payment"}));
 
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
@@ -1261,7 +1369,11 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel27.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel27.setText("Category:");
 
-        addTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
+        // Use getFormCategories() which includes the "Select..." option
+        List<String> formList = frontend.CategoryList.getFormCategories();
+        addTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(formList.toArray(new String[0])));
+
+        editTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(formList.toArray(new String[0])));
 
         cancelAdtTransactionButton.setBackground(new java.awt.Color(255, 0, 0));
         cancelAdtTransactionButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -1606,7 +1718,7 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel31.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel31.setText("Category:");
 
-        editTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
+        //editTransactionCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select...", "Dining", "Leisure", "Gifts", "Work" }));
 
         editTransactionCancelButton.setBackground(new java.awt.Color(255, 0, 0));
         editTransactionCancelButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -1742,7 +1854,14 @@ public class HomePageView extends javax.swing.JFrame {
         label.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         label.setText("Select Category:");
 
-        editBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        editBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {"home",
+                "bills & utilities","auto & transport","vehicle & repairs","gas","other transportation",
+                "food & drink","groceries","restaurants & other","health & wellness","medical","gym",
+                "other health & wellness","travel & vacation","shopping","clothing","other shopping",
+                "entertainment & lifestyle","education","gifts & donations","loans & financial fees",
+                "family & pets","subscriptions","business & work","investments","taxes","insurance",
+                "other expenses","primary paycheck","business income","repayment from others",
+                "other income","transfer","credit card payment"}));
 
         editBudgetEditButton.setBackground(new java.awt.Color(51, 255, 0));
         editBudgetEditButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -1914,6 +2033,43 @@ public class HomePageView extends javax.swing.JFrame {
 
     private void transactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
         showCard(CARD_TRANS);
+
+        // 1. Initialize the TableSorter if it hasn't been done already
+        if (transactionSorter == null) {
+            javax.swing.table.DefaultTableModel model =
+                    (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+            transactionSorter = new javax.swing.table.TableRowSorter<>(model);
+            transactionTable.setRowSorter(transactionSorter);
+        }
+
+        // 2. Clear any existing filter when the screen is first opened/reopened
+        transactionSorter.setRowFilter(null);
+
+        // Optional: Reset the filter selection to show all
+        transactionFilterCategorySelect.setSelectedItem("Select Category...");
+    }
+    private void transactionFilterCategorySelectActionPerformed(java.awt.event.ActionEvent evt) {
+        String selectedCategory = (String) transactionFilterCategorySelect.getSelectedItem();
+
+        if (selectedCategory == null || selectedCategory.equals("Select Category...")
+        ||selectedCategory.equals("All Categories")) {
+            // If the default item is selected, clear the filter to show all rows.
+            transactionSorter.setRowFilter(null);
+        } else {
+            // Create a RowFilter to only keep rows where the Category column (index 4)
+            // matches the selected category string.
+
+            // Column index 4 corresponds to the "Category" column in transactionTable
+            int categoryColumnIndex = 4;
+
+            javax.swing.RowFilter<Object, Object> categoryFilter =
+                    javax.swing.RowFilter.regexFilter(
+                            "^" + java.util.regex.Pattern.quote(selectedCategory) + "$",
+                            categoryColumnIndex
+                    );
+
+            transactionSorter.setRowFilter(categoryFilter);
+        }
     }
 
     private void addBudgetButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -2186,7 +2342,55 @@ public class HomePageView extends javax.swing.JFrame {
     }
 
     private void editCategoryButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        showCard(CARD_EDIT_CATEGORY);
+        // 1. Prompt the user for a new category name
+        String newCategory = javax.swing.JOptionPane.showInputDialog(this,
+                "Enter the name of the new category:",
+                "Add New Category",
+                javax.swing.JOptionPane.PLAIN_MESSAGE);
+
+        // Check if the user clicked Cancel or entered an empty string
+        if (newCategory == null || newCategory.trim().isEmpty()) {
+            return;
+        }
+
+        newCategory = newCategory.trim();
+
+        // 2. Prevent duplicate entries by checking one of the models (e.g., transaction filter)
+        // We must explicitly cast to DefaultComboBoxModel to use methods like getElementAt() and addElement().
+        javax.swing.DefaultComboBoxModel<String> filterModel =
+                (javax.swing.DefaultComboBoxModel<String>) transactionFilterCategorySelect.getModel();
+
+        for (int i = 0; i < filterModel.getSize(); i++) {
+            if (filterModel.getElementAt(i).equalsIgnoreCase(newCategory)) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Category '" + newCategory + "' already exists.",
+                        "Duplicate Category",
+                        javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        }
+
+        // 3. Add the new category to ALL SIX relevant JComboBox models
+
+        // a. Transaction Filter ComboBox (Already retrieved for validation)
+        filterModel.addElement(newCategory);
+
+        // b. Add Transaction ComboBox
+        javax.swing.DefaultComboBoxModel<String> addTransModel =
+                (javax.swing.DefaultComboBoxModel<String>) addTransactionCategorySelect.getModel();
+        addTransModel.addElement(newCategory);
+
+        // c. Edit Transaction ComboBox
+        javax.swing.DefaultComboBoxModel<String> editTransModel =
+                (javax.swing.DefaultComboBoxModel<String>) editTransactionCategorySelect.getModel();
+        editTransModel.addElement(newCategory);
+
+
+        // 4. Success Message
+        javax.swing.JOptionPane.showMessageDialog(this,
+                "Category '" + newCategory + "' added successfully and available in all forms!",
+                "Success",
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void addTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -2233,8 +2437,10 @@ public class HomePageView extends javax.swing.JFrame {
             return;
         }
 
-        if (year.contains("Item") || month.contains("Item") || day.contains("Item") ||
-                category.contains("Item")) {
+        // Check for default/placeholder values in JComboBoxes (Fixes the issue where validation is skipped)
+        if (year.contains("Select") || month.contains("Select") || day.contains("Select") ||
+                category.contains("Select")) {
+
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please select a valid Date and Category.",
                     "Missing Information",
@@ -2243,7 +2449,21 @@ public class HomePageView extends javax.swing.JFrame {
         }
 
         try {
-            // 3. Parse amount
+            try {
+                java.time.Month monthEnum = java.time.Month.valueOf(month.toUpperCase());
+                java.time.LocalDate.of(
+                        Integer.parseInt(year),
+                        monthEnum,
+                        Integer.parseInt(day)
+                );
+            } catch (java.time.DateTimeException | NumberFormatException e) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "The date you selected (" + dateString + ") is not a valid calendar date.",
+                        "Invalid Date",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            // 3. Parse the amount and handle NumberFormatException
             double amount = Double.parseDouble(amountText);
             if (amount < 0) {
                 javax.swing.JOptionPane.showMessageDialog(this,
@@ -2353,6 +2573,23 @@ public class HomePageView extends javax.swing.JFrame {
         }
 
         try {
+            try {
+                // Convert month name to enum for parsing
+                java.time.Month monthEnum = java.time.Month.valueOf(month.toUpperCase());
+
+                // This line throws an exception if the combination is invalid (e.g., day 31 in April)
+                java.time.LocalDate.of(
+                        Integer.parseInt(year),
+                        monthEnum,
+                        Integer.parseInt(day)
+                );
+            } catch (java.time.DateTimeException | NumberFormatException e) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "The date you selected (" + dateString + ") is not a valid calendar date.",
+                        "Invalid Date",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                return; // Stop execution if the date is invalid
+            }
             // 3. Parse the amount to ensure it is a valid number
             double amount = Double.parseDouble(amountText);
             if (amount < 0) {
@@ -2502,6 +2739,42 @@ public class HomePageView extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(() -> new HomePageView(addTransactionInteractor, deleteTransactionInteractor, editTransactionInteractor, budgetInteractor).setVisible(true));
     }
 
+    @Override
+    public void showReport(GenerateCategoryReportResponseModel responseModel) {
+        String summary = String.format(
+                "Category: %s | From %s to %s | Total: $%.2f | %d transactions",
+                responseModel.getCategory(),
+                responseModel.getStartDate(),
+                responseModel.getEndDate(),
+                responseModel.getTotalAmount(),
+                responseModel.getTransactionCount()
+        );
+        reportSummaryLabel.setText(summary);
+
+        // Clear existing rows
+        reportTableModel.setRowCount(0);
+
+        // Populate table
+        for (GenerateCategoryReportResponseModel.TransactionSummary ts
+                : responseModel.getTransactions()) {
+            reportTableModel.addRow(new Object[]{
+                    ts.getDate().toString(),
+                    ts.getDescription(),
+                    ts.getAmount()
+            });
+        }
+    }
+
+    @Override
+    public void showError(String message) {
+        javax.swing.JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Report Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE
+        );
+    }
+
     // Variables declaration - do not modify
     private javax.swing.JTextField addBudgetAmountEntry;
     private javax.swing.JButton addBudgetButton;
@@ -2562,7 +2835,7 @@ public class HomePageView extends javax.swing.JFrame {
     private javax.swing.JButton homeButton;
     private javax.swing.JButton importButton;
     private javax.swing.JButton importFileButton;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JComboBox<String> reportDateSelected;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
