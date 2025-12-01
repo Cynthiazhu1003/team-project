@@ -3,36 +3,48 @@ package use_case5.use_case;
 import use_case5.boundary.*;
 import use_case5.data.BudgetRepository;
 import frontend.Budget;
+import frontend.Transaction;
+import use_case2.use_case.TransactionDataAccessInterface;
+
+import java.util.List;
 
 /**
  * Interactor for handling budget operations.
- * Implements the input boundary.
+ * Automatically recalculates spending using TransactionDAO.
  */
 public class BudgetInteractor implements BudgetInputBoundary {
 
     private final BudgetRepository repository;
     private final BudgetOutputBoundary presenter;
+    private final TransactionDataAccessInterface transactionDAO;
 
-    public BudgetInteractor(BudgetRepository repository, BudgetOutputBoundary presenter) {
+    public BudgetInteractor(BudgetRepository repository,
+                            TransactionDataAccessInterface transactionDAO,
+                            BudgetOutputBoundary presenter) {
         this.repository = repository;
+        this.transactionDAO = transactionDAO;
         this.presenter = presenter;
     }
 
     /**
-     * Sets a new budget for a given category and month.
+     * Sets a new budget for a category/month.
+     * Initial spent value comes from existing transactions.
      */
     @Override
     public void setBudget(SetBudgetRequestModel request) {
         Budget budget = new Budget(request.category, request.limit, request.month);
-        repository.save(budget);
 
-        BudgetResponseModel response = buildResponse(budget);
-        presenter.presentBudget(response);
+        // Auto-calc spent from DAO
+        double spent = calculateSpent(request.category);
+        budget.setSpent(spent);
+
+        repository.save(budget);
+        presenter.presentBudget(buildResponse(budget));
     }
 
     /**
-     * Updates spending for a budget category.
-     * Can handle negative amounts for adjustments or edits.
+     * Recomputes total spending for this category.
+     * Ignores the incoming amount because DAO is the source of truth.
      */
     @Override
     public void addSpending(UpdateBudgetRequestModel request) {
@@ -42,17 +54,15 @@ public class BudgetInteractor implements BudgetInputBoundary {
             throw new RuntimeException("Budget does not exist for category: " + request.category);
         }
 
-        // Add the amount (can be negative if subtracting)
-        budget.addSpent(request.amount);
+        // FULLY recalc based on all transactions (grouped by category)
+        double spent = calculateSpent(request.category);
+        budget.setSpent(spent);
 
-        // Save updated budget
         repository.save(budget);
 
-        // Build and send response to presenter
-        BudgetResponseModel response = buildResponse(budget);
-        presenter.presentBudget(response);
+        presenter.presentBudget(buildResponse(budget));
 
-        // Notify if over limit
+        // Trigger UI notification if needed
         if (!budget.getWarningLevel().equals("OK")) {
             BudgetNotificationModel notif = new BudgetNotificationModel();
             notif.category = budget.getCategory();
@@ -62,7 +72,18 @@ public class BudgetInteractor implements BudgetInputBoundary {
     }
 
     /**
-     * Converts a Budget object into a BudgetResponseModel for the presenter.
+     * Sums all transactions in DAO for this category.
+     */
+    private double calculateSpent(String category) {
+        List<Transaction> all = transactionDAO.getAllTransactions();
+        return all.stream()
+                .filter(t -> t.getCategory().equals(category)) // grouped by category
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+    }
+
+    /**
+     * Converts Budget → ResponseModel
      */
     private BudgetResponseModel buildResponse(Budget budget) {
         BudgetResponseModel res = new BudgetResponseModel();
