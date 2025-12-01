@@ -2,6 +2,7 @@ package use_case6.interface_adapter;
 
 import frontend.Transaction;
 import use_case2.use_case.TransactionDataAccessInterface;
+import java.time.format.DateTimeParseException;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -60,13 +61,37 @@ public class TableBackedTransactionDataAccess implements TransactionDataAccessIn
     }
 
     private LocalDate parseUiDate(String dateString) {
-        // Format: "YYYY-MonthName-DD", e.g. "2024-October-15"
+        if (dateString == null || dateString.isBlank()) {
+            throw new IllegalArgumentException("Date string is null/blank");
+        }
+
+        // 1) Try standard ISO format: "YYYY-MM-DD" (what CSV uses)
+        try {
+            return LocalDate.parse(dateString);  // uses ISO_LOCAL_DATE
+        } catch (DateTimeParseException ignored) {
+            // fall through to manual parsing
+        }
+
+        // 2) Fallback for formats like "YYYY-January-05" or "YYYY-11-05"
         String[] parts = dateString.split("-");
+        if (parts.length != 3) {
+            throw new IllegalArgumentException("Unrecognized date format: " + dateString);
+        }
+
         int year = Integer.parseInt(parts[0]);
-        String monthName = parts[1];
+        String monthPart = parts[1];
         int day = Integer.parseInt(parts[2]);
 
-        Month month = Month.valueOf(monthName.toUpperCase()); // "October" -> OCTOBER
-        return LocalDate.of(year, month.getValue(), day);
+        Month month;
+        try {
+            // numeric month like "11"
+            int m = Integer.parseInt(monthPart);
+            month = Month.of(m); // 1–12
+        } catch (NumberFormatException e) {
+            // text month like "January"
+            month = Month.valueOf(monthPart.toUpperCase());
+        }
+
+        return LocalDate.of(year, month, day);
     }
 }
