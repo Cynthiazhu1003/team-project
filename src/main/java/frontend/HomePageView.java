@@ -399,6 +399,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                 };
 
         worker.execute();
+        importFileButton.addActionListener(e-> handleImportFileButtonClick());
     }
 
 
@@ -1921,6 +1922,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
 
         pack();
     }// </editor-fold>
+
 
     private void handleImportFileButtonClick() {
         JFileChooser chooser = new JFileChooser();
