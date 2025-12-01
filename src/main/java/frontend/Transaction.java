@@ -2,6 +2,8 @@ package frontend;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Transaction {
 
@@ -10,6 +12,16 @@ public class Transaction {
     private String merchant;
     private double amount;
     private String category;
+
+    private static List<Transaction> allTransactions = new ArrayList<>();
+
+    public static void addAll(List<Transaction> transactions) {
+        allTransactions.addAll(transactions);
+    }
+
+    public static List<Transaction> getAll() {
+        return allTransactions;
+    }
 
     // Full constructor including category
     public Transaction(LocalDate date, String description, String merchant, double amount, String category) {
