@@ -34,11 +34,11 @@ import use_case5.data.InMemoryBudgetRepository;
 import use_case5.interface_adapter.BudgetPresenter;
 import use_case5.interface_adapter.BudgetViewModel;
 import use_case5.use_case.BudgetInteractor;
-import javax.swing.DefaultComboBoxModel;
+
 import javax.swing.border.Border;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import use_case2.use_case.TransactionDataAccessInterface;
+
 import use_case6.boundary.GenerateCategoryReportResponseModel;
 import use_case6.interface_adapter.CategoryReportViewBoundary;
 import use_case6.interface_adapter.GenerateCategoryReportController;
@@ -2736,38 +2736,201 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
 
     @Override
     public void showReport(GenerateCategoryReportResponseModel responseModel) {
-        String summary = String.format(
-                "Category: %s | From %s to %s | Total: $%.2f | %d transactions",
-                responseModel.getCategory(),
-                responseModel.getStartDate(),
-                responseModel.getEndDate(),
-                responseModel.getTotalAmount(),
-                responseModel.getTransactionCount()
-        );
-        reportSummaryLabel.setText(summary);
+        // Make sure UI updates happen on EDT
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            // 1) Update the summary label
+            String category = responseModel.getCategory();
+            java.time.LocalDate start = responseModel.getStartDate();
+            java.time.LocalDate end   = responseModel.getEndDate();
+            double total              = responseModel.getTotalAmount();
+            int count                 = responseModel.getTransactionCount();
 
-        // Clear existing rows
-        reportTableModel.setRowCount(0);
+            String summaryText = String.format(
+                    "<html><div style='text-align:center;'>"
+                            + "Category: <b>%s</b><br>"
+                            + "Period: %s to %s<br>"
+                            + "Total spent: <b>%.2f</b> across %d transaction(s)"
+                            + "</div></html>",
+                    category,
+                    start.toString(),
+                    end.toString(),
+                    total,
+                    count
+            );
+            reportSummaryLabel.setText(summaryText);
 
-        // Populate table
-        for (GenerateCategoryReportResponseModel.TransactionSummary ts
-                : responseModel.getTransactions()) {
-            reportTableModel.addRow(new Object[]{
-                    ts.getDate().toString(),
-                    ts.getDescription(),
-                    ts.getAmount()
-            });
-        }
+            // 2) Fill the report table
+            reportTableModel.setRowCount(0); // clear existing rows
+
+            for (GenerateCategoryReportResponseModel.TransactionSummary ts
+                    : responseModel.getTransactions()) {
+
+                reportTableModel.addRow(new Object[]{
+                        ts.getDate().toString(),   // Date column
+                        ts.getDescription(),       // Description column
+                        ts.getAmount()             // Amount column
+                });
+            }
+
+            // 3) Show the chart popup
+            showChartDialog(responseModel);
+        });
     }
 
     @Override
     public void showError(String message) {
-        javax.swing.JOptionPane.showMessageDialog(
-                this,
-                message,
-                "Report Error",
-                javax.swing.JOptionPane.ERROR_MESSAGE
+        javax.swing.SwingUtilities.invokeLater(() ->
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        message,
+                        "Report Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE
+                )
         );
+    }
+
+    private void showChartDialog(GenerateCategoryReportResponseModel responseModel) {
+        java.util.List<GenerateCategoryReportResponseModel.TransactionSummary> txs =
+                responseModel.getTransactions();
+
+        if (txs == null || txs.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "No data to display in chart.",
+                    "No Data",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE
+            );
+            return;
+        }
+
+        java.util.List<String> labels = new java.util.ArrayList<>();
+        java.util.List<Double> values = new java.util.ArrayList<>();
+
+        for (GenerateCategoryReportResponseModel.TransactionSummary ts : txs) {
+            labels.add(ts.getDate().toString());
+            values.add(ts.getAmount());
+        }
+
+        javax.swing.JDialog dialog = new javax.swing.JDialog(this, "Category Spending Chart", true);
+        dialog.setSize(700, 450);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new java.awt.BorderLayout());
+
+        dialog.add(new SimpleBarChartPanel(labels, values, responseModel.getCategory()), java.awt.BorderLayout.CENTER);
+
+        dialog.setVisible(true);
+    }
+
+    private static class SimpleBarChartPanel extends javax.swing.JPanel {
+
+        private final java.util.List<String> labels;
+        private final java.util.List<Double> values;
+        private final double maxValue;
+        private final String categoryTitle;
+
+        SimpleBarChartPanel(java.util.List<String> labels,
+                            java.util.List<Double> values,
+                            String categoryTitle) {
+            this.labels = labels;
+            this.values = values;
+            this.categoryTitle = categoryTitle;
+
+            double max = 0.0;
+            for (double v : values) {
+                if (v > max) max = v;
+            }
+            this.maxValue = (max <= 0) ? 1.0 : max; // avoid zero division
+            setBackground(java.awt.Color.WHITE);
+        }
+
+        @Override
+        protected void paintComponent(java.awt.Graphics g) {
+            super.paintComponent(g);
+            if (labels.isEmpty()) {
+                return;
+            }
+
+            java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+            g2.setRenderingHint(
+                    java.awt.RenderingHints.KEY_ANTIALIASING,
+                    java.awt.RenderingHints.VALUE_ANTIALIAS_ON
+            );
+
+            int width  = getWidth();
+            int height = getHeight();
+
+            int paddingLeft   = 60;
+            int paddingRight  = 30;
+            int paddingTop    = 50;
+            int paddingBottom = 80;
+
+            int chartWidth  = width  - paddingLeft - paddingRight;
+            int chartHeight = height - paddingTop  - paddingBottom;
+
+            // Title
+            String title = "Spending for category: " + categoryTitle;
+            java.awt.Font titleFont = g2.getFont().deriveFont(java.awt.Font.BOLD, 16f);
+            g2.setFont(titleFont);
+            java.awt.FontMetrics titleFm = g2.getFontMetrics();
+            int titleWidth = titleFm.stringWidth(title);
+            g2.setColor(java.awt.Color.DARK_GRAY);
+            g2.drawString(title, (width - titleWidth) / 2, paddingTop - 15);
+
+            // Axes
+            g2.setColor(java.awt.Color.DARK_GRAY);
+            // y-axis
+            g2.drawLine(paddingLeft, paddingTop, paddingLeft, paddingTop + chartHeight);
+            // x-axis
+            g2.drawLine(paddingLeft, paddingTop + chartHeight,
+                        paddingLeft + chartWidth, paddingTop + chartHeight);
+
+            int n = values.size();
+            double slotWidth = (double) chartWidth / n;
+            double barWidth  = slotWidth * 0.6;
+            double gap       = slotWidth * 0.4;
+
+            java.awt.FontMetrics fm = g2.getFontMetrics();
+
+            for (int i = 0; i < n; i++) {
+                double value = values.get(i);
+                double normalized = value / maxValue;
+                int barHeight = (int) (normalized * chartHeight);
+
+                int x = (int) (paddingLeft + i * slotWidth + gap / 2);
+                int y = paddingTop + chartHeight - barHeight;
+
+                // Bar
+                g2.setColor(new java.awt.Color(100, 149, 237)); // cornflower-ish
+                g2.fillRect(x, y, (int) barWidth, barHeight);
+
+                g2.setColor(java.awt.Color.DARK_GRAY);
+                g2.setStroke(new java.awt.BasicStroke(1f));
+                g2.drawRect(x, y, (int) barWidth, barHeight);
+
+                // Amount label above bar
+                String amountLabel = String.format("%.2f", value);
+                int amountWidth = fm.stringWidth(amountLabel);
+                g2.drawString(amountLabel,
+                        x + (int) barWidth / 2 - amountWidth / 2,
+                        y - 4);
+
+                // Date label under x-axis
+                String label = labels.get(i);
+                if (label.length() > 10) {
+                    label = label.substring(5); // e.g. keep MM-DD
+                }
+                int labelWidth = fm.stringWidth(label);
+                g2.drawString(label,
+                        x + (int) barWidth / 2 - labelWidth / 2,
+                        paddingTop + chartHeight + fm.getAscent() + 4);
+            }
+
+            // max value label near top of y-axis
+            String maxLabel = String.format("Max: %.2f", maxValue);
+            g2.drawString(maxLabel, 10, paddingTop - 5);
+
+            g2.dispose();
+        }
     }
 
     // Variables declaration - do not modify
