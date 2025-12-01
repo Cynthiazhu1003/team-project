@@ -20,8 +20,12 @@ import use_case2.data_access.InMemoryTransactionDataAccessObject;
 import use_case2.interface_adapter.ViewManagerModel;
 import use_case2.interface_adapter.add_transaction.AddTransactionPresenter;
 import use_case2.interface_adapter.delete_transaction.DeleteTransactionPresenter;
+import use_case2.interface_adapter.edit_transaction.EditTransactionPresenter;
 import use_case2.interface_adapter.transaction.TransactionViewModel;
 import use_case2.use_case.*;
+import use_case2.use_case_edit_transactions.EditTransactionInputBoundary;
+import use_case2.use_case_edit_transactions.EditTransactionInputData;
+import use_case2.use_case_edit_transactions.EditTransactionInteractor;
 
 /*public class NewsApiClient {
 
@@ -92,6 +96,7 @@ public class HomePageView extends javax.swing.JFrame {
 
     private final AddTransactionInputBoundary AddTransactionInteractor;
     private final DeleteTransactionInputBoundary DeleteTransactionInteractor;
+    private final EditTransactionInputBoundary EditTransactionInteractor;
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
@@ -153,11 +158,12 @@ public class HomePageView extends javax.swing.JFrame {
     /**
      * Creates new form HomePage
      */
-    public HomePageView(AddTransactionInputBoundary AddTransactionInteractor, DeleteTransactionInteractor DeleteTransactionInteractor) {
+    public HomePageView(AddTransactionInputBoundary AddTransactionInteractor, DeleteTransactionInteractor DeleteTransactionInteractor, EditTransactionInputBoundary editTransactionInteractor) {
         initComponents();
 
         this.AddTransactionInteractor = AddTransactionInteractor;
         this.DeleteTransactionInteractor = DeleteTransactionInteractor;
+        this.EditTransactionInteractor = editTransactionInteractor;
 
         setupNewsPanel();
         loadNewsAsync();
@@ -2036,13 +2042,11 @@ public class HomePageView extends javax.swing.JFrame {
         String amountText = editTransactionAmountEntry.getText().trim();
         String category = (String) editTransactionCategorySelect.getSelectedItem();
 
-        // Construct the date string (e.g., "2024-October-15")
         String year = (String) editTransactionYearSelect.getSelectedItem();
         String month = (String) editTransactionMonthSelect.getSelectedItem();
         String day = (String) editTransactionDaySelect.getSelectedItem();
-        String dateString = year + "-" + month + "-" + day;
 
-        // 2. Validation (Checking for missing/default values)
+        // 2. Validation for empty fields (basic GUI validation)
         if (store.isEmpty() || amountText.isEmpty() || amountText.equals("0.00")) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please fill in the Store Name and enter a non-zero Amount.",
@@ -2051,10 +2055,8 @@ public class HomePageView extends javax.swing.JFrame {
             return;
         }
 
-        // Check for default/placeholder values in JComboBoxes (Fixes the issue where validation is skipped)
         if (year.contains("Item") || month.contains("Item") || day.contains("Item") ||
                 category.contains("Item")) {
-
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please select a valid Date and Category.",
                     "Missing Information",
@@ -2063,41 +2065,70 @@ public class HomePageView extends javax.swing.JFrame {
         }
 
         try {
-            // 3. Parse the amount and handle NumberFormatException
+            // 3. Parse amount
             double amount = Double.parseDouble(amountText);
             if (amount < 0) {
                 javax.swing.JOptionPane.showMessageDialog(this,
                         "Amount cannot be negative. Please enter a positive value.",
                         "Invalid Amount",
                         javax.swing.JOptionPane.ERROR_MESSAGE);
-                return; // Stop execution
+                return;
             }
-            // 4. Update the JTable Model (Using the stored row index)
+
+            // 4. Convert month to LocalDate
+            Month monthEnum;
+            try {
+                monthEnum = Month.valueOf(month.toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Invalid month selected.",
+                        "Invalid Input",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int yearInt = Integer.parseInt(year);
+            int dayInt = Integer.parseInt(day);
+            LocalDate date = LocalDate.of(yearInt, monthEnum, dayInt);
+
+            // 5. Create input data for interactor
+            EditTransactionInputData inputData = new EditTransactionInputData(
+                    editingRowIndex, // index of the row being edited
+                    date,
+                    description,
+                    store,
+                    amount,
+                    category
+            );
+
+            // 6. Call interactor
+            EditTransactionInteractor.execute(inputData);
+
+            // 7. Update JTable to reflect changes visually
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) transactionTable.getModel();
-
-            // Use the editingRowIndex saved in loadTransactionForEditing()
-            // The column indices must match your table: 0=Date, 1=Merchant, 2=Description, 3=Amount, 4=Category
-            model.setValueAt(dateString, editingRowIndex, 0);
+            model.setValueAt(date, editingRowIndex, 0);
             model.setValueAt(store, editingRowIndex, 1);
             model.setValueAt(description, editingRowIndex, 2);
             model.setValueAt(amount, editingRowIndex, 3);
             model.setValueAt(category, editingRowIndex, 4);
 
-            // 5. Show Success Message
+            // 8. Show success message and return to main view
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Transaction updated successfully!",
                     "Success",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
-
-            // 6. Return to the main Transaction list view
             showCard(CARD_TRANS);
 
         } catch (NumberFormatException e) {
-            // Validation for invalid number input
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please enter a valid number for the amount (e.g., 10.50).",
                     "Invalid Input",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Failed to edit transaction: " + e.getMessage(),
+                    "Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -2280,8 +2311,11 @@ public class HomePageView extends javax.swing.JFrame {
         DeleteTransactionPresenter deleteTransactionPresenter = new DeleteTransactionPresenter(viewManagerModel, transactionViewModel);
         DeleteTransactionInteractor deleteTransactionInteractor = new DeleteTransactionInteractor(deleteTransactionPresenter, dao);
 
+        EditTransactionPresenter editTransactionPresenter = new EditTransactionPresenter(viewManagerModel, transactionViewModel);
+        EditTransactionInteractor editTransactionInteractor = new EditTransactionInteractor(editTransactionPresenter, dao);
+
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new HomePageView(addTransactionInteractor, deleteTransactionInteractor).setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new HomePageView(addTransactionInteractor, deleteTransactionInteractor, editTransactionInteractor).setVisible(true));
     }
 
     // Variables declaration - do not modify
