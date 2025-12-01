@@ -9,5 +9,7 @@ public interface TransactionDataAccessInterface {
     List<Transaction> getAllTransactions();
     void update(Transaction transaction);
     void delete(Transaction transaction);
+
+    boolean deleteByIndex(int index);
 }
 

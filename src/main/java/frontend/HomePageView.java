@@ -3,40 +3,25 @@ package frontend;
 import api.news.NewsApiGateway;
 import api.news.NewsApiGatewayImpl;
 import api.news.NewsApiResponse;
-import java.awt.BasicStroke;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.dnd.*;
-import java.awt.geom.RoundRectangle2D;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
-import javax.swing.border.Border;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
 import use_case2.data_access.InMemoryTransactionDataAccessObject;
 import use_case2.interface_adapter.ViewManagerModel;
 import use_case2.interface_adapter.add_transaction.AddTransactionPresenter;
+import use_case2.interface_adapter.delete_transaction.DeleteTransactionPresenter;
 import use_case2.interface_adapter.transaction.TransactionViewModel;
-import use_case2.use_case.AddTransactionInputBoundary;
-import use_case2.use_case.AddTransactionInputData;
-import use_case2.use_case.AddTransactionInteractor;
-import use_case2.use_case.TransactionDataAccessInterface;
+import use_case2.use_case.*;
 
 /*public class NewsApiClient {
 
@@ -105,7 +90,8 @@ public class HomePageView extends javax.swing.JFrame {
     private JList<String> newsList = new JList<>(newsListModel);
     private java.util.List<NewsApiResponse.Article> currentArticles = new java.util.ArrayList<>();
 
-    private final AddTransactionInputBoundary transactionInteractor;
+    private final AddTransactionInputBoundary AddTransactionInteractor;
+    private final DeleteTransactionInputBoundary DeleteTransactionInteractor;
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
@@ -167,10 +153,11 @@ public class HomePageView extends javax.swing.JFrame {
     /**
      * Creates new form HomePage
      */
-    public HomePageView(AddTransactionInputBoundary transactionInteractor) {
+    public HomePageView(AddTransactionInputBoundary AddTransactionInteractor, DeleteTransactionInteractor DeleteTransactionInteractor) {
         initComponents();
 
-        this.transactionInteractor = transactionInteractor;
+        this.AddTransactionInteractor = AddTransactionInteractor;
+        this.DeleteTransactionInteractor = DeleteTransactionInteractor;
 
         setupNewsPanel();
         loadNewsAsync();
@@ -2202,7 +2189,7 @@ public class HomePageView extends javax.swing.JFrame {
             AddTransactionInputData inputData = new AddTransactionInputData(
                     date, description, store, amount, category
             );
-            transactionInteractor.execute(inputData);
+            AddTransactionInteractor.execute(inputData);
 
             // 7. Success Message and Cleanup
             javax.swing.JOptionPane.showMessageDialog(this,
@@ -2228,10 +2215,8 @@ public class HomePageView extends javax.swing.JFrame {
      * Handles the deletion of a selected transaction row.
      */
     private void deleteTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // 1. Get the index of the selected row
         int selectedRow = transactionTable.getSelectedRow();
 
-        // 2. Validation: Check if a row is actually selected
         if (selectedRow == -1) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please select a transaction to delete.",
@@ -2240,30 +2225,29 @@ public class HomePageView extends javax.swing.JFrame {
             return;
         }
 
-        // 3. Confirmation Dialog (CRITICAL STEP)
         int confirmResult = javax.swing.JOptionPane.showConfirmDialog(this,
                 "Are you sure you want to permanently delete the selected transaction?",
                 "Confirm Deletion",
                 javax.swing.JOptionPane.YES_NO_OPTION,
                 javax.swing.JOptionPane.WARNING_MESSAGE);
 
-        // Check if the user clicked "Yes"
         if (confirmResult == javax.swing.JOptionPane.YES_OPTION) {
+            try {
+                // 1. Call the interactor to delete by index
+                DeleteTransactionInteractor.execute(selectedRow);
 
-            // 4. Delete the row from the JTable model
-            javax.swing.table.DefaultTableModel model =
-                    (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+                // 2. Remove the row from the JTable
+                javax.swing.table.DefaultTableModel model =
+                        (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+                model.removeRow(selectedRow);
 
-            // Use the index to remove the row
-            model.removeRow(selectedRow);
-
-            // 5. Show Success Message
-            javax.swing.JOptionPane.showMessageDialog(this,
-                    "Transaction successfully deleted.",
-                    "Deleted",
-                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Failed to delete transaction: " + e.getMessage(),
+                        "Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
         }
-        // If the user selects "No," the method simply returns, and no action is taken.
     }
 
     /**
@@ -2290,11 +2274,14 @@ public class HomePageView extends javax.swing.JFrame {
         ViewManagerModel viewManagerModel = new ViewManagerModel();
         TransactionViewModel transactionViewModel = new TransactionViewModel();
         TransactionDataAccessInterface dao = new InMemoryTransactionDataAccessObject();
-        AddTransactionPresenter presenter = new AddTransactionPresenter(viewManagerModel, transactionViewModel);
-        AddTransactionInputBoundary interactor = new AddTransactionInteractor(presenter, dao);
+        AddTransactionPresenter addTransactionPresenter = new AddTransactionPresenter(viewManagerModel, transactionViewModel);
+        AddTransactionInputBoundary addTransactionInteractor = new AddTransactionInteractor(addTransactionPresenter, dao);
+
+        DeleteTransactionPresenter deleteTransactionPresenter = new DeleteTransactionPresenter(viewManagerModel, transactionViewModel);
+        DeleteTransactionInteractor deleteTransactionInteractor = new DeleteTransactionInteractor(deleteTransactionPresenter, dao);
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new HomePageView(interactor).setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new HomePageView(addTransactionInteractor, deleteTransactionInteractor).setVisible(true));
     }
 
     // Variables declaration - do not modify

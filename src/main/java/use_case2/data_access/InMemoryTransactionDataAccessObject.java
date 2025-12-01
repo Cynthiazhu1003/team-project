@@ -35,13 +35,16 @@ public class InMemoryTransactionDataAccessObject implements TransactionDataAcces
      */
     public boolean deleteByIndex(int index) { // ⭐️ MUST be public boolean and take an int ⭐️
         if (index >= 0 && index < transactions.size()) {
+            System.out.println("Deleting from DB with index: " + index);
             transactions.remove(index);
             return true;
         }
         return false;
     }
     @Override
-    public void delete(Transaction transaction) {transactions.remove(transaction);}
+    public void delete(Transaction transaction) {
+        transactions.remove(transaction);
+    }
 
     public int getTransactionCount() {
         return transactions.size();
