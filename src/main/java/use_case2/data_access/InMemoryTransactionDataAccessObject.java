@@ -40,7 +40,9 @@ public class InMemoryTransactionDataAccessObject implements TransactionDataAcces
         return false;
     }
     @Override
-    public void delete(Transaction transaction) {transactions.remove(transaction);}
+    public void delete(Transaction transaction) {
+        transactions.remove(transaction);
+    }
 
     public int getTransactionCount() {
         return transactions.size();

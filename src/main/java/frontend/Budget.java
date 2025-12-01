@@ -1,4 +1,4 @@
-package use_case2.entity;
+package frontend;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
