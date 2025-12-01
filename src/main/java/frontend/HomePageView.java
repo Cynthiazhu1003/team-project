@@ -15,6 +15,8 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
+
+import use_case1.UseCase1;
 import java.awt.font.LayoutPath;
 import use_case2.data_access.InMemoryTransactionDataAccessObject;
 import use_case2.interface_adapter.ViewManagerModel;
@@ -1885,9 +1887,24 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                 "File chosen",
                 JOptionPane.INFORMATION_MESSAGE
         );
-        List<String> data;
         try {
-            data = Files.readAllLines(selectedFile.toPath());
+            List<Transaction> transactions = UseCase1.importFromFile(selectedFile);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Imported " + transactions.size() + " transactions.",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
         } catch (IOException e) {
             JOptionPane.showMessageDialog(
                     this,
@@ -1895,35 +1912,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
-            return;
-        }
-
-        if (data.size() <= 1) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "File has no data rows.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
-
-        //
-        boolean isFormatCorrect = data.stream()
-                .skip(1)
-                .allMatch(s -> s.matches(
-                        "\\d{4}-\\d{2}-\\d{2}\\s*,\\s*[^,]+\\s*,\\s*[^,]+\\s*,-?[0-9]+(\\.[0-9]+)?"
-                ));
-
-        if (!isFormatCorrect) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "CSV format is not correct.\n" +
-                            "Expected: date, description, merchant, -amount.decimals",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
         }
 
         List<Transaction> transactions = data.stream()
