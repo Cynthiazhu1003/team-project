@@ -1940,66 +1940,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
             );
         }
     }
-//    private void handleImportFileButtonClick() {
-//        JFileChooser chooser = new JFileChooser();
-//        int result = chooser.showOpenDialog(this);
-//
-//        if (result != JFileChooser.APPROVE_OPTION) {
-//            return;
-//        }
-//
-//        File file = chooser.getSelectedFile();
-//
-//        if (!file.getName().endsWith(".csv")) {
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Invalid file type. File must be .csv",
-//                    "Error",
-//                    JOptionPane.ERROR_MESSAGE
-//            );
-//            return;
-//        }
-//
-//        File selectedFile = file;
-//
-//        JOptionPane.showMessageDialog(
-//                this,
-//                "Selected file:\n" + selectedFile.getName(),
-//                "File chosen",
-//                JOptionPane.INFORMATION_MESSAGE
-//        );
-//        try {
-//            List<Transaction> transactions = UseCase1.importFromFile(selectedFile);
-//
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Imported " + transactions.size() + " transactions.",
-//                    "Success",
-//                    JOptionPane.INFORMATION_MESSAGE
-//            );
-//
-//        } catch (IllegalArgumentException e) {
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    e.getMessage(),
-//                    "Error",
-//                    JOptionPane.ERROR_MESSAGE
-//            );
-//
-//        } catch (IOException e) {
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Could not read file: " + e.getMessage(),
-//                    "Error",
-//                    JOptionPane.ERROR_MESSAGE
-//            );
-//        }
-//
-//        /*List<Transaction> transactions = data.stream()
-//                .skip(1)
-//                .map(Transaction::of)
-//                .collect(Collectors.toList());*/
-//    }
 
     private void homeButtonActionPerformed(java.awt.event.ActionEvent evt) {
         showCard(CARD_HOME);
