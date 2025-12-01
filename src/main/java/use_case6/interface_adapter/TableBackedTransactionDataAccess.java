@@ -54,6 +54,11 @@ public class TableBackedTransactionDataAccess implements TransactionDataAccessIn
         throw new UnsupportedOperationException("delete not used in report use case");
     }
 
+    @Override
+    public boolean deleteByIndex(int index) {
+        return false;
+    }
+
     private LocalDate parseUiDate(String dateString) {
         // Format: "YYYY-MonthName-DD", e.g. "2024-October-15"
         String[] parts = dateString.split("-");

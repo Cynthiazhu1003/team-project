@@ -2200,6 +2200,11 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
             model.addRow(new Object[]{category, limit, spent, limit - spent});
         }
 
+        addBudgetAmountEntry.setText("0.00");
+        addBudgetCategorySelect.setSelectedIndex(0);
+
+        showCard(CARD_BUDGET);
+
         if (spent >= limit) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Warning: You have reached or exceeded your budget for " + category + "!",
@@ -2211,11 +2216,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                     "Success",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
         }
-
-        addBudgetAmountEntry.setText("0.00");
-        addBudgetCategorySelect.setSelectedIndex(0);
-
-        showCard(CARD_BUDGET);
     }
 
     private void deleteBudgetButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -2428,7 +2428,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         String month = (String) editTransactionMonthSelect.getSelectedItem();
         String day = (String) editTransactionDaySelect.getSelectedItem();
 
-        // 2. Validation for empty fields (basic GUI validation)
+        // 2. Validation for empty fields
         if (store.isEmpty() || amountText.isEmpty() || amountText.equals("0.00")) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please fill in the Store Name and enter a non-zero Amount.",
@@ -2437,10 +2437,8 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
             return;
         }
 
-        // Check for default/placeholder values in JComboBoxes (Fixes the issue where validation is skipped)
-        if (year.contains("Select") || month.contains("Select") || day.contains("Select") ||
-                category.contains("Select")) {
-
+        // Check for default/placeholder values in JComboBoxes
+        if (year.contains("Select") || month.contains("Select") || day.contains("Select") || category.contains("Select")) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please select a valid Date and Category.",
                     "Missing Information",
@@ -2449,21 +2447,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         }
 
         try {
-            try {
-                java.time.Month monthEnum = java.time.Month.valueOf(month.toUpperCase());
-                java.time.LocalDate.of(
-                        Integer.parseInt(year),
-                        monthEnum,
-                        Integer.parseInt(day)
-                );
-            } catch (java.time.DateTimeException | NumberFormatException e) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                        "The date you selected (" + dateString + ") is not a valid calendar date.",
-                        "Invalid Date",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            // 3. Parse the amount and handle NumberFormatException
+            // 3. Parse the amount
             double amount = Double.parseDouble(amountText);
             if (amount < 0) {
                 javax.swing.JOptionPane.showMessageDialog(this,
@@ -2473,7 +2457,9 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                 return;
             }
 
-            // 4. Convert month to LocalDate
+            // 4. Parse the date safely
+            int yearInt = Integer.parseInt(year);
+            int dayInt = Integer.parseInt(day);
             Month monthEnum;
             try {
                 monthEnum = Month.valueOf(month.toUpperCase());
@@ -2485,9 +2471,16 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                 return;
             }
 
-            int yearInt = Integer.parseInt(year);
-            int dayInt = Integer.parseInt(day);
-            LocalDate date = LocalDate.of(yearInt, monthEnum, dayInt);
+            LocalDate date;
+            try {
+                date = LocalDate.of(yearInt, monthEnum, dayInt);
+            } catch (java.time.DateTimeException ex) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "The date you selected (" + month + " " + day + ", " + year + ") is not a valid calendar date.",
+                        "Invalid Date",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             // 5. Create input data for interactor
             EditTransactionInputData inputData = new EditTransactionInputData(
@@ -2502,7 +2495,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
             // 6. Call interactor
             EditTransactionInteractor.execute(inputData);
 
-            // 7. Update JTable to reflect changes visually
+            // 7. Update JTable
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) transactionTable.getModel();
             model.setValueAt(date, editingRowIndex, 0);
