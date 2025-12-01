@@ -2429,6 +2429,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         String year = (String) editTransactionYearSelect.getSelectedItem();
         String month = (String) editTransactionMonthSelect.getSelectedItem();
         String day = (String) editTransactionDaySelect.getSelectedItem();
+        String dateString = year + '-' + month + '-' + day;
 
         // 2. Validation for empty fields
         if (store.isEmpty() || amountText.isEmpty() || amountText.equals("0.00")) {
@@ -2500,7 +2501,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
             // 7. Update JTable
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) transactionTable.getModel();
-            model.setValueAt(date, editingRowIndex, 0);
+            model.setValueAt(dateString, editingRowIndex, 0);
             model.setValueAt(store, editingRowIndex, 1);
             model.setValueAt(description, editingRowIndex, 2);
             model.setValueAt(amount, editingRowIndex, 3);

@@ -6,6 +6,7 @@ import frontend.Budget;
 import frontend.Transaction;
 import use_case2.use_case.TransactionDataAccessInterface;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -77,8 +78,13 @@ public class BudgetInteractor implements BudgetInputBoundary {
     @Override
     public double calculateSpent(String category) {
         List<Transaction> all = transactionDAO.getAllTransactions();
+
+        // Get the first day of the current month
+        LocalDate firstDayOfCurrentMonth = LocalDate.now().withDayOfMonth(1);
+
         return all.stream()
-                .filter(t -> t.getCategory().equals(category)) // grouped by category
+                .filter(t -> t.getCategory() != null && t.getCategory().equals(category))
+                .filter(t -> t.getDate().isAfter(firstDayOfCurrentMonth)) // only transactions before current month
                 .mapToDouble(Transaction::getAmount)
                 .sum();
     }
