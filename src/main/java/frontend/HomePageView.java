@@ -1064,11 +1064,6 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel17.setText("Amount:");
 
         addBudgetAmountEntry.setText("0.00");
-        addBudgetAmountEntry.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addBudgetAmountEntryActionPerformed(evt);
-            }
-        });
 
         addBudgetCancelButton.setBackground(new java.awt.Color(255, 0, 0));
         addBudgetCancelButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -1240,11 +1235,6 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel26.setText("Store Name:");
 
         addTransactionStoreEntry.setText("Store");
-        addTransactionStoreEntry.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addTransactionStoreEntryActionPerformed(evt);
-            }
-        });
 
         jLabel27.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel27.setText("Category:");
@@ -1964,10 +1954,6 @@ public class HomePageView extends javax.swing.JFrame {
         importButton.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
     }
 
-    private void addBudgetAmountEntryActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
     private void addBudgetCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {
         showCard(CARD_BUDGET);
     }
@@ -1978,10 +1964,6 @@ public class HomePageView extends javax.swing.JFrame {
 
     private void editBudgetButtonActionPerformed(java.awt.event.ActionEvent evt) {
         showCard(CARD_CHOOSE_BUDGET);
-    }
-
-    private void addTransactionStoreEntryActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
     }
 
     private void cancelAdtTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
