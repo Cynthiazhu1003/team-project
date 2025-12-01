@@ -1,7 +1,7 @@
-package use_case5.interface_adapter;
+package use_case6.interface_adapter;
 
-import use_case5.boundary.GenerateCategoryReportOutputBoundary;
-import use_case5.boundary.GenerateCategoryReportResponseModel;
+import use_case6.boundary.GenerateCategoryReportOutputBoundary;
+import use_case6.boundary.GenerateCategoryReportResponseModel;
 
 public class GenerateCategoryReportPresenter implements GenerateCategoryReportOutputBoundary {
 

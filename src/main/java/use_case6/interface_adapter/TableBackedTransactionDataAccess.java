@@ -1,4 +1,4 @@
-package use_case5.interface_adapter;
+package use_case6.interface_adapter;
 
 import frontend.Transaction;
 import use_case2.use_case.TransactionDataAccessInterface;

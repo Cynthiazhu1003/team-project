@@ -1,4 +1,4 @@
-package use_case5.boundary;
+package use_case6.boundary;
 
 public interface GenerateCategoryReportOutputBoundary {
     void present(GenerateCategoryReportResponseModel responseModel);

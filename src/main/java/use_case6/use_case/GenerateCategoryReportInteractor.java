@@ -1,11 +1,11 @@
-package use_case5.use_case;
+package use_case6.use_case;
 
 import frontend.Transaction;
 import use_case2.use_case.TransactionDataAccessInterface;
-import use_case5.boundary.GenerateCategoryReportInputBoundary;
-import use_case5.boundary.GenerateCategoryReportOutputBoundary;
-import use_case5.boundary.GenerateCategoryReportRequestModel;
-import use_case5.boundary.GenerateCategoryReportResponseModel;
+import use_case6.boundary.GenerateCategoryReportInputBoundary;
+import use_case6.boundary.GenerateCategoryReportOutputBoundary;
+import use_case6.boundary.GenerateCategoryReportRequestModel;
+import use_case6.boundary.GenerateCategoryReportResponseModel;
 
 import java.time.LocalDate;
 import java.util.List;

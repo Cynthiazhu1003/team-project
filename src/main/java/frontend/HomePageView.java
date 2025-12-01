@@ -28,12 +28,12 @@ import javax.swing.border.Border;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import use_case2.use_case.TransactionDataAccessInterface;
-import use_case5.interface_adapter.CategoryReportViewBoundary;
-import use_case5.interface_adapter.GenerateCategoryReportController;
-import use_case5.interface_adapter.GenerateCategoryReportPresenter;
-import use_case5.interface_adapter.TableBackedTransactionDataAccess;
-import use_case5.use_case.GenerateCategoryReportInteractor;
-import use_case5.boundary.GenerateCategoryReportResponseModel;
+import use_case6.boundary.GenerateCategoryReportResponseModel;
+import use_case6.interface_adapter.CategoryReportViewBoundary;
+import use_case6.interface_adapter.GenerateCategoryReportController;
+import use_case6.interface_adapter.GenerateCategoryReportPresenter;
+import use_case6.interface_adapter.TableBackedTransactionDataAccess;
+import use_case6.use_case.GenerateCategoryReportInteractor;
 
 /*public class NewsApiClient {
 

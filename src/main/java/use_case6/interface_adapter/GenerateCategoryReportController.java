@@ -1,9 +1,9 @@
-package use_case5.interface_adapter;
-
-import use_case5.boundary.GenerateCategoryReportInputBoundary;
-import use_case5.boundary.GenerateCategoryReportRequestModel;
+package use_case6.interface_adapter;
 
 import java.time.LocalDate;
+
+import use_case6.boundary.GenerateCategoryReportInputBoundary;
+import use_case6.boundary.GenerateCategoryReportRequestModel;
 
 public class GenerateCategoryReportController {
 
