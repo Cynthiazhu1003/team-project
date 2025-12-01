@@ -17,8 +17,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
@@ -29,8 +27,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import use_case2.data_access.InMemoryTransactionDataAccessObject;
-import use_case2.interface_adapter.transaction.TransactionController;
 
 /*public class NewsApiClient {
 
@@ -99,9 +95,6 @@ public class HomePageView extends javax.swing.JFrame {
     private JList<String> newsList = new JList<>(newsListModel);
     private java.util.List<NewsApiResponse.Article> currentArticles = new java.util.ArrayList<>();
 
-    private final TransactionController controller;
-    private final InMemoryTransactionDataAccessObject dao;
-
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
         java.awt.CardLayout layout = (java.awt.CardLayout) mainPanel.getLayout();
@@ -164,10 +157,6 @@ public class HomePageView extends javax.swing.JFrame {
      */
     public HomePageView() {
         initComponents();
-
-        dao = new InMemoryTransactionDataAccessObject();
-        controller = new TransactionController(dao);
-
         setupNewsPanel();
         loadNewsAsync();
         // Register each card with its name
@@ -190,7 +179,7 @@ public class HomePageView extends javax.swing.JFrame {
     }
 
     private void setupNewsPanel() {
-       newsPanel.setLayout(new BorderLayout());
+        newsPanel.setLayout(new BorderLayout());
         newsPanel.setBackground(new Color(245, 245, 245));
 
         // style list
@@ -211,7 +200,7 @@ public class HomePageView extends javax.swing.JFrame {
 
                 String text = (value == null) ? "" : value.toString();
                 label.setText("<html><body style='width:520px; padding:3px 0;'>" +
-                            text + "</body></html>");
+                        text + "</body></html>");
 
                 label.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
                 if (isSelected) {
@@ -269,41 +258,41 @@ public class HomePageView extends javax.swing.JFrame {
     private void loadNewsAsync() {
         javax.swing.SwingWorker<java.util.List<String>, Void> worker =
                 new javax.swing.SwingWorker<>() {
-            @Override
-            protected java.util.List<String> doInBackground() throws Exception {
-                NewsApiGateway gateway = new NewsApiGatewayImpl();
+                    @Override
+                    protected java.util.List<String> doInBackground() throws Exception {
+                        NewsApiGateway gateway = new NewsApiGatewayImpl();
 
-                NewsApiGateway.TopHeadlinesRequest req = new NewsApiGateway.TopHeadlinesRequest();
-                req.country = "us";
-                req.category = "business";
+                        NewsApiGateway.TopHeadlinesRequest req = new NewsApiGateway.TopHeadlinesRequest();
+                        req.country = "us";
+                        req.category = "business";
 
-                NewsApiResponse resp = gateway.getTopHeadlines(req);
+                        NewsApiResponse resp = gateway.getTopHeadlines(req);
 
-                java.util.List<String> titles = new java.util.ArrayList<>();
-                if (resp.articles != null) {
-                    for (NewsApiResponse.Article a : resp.articles) {
-                        if (a.title != null) {
-                            titles.add("• " + a.title);
+                        java.util.List<String> titles = new java.util.ArrayList<>();
+                        if (resp.articles != null) {
+                            for (NewsApiResponse.Article a : resp.articles) {
+                                if (a.title != null) {
+                                    titles.add("• " + a.title);
+                                }
+                            }
+                        }
+                        return titles;
+                    }
+
+                    @Override
+                    protected void done() {
+                        try {
+                            java.util.List<String> titles = get();
+                            newsListModel.clear();
+                            for (String t : titles) {
+                                newsListModel.addElement(t);
+                            }
+                        } catch (Exception e) {
+                            newsListModel.clear();
+                            newsListModel.addElement("Failed to load news: " + e.getMessage());
                         }
                     }
-                }
-                return titles;
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    java.util.List<String> titles = get();
-                    newsListModel.clear();
-                    for (String t : titles) {
-                        newsListModel.addElement(t);
-                    }
-                } catch (Exception e) {
-                    newsListModel.clear();
-                    newsListModel.addElement("Failed to load news: " + e.getMessage());
-                }
-            }
-        };
+                };
 
         worker.execute();
     }
@@ -1243,6 +1232,11 @@ public class HomePageView extends javax.swing.JFrame {
         jLabel26.setText("Store Name:");
 
         addTransactionStoreEntry.setText("Store");
+        addTransactionStoreEntry.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addTransactionStoreEntryActionPerformed(evt);
+            }
+        });
 
         jLabel27.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel27.setText("Category:");
@@ -1654,7 +1648,7 @@ public class HomePageView extends javax.swing.JFrame {
                                                 .addComponent(editTransactionCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addGap(135, 135, 135)
                                                 .addComponent(editTransactionEditButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addContainerGap(67, Short.MAX_VALUE))
+                                .addContainerGap(67, Short.MAX_VALUE))
         );
 
         jPanel23Layout.setVerticalGroup(
@@ -1923,7 +1917,7 @@ public class HomePageView extends javax.swing.JFrame {
     }
 
     private void budgetButtonMouseClicked(java.awt.event.MouseEvent evt) {
-        budgetButton.setBackground(new java.awt.Color(220, 220, 220));
+
     }
 
     private void transactionButtonMouseClicked(java.awt.event.MouseEvent evt) {
@@ -1976,6 +1970,10 @@ public class HomePageView extends javax.swing.JFrame {
 
     private void editBudgetButtonActionPerformed(java.awt.event.ActionEvent evt) {
         showCard(CARD_CHOOSE_BUDGET);
+    }
+
+    private void addTransactionStoreEntryActionPerformed(java.awt.event.ActionEvent evt) {
+        // TODO add your handling code here:
     }
 
     private void cancelAdtTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -2036,11 +2034,13 @@ public class HomePageView extends javax.swing.JFrame {
         String amountText = editTransactionAmountEntry.getText().trim();
         String category = (String) editTransactionCategorySelect.getSelectedItem();
 
+        // Construct the date string (e.g., "2024-October-15")
         String year = (String) editTransactionYearSelect.getSelectedItem();
         String month = (String) editTransactionMonthSelect.getSelectedItem();
         String day = (String) editTransactionDaySelect.getSelectedItem();
+        String dateString = year + "-" + month + "-" + day;
 
-        // 2. Validation for required fields
+        // 2. Validation (Checking for missing/default values)
         if (store.isEmpty() || amountText.isEmpty() || amountText.equals("0.00")) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please fill in the Store Name and enter a non-zero Amount.",
@@ -2049,8 +2049,10 @@ public class HomePageView extends javax.swing.JFrame {
             return;
         }
 
+        // Check for default/placeholder values in JComboBoxes (Fixes the issue where validation is skipped)
         if (year.contains("Item") || month.contains("Item") || day.contains("Item") ||
                 category.contains("Item")) {
+
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please select a valid Date and Category.",
                     "Missing Information",
@@ -2059,48 +2061,38 @@ public class HomePageView extends javax.swing.JFrame {
         }
 
         try {
-            // 3. Parse amount
+            // 3. Parse the amount and handle NumberFormatException
             double amount = Double.parseDouble(amountText);
             if (amount < 0) {
                 javax.swing.JOptionPane.showMessageDialog(this,
                         "Amount cannot be negative. Please enter a positive value.",
                         "Invalid Amount",
                         javax.swing.JOptionPane.ERROR_MESSAGE);
-                return;
+                return; // Stop execution
             }
-
-            // 4. Parse date
-            String dateString = year + "-" + month + "-" + day;
-            LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MMMM-d"));
-
-            // 5. Get original Transaction from DAO
-            Transaction original = dao.getAllTransactions().get(editingRowIndex);
-
-            // 6. Create updated Transaction
-            Transaction updated = new Transaction(date, description, store, amount, category);
-
-            // 7. Update DAO through controller
-            controller.updateTransaction(original, updated);
-
-            // 8. Update JTable
+            // 4. Update the JTable Model (Using the stored row index)
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+
+            // Use the editingRowIndex saved in loadTransactionForEditing()
+            // The column indices must match your table: 0=Date, 1=Merchant, 2=Description, 3=Amount, 4=Category
             model.setValueAt(dateString, editingRowIndex, 0);
             model.setValueAt(store, editingRowIndex, 1);
             model.setValueAt(description, editingRowIndex, 2);
             model.setValueAt(amount, editingRowIndex, 3);
             model.setValueAt(category, editingRowIndex, 4);
 
-            // 9. Success message
+            // 5. Show Success Message
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Transaction updated successfully!",
                     "Success",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
-            // 10. Return to main transaction view
+            // 6. Return to the main Transaction list view
             showCard(CARD_TRANS);
 
         } catch (NumberFormatException e) {
+            // Validation for invalid number input
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Please enter a valid number for the amount (e.g., 10.50).",
                     "Invalid Input",
@@ -2167,12 +2159,6 @@ public class HomePageView extends javax.swing.JFrame {
                     (javax.swing.table.DefaultTableModel) transactionTable.getModel();
 
             // Order matches your table columns: [Date, Merchant, Description, Amount, Category]
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMMM-d");
-            LocalDate date = LocalDate.parse(dateString, formatter);
-
-            Transaction t = new Transaction(date, description, store, amount, category);
-            controller.addTransaction(t);
             model.addRow(new Object[]{dateString, store, description, amount, category});
 
             // 5. Success Message and Cleanup
@@ -2226,8 +2212,6 @@ public class HomePageView extends javax.swing.JFrame {
                     (javax.swing.table.DefaultTableModel) transactionTable.getModel();
 
             // Use the index to remove the row
-            Transaction t = dao.getAllTransactions().get(selectedRow); // get object from DAO
-            controller.deleteTransaction(t);
             model.removeRow(selectedRow);
 
             // 5. Show Success Message
