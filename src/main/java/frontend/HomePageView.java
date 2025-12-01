@@ -1914,10 +1914,10 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
             );
         }
 
-        List<Transaction> transactions = data.stream()
+        /*List<Transaction> transactions = data.stream()
                 .skip(1)
                 .map(Transaction::of)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
     }
 
     private void homeButtonActionPerformed(java.awt.event.ActionEvent evt) {

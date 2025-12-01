@@ -1,0 +1,155 @@
+@startuml use_case6_generate_category_report
+title Use Case 6 : Generate Category Report
+hide methods          
+hide fields         
+skinparam linetype ortho
+left to right direction
+
+' ===== External dependency (from use_case2) =====
+package "use_case2.use_case" {
+  interface TransactionDataAccessInterface {
+    +save(t: Transaction)
+    +getAllTransactions()
+    +update(t: Transaction)
+    +delete(t: Transaction)
+    +deleteByIndex(index: int)
+  }
+}
+
+' ===== use_case6.boundary =====
+package "use_case6.boundary" {
+
+  interface GenerateCategoryReportInputBoundary {
+    +generateReport(requestModel: GenerateCategoryReportRequestModel)
+  }
+
+  interface GenerateCategoryReportOutputBoundary {
+    +present(responseModel: GenerateCategoryReportResponseModel)
+    +presentError(message: String)
+  }
+
+  class GenerateCategoryReportRequestModel {
+    -category: String
+    -daysBack: int
+    -today: LocalDate
+
+    +GenerateCategoryReportRequestModel(category: String, daysBack: int, today: LocalDate)
+    +getCategory(): String
+    +getDaysBack(): int
+    +getToday(): LocalDate
+  }
+
+  class GenerateCategoryReportResponseModel {
+    -category: String
+    -startDate: LocalDate
+    -endDate: LocalDate
+    -totalAmount: double
+    -transactionCount: int
+    -transactions: List
+
+    +GenerateCategoryReportResponseModel(
+      category: String,
+      startDate: LocalDate,
+      endDate: LocalDate,
+      totalAmount: double,
+      transactionCount: int,
+      transactions: List
+    )
+
+    +getCategory(): String
+    +getStartDate(): LocalDate
+    +getEndDate(): LocalDate
+    +getTotalAmount(): double
+    +getTransactionCount(): int
+    +getTransactions(): List
+  }
+
+  class TransactionSummary {
+    -date: LocalDate
+    -description: String
+    -amount: double
+
+    +TransactionSummary(date: LocalDate, description: String, amount: double)
+    +getDate(): LocalDate
+    +getDescription(): String
+    +getAmount(): double
+  }
+}
+
+' ===== use_case6.use_case =====
+package "use_case6.use_case" {
+
+  class GenerateCategoryReportInteractor {
+    -transactionGateway: TransactionDataAccessInterface
+    -presenter: GenerateCategoryReportOutputBoundary
+
+    +GenerateCategoryReportInteractor(
+      transactionGateway: TransactionDataAccessInterface,
+      presenter: GenerateCategoryReportOutputBoundary
+    )
+
+    +generateReport(requestModel: GenerateCategoryReportRequestModel)
+  }
+
+  GenerateCategoryReportInteractor ..|> GenerateCategoryReportInputBoundary
+}
+
+' ===== use_case6.interface_adapter =====
+package "use_case6.interface_adapter" {
+
+  interface CategoryReportViewBoundary {
+    +showReport(responseModel: GenerateCategoryReportResponseModel)
+    +showError(message: String)
+  }
+
+  class GenerateCategoryReportController {
+    -interactor: GenerateCategoryReportInputBoundary
+
+    +GenerateCategoryReportController(interactor: GenerateCategoryReportInputBoundary)
+    +generate(category: String, daysBack: int)
+  }
+
+  class GenerateCategoryReportPresenter {
+    -view: CategoryReportViewBoundary
+
+    +GenerateCategoryReportPresenter(view: CategoryReportViewBoundary)
+    +present(responseModel: GenerateCategoryReportResponseModel)
+    +presentError(message: String)
+  }
+
+  class TableBackedTransactionDataAccess {
+    -transactionTable: JTable
+
+    +TableBackedTransactionDataAccess(transactionTable: JTable)
+    +save(t: Transaction)
+    +getAllTransactions()
+    +update(t: Transaction)
+    +delete(t: Transaction)
+    +deleteByIndex(index: int)
+    -parseUiDate(dateString: String): LocalDate
+  }
+
+  GenerateCategoryReportPresenter ..|> GenerateCategoryReportOutputBoundary
+  TableBackedTransactionDataAccess ..|> TransactionDataAccessInterface
+}
+
+' ===== Relationships between classes =====
+
+' Interactor <-> boundary models
+GenerateCategoryReportInteractor --> GenerateCategoryReportRequestModel
+GenerateCategoryReportInteractor --> GenerateCategoryReportResponseModel
+GenerateCategoryReportResponseModel --> TransactionSummary
+
+' Interactor depends on gateway + presenter
+GenerateCategoryReportInteractor ..> TransactionDataAccessInterface
+GenerateCategoryReportInteractor ..> GenerateCategoryReportOutputBoundary
+
+' Controller uses input boundary + request model
+GenerateCategoryReportController --> GenerateCategoryReportInputBoundary
+GenerateCategoryReportController ..> GenerateCategoryReportRequestModel
+
+' Presenter talks to view and response model
+GenerateCategoryReportPresenter --> CategoryReportViewBoundary
+GenerateCategoryReportPresenter --> GenerateCategoryReportResponseModel
+
+@enduml
