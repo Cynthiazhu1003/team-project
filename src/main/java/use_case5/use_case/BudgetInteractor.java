@@ -84,7 +84,10 @@ public class BudgetInteractor implements BudgetInputBoundary {
 
         return all.stream()
                 .filter(t -> t.getCategory() != null && t.getCategory().equals(category))
-                .filter(t -> t.getDate().isAfter(firstDayOfCurrentMonth)) // only transactions before current month
+                .filter(t ->
+                        t.getDate().isEqual(firstDayOfCurrentMonth) ||
+                                t.getDate().isAfter(firstDayOfCurrentMonth)
+                )// only transactions during current month
                 .mapToDouble(Transaction::getAmount)
                 .sum();
     }
