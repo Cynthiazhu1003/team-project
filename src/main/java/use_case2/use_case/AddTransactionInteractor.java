@@ -16,10 +16,8 @@ public class AddTransactionInteractor implements AddTransactionInputBoundary {
     @Override
     public void execute(AddTransactionInputData inputData) {
         try {
-            // Since we removed merchant, we need different validation
-            // Let's validate that we have at least a description or amount
             if (inputData.getDescription() == null || inputData.getDescription().trim().isEmpty()) {
-                presenter.prepareFailView("Description is required");
+                presenter.prepareFailView("Please fill in the Store Name");
                 return;
             }
             if (inputData.getMerchant() == null || inputData.getMerchant().trim().isEmpty()) {
@@ -28,10 +26,9 @@ public class AddTransactionInteractor implements AddTransactionInputBoundary {
             }
 
             if (inputData.getAmount() == 0) {
-                presenter.prepareFailView("Amount cannot be zero");
+                presenter.prepareFailView("Please enter a non-zero Amount.");
                 return;
             }
-
             Transaction transaction = new Transaction(
                     inputData.getDate(),
                     inputData.getDescription(),
@@ -39,11 +36,9 @@ public class AddTransactionInteractor implements AddTransactionInputBoundary {
                     inputData.getAmount(),
                     inputData.getCategory()
             );
-
             transactionDataAccess.save(transaction);
             AddTransactionOutputData outputData = new AddTransactionOutputData(true, null);
             presenter.prepareSuccessView(outputData);
-
         } catch (Exception e) {
             presenter.prepareFailView("Failed to add transaction: " + e.getMessage());
         }

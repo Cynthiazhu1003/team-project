@@ -1,5 +1,6 @@
 package use_case2;
 
+import frontend.Transaction;
 import use_case2.data_access.InMemoryTransactionDataAccessObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,6 +8,7 @@ import use_case2.use_case.AddTransactionInteractor;
 import use_case2.use_case.AddTransactionInputData;
 import use_case2.use_case.AddTransactionOutputBoundary;
 import use_case2.use_case.AddTransactionOutputData;
+import use_case2.use_case.TransactionDataAccessInterface;
 
 import java.time.LocalDate;
 
@@ -26,54 +28,163 @@ public class AddTransactionInteractorTest {
 
     @Test
     public void testSuccess() {
-        // Given
         AddTransactionInputData inputData = new AddTransactionInputData(
                 LocalDate.now(), "Starbucks","Latte", -5.75, "Drinks"
         );
 
-        // When
         interactor.execute(inputData);
 
-        // Then
         assertTrue(presenter.success);
+        assertNotNull(presenter.outputData);
+        assertTrue(presenter.outputData.isSuccess());
+        assertNull(presenter.outputData.getErrorMessage());
         assertEquals(1, transactionDAO.getTransactionCount());
     }
 
     @Test
     public void testFailureEmptyDescription() {
-        // Given
         AddTransactionInputData inputData = new AddTransactionInputData(
                 LocalDate.now(), "", "Latte",-5.75, "Drinks"
         );
 
-        // When
         interactor.execute(inputData);
 
-        // Then
         assertFalse(presenter.success);
-        assertEquals("Description is required", presenter.errorMessage);
+        assertEquals("Please fill in the Store Name", presenter.errorMessage);
+        assertEquals(0, transactionDAO.getTransactionCount());
+    }
+
+    @Test
+    public void testFailureNullDescription() {
+        AddTransactionInputData inputData = new AddTransactionInputData(
+                LocalDate.now(), null, "Latte", 5.75, "Drinks"
+        );
+
+        interactor.execute(inputData);
+
+        assertFalse(presenter.success);
+        assertEquals("Please fill in the Store Name", presenter.errorMessage);
+    }
+
+    @Test
+    public void testFailureDescriptionWithOnlySpaces() {
+        AddTransactionInputData inputData = new AddTransactionInputData(
+                LocalDate.now(), "   ", "Latte", 5.75, "Drinks"
+        );
+
+        interactor.execute(inputData);
+
+        assertFalse(presenter.success);
+        assertEquals("Please fill in the Store Name", presenter.errorMessage);
     }
 
     @Test
     public void testFailureZeroAmount() {
-        // Given
         AddTransactionInputData inputData = new AddTransactionInputData(
                 LocalDate.now(), "Starbucks", "Latte",0.0, "Dining"
         );
 
-        // When
         interactor.execute(inputData);
 
-        // Then
         assertFalse(presenter.success);
-        assertEquals("Amount cannot be zero", presenter.errorMessage);
+        assertEquals("Please enter a non-zero Amount.", presenter.errorMessage);
+        assertEquals(0, transactionDAO.getTransactionCount());
+    }
+
+    @Test
+    public void testFailureNegativeAmount() {
+        AddTransactionInputData inputData = new AddTransactionInputData(
+                LocalDate.now(), "Starbucks", "Latte", -5.75, "Drinks"
+        );
+
+        interactor.execute(inputData);
+
+        assertTrue(presenter.success);
+        assertEquals(1, transactionDAO.getTransactionCount());
     }
 
     @Test
     public void testFailureEmptyMerchant() {
-        // Given
         AddTransactionInputData inputData = new AddTransactionInputData(
                 LocalDate.now(), "Starbucks", "", -5.75, "Dining"  // Empty merchant
+        );
+
+
+        interactor.execute(inputData);
+
+        assertFalse(presenter.success);
+        assertEquals("Merchant is required", presenter.errorMessage);
+        assertEquals(0, transactionDAO.getTransactionCount());
+    }
+    @Test
+    public void testFailureNullMerchant() {
+
+        AddTransactionInputData inputData = new AddTransactionInputData(
+                LocalDate.now(), "Starbucks", null, 5.75, "Dining"
+        );
+
+        interactor.execute(inputData);
+
+        assertFalse(presenter.success);
+        assertEquals("Merchant is required", presenter.errorMessage);
+    }
+
+    @Test
+    public void testFailureMerchantWithOnlySpaces() {
+        AddTransactionInputData inputData = new AddTransactionInputData(
+                LocalDate.now(), "Starbucks", "   ", 5.75, "Dining"
+        );
+
+        interactor.execute(inputData);
+
+        assertFalse(presenter.success);
+        assertEquals("Merchant is required", presenter.errorMessage);
+    }
+
+
+    @Test
+    public void testMultipleSuccessTransactions() {
+        AddTransactionInputData input1 = new AddTransactionInputData(
+                LocalDate.now(), "Store1", "Merchant1", 10.0, "Cat1"
+        );
+        AddTransactionInputData input2 = new AddTransactionInputData(
+                LocalDate.now(), "Store2", "Merchant2", 20.0, "Cat2"
+        );
+
+        interactor.execute(input1);
+        interactor.execute(input2);
+
+        assertEquals(2, transactionDAO.getTransactionCount());
+    }
+
+    @Test
+    public void testOutputDataContents() {
+        AddTransactionInputData inputData = new AddTransactionInputData(
+                LocalDate.now(), "Amazon", "Online", 99.99, "Shopping"
+        );
+
+
+        interactor.execute(inputData);
+        assertTrue(presenter.success);
+        assertNotNull(presenter.outputData);
+        assertTrue(presenter.outputData.isSuccess());
+        assertNull(presenter.outputData.getErrorMessage());
+    }
+
+    @Test
+    public void testExceptionHandling_SaveThrowsException() {
+        // Create a spy/wrapper that extends your real DAO
+        InMemoryTransactionDataAccessObject failingDAO = new InMemoryTransactionDataAccessObject() {
+            @Override
+            public void save(Transaction transaction) {
+                throw new RuntimeException("Database connection failed");
+            }
+        };
+
+        interactor = new AddTransactionInteractor(presenter, failingDAO);
+
+        AddTransactionInputData inputData = new AddTransactionInputData(
+                LocalDate.now(), "Test Store", "Test Merchant", 10.0, "Test Category"
         );
 
         // When
@@ -81,7 +192,7 @@ public class AddTransactionInteractorTest {
 
         // Then
         assertFalse(presenter.success);
-        assertEquals("Merchant is required", presenter.errorMessage);
+        assertTrue(presenter.errorMessage.contains("Failed to add transaction:"));
     }
 
     // Helper class
