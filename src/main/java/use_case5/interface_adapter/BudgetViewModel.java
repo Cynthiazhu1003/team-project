@@ -1,17 +1,14 @@
 package use_case5.interface_adapter;
 
-import use_case5.boundary.*;
+import use_case5.boundary.BudgetNotificationModel;
+import use_case5.boundary.BudgetResponseModel;
 
 public class BudgetViewModel {
-    public void displayBudget(BudgetResponseModel model) {
-        System.out.println("[Budget Updated] " + model.category +
-                " | Limit: " + model.limit +
-                " | Spent: " + model.spent +
-                " | Remaining: " + model.remaining +
-                " | Warning: " + model.warningLevel);
-    }
+    public BudgetResponseModel lastBudget;
+    public BudgetResponseModel getBudget() { return lastBudget; }
+    public void setBudget(BudgetResponseModel budget) { lastBudget = budget; }
 
-    public void showNotification(BudgetNotificationModel notif) {
-        System.out.println("[NOTIFICATION] " + notif.category + ": " + notif.message);
-    }
+    public BudgetNotificationModel lastNotification;
+    public void setNotification(BudgetNotificationModel notif) { lastNotification = notif; }
+    public BudgetNotificationModel getNotification() { return lastNotification; }
 }

@@ -74,7 +74,8 @@ public class BudgetInteractor implements BudgetInputBoundary {
     /**
      * Sums all transactions in DAO for this category.
      */
-    private double calculateSpent(String category) {
+    @Override
+    public double calculateSpent(String category) {
         List<Transaction> all = transactionDAO.getAllTransactions();
         return all.stream()
                 .filter(t -> t.getCategory().equals(category)) // grouped by category
@@ -94,4 +95,19 @@ public class BudgetInteractor implements BudgetInputBoundary {
         res.warningLevel = budget.getWarningLevel();
         return res;
     }
+
+    public void deleteBudget(String category) {
+        Budget budget = repository.find(category);
+        if (budget == null) {
+            throw new RuntimeException("Budget does not exist for category: " + category);
+        }
+
+        repository.delete(category);
+
+        BudgetNotificationModel notif = new BudgetNotificationModel();
+        notif.category = category;
+        notif.message = "Budget for " + category + " has been deleted.";
+        presenter.presentNotification(notif);
+    }
+
 }

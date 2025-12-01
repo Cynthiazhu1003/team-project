@@ -26,6 +26,14 @@ import use_case2.use_case.*;
 import use_case2.use_case_edit_transactions.EditTransactionInputBoundary;
 import use_case2.use_case_edit_transactions.EditTransactionInputData;
 import use_case2.use_case_edit_transactions.EditTransactionInteractor;
+import use_case5.boundary.BudgetInputBoundary;
+import use_case5.boundary.BudgetOutputBoundary;
+import use_case5.boundary.SetBudgetRequestModel;
+import use_case5.data.BudgetRepository;
+import use_case5.data.InMemoryBudgetRepository;
+import use_case5.interface_adapter.BudgetPresenter;
+import use_case5.interface_adapter.BudgetViewModel;
+import use_case5.use_case.BudgetInteractor;
 
 /*public class NewsApiClient {
 
@@ -85,10 +93,10 @@ public class HomePageView extends javax.swing.JFrame {
     private static final String CARD_EDIT_TRANS = "cardEditTransaction";
     private static final String CARD_EDIT_BUDGET = "cardEditBudget";
     private static final String CARD_EDIT_CATEGORY = "cardEditCategory";
-    private static final String CARD_CHOOSE_BUDGET = "cardChooseBudget";
     private static final String CARD_CHOOSE_TRANS = "cardChooseTransaction";
     private int editingRowIndex = -1;
     private javax.swing.JButton deleteTransactionButton;
+    private javax.swing.JButton deleteBudgetButton;
 
     private DefaultListModel<String> newsListModel = new DefaultListModel<>();
     private JList<String> newsList = new JList<>(newsListModel);
@@ -97,6 +105,7 @@ public class HomePageView extends javax.swing.JFrame {
     private final AddTransactionInputBoundary AddTransactionInteractor;
     private final DeleteTransactionInputBoundary DeleteTransactionInteractor;
     private final EditTransactionInputBoundary EditTransactionInteractor;
+    private final BudgetInputBoundary BudgetInteractor;
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
@@ -158,12 +167,13 @@ public class HomePageView extends javax.swing.JFrame {
     /**
      * Creates new form HomePage
      */
-    public HomePageView(AddTransactionInputBoundary AddTransactionInteractor, DeleteTransactionInteractor DeleteTransactionInteractor, EditTransactionInputBoundary editTransactionInteractor) {
+    public HomePageView(AddTransactionInputBoundary AddTransactionInteractor, DeleteTransactionInteractor DeleteTransactionInteractor, EditTransactionInputBoundary EditTransactionInteractor, BudgetInputBoundary BudgetInteractor) {
         initComponents();
 
         this.AddTransactionInteractor = AddTransactionInteractor;
         this.DeleteTransactionInteractor = DeleteTransactionInteractor;
-        this.EditTransactionInteractor = editTransactionInteractor;
+        this.EditTransactionInteractor = EditTransactionInteractor;
+        this.BudgetInteractor = BudgetInteractor;
 
         setupNewsPanel();
         loadNewsAsync();
@@ -179,7 +189,6 @@ public class HomePageView extends javax.swing.JFrame {
         mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
         mainPanel.add(cardEditCategory, CARD_EDIT_CATEGORY);
         mainPanel.add(cardChooseTransaction, CARD_CHOOSE_TRANS);
-        mainPanel.add(cardChooseBudget, CARD_CHOOSE_BUDGET);
 
         // Optional: show a default screen when program starts
         showCard(CARD_HOME);
@@ -412,6 +421,7 @@ public class HomePageView extends javax.swing.JFrame {
         chooseTransactionCancelButton = new javax.swing.JButton();
         chooseTransactionSelectScrollPane = new javax.swing.JScrollPane();
         deleteTransactionButton = new javax.swing.JButton();
+        deleteBudgetButton = new javax.swing.JButton();
         cardChooseBudget = new javax.swing.JPanel();
         jPanel15 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
@@ -826,6 +836,15 @@ public class HomePageView extends javax.swing.JFrame {
             }
         });
 
+        deleteBudgetButton.setBackground(new java.awt.Color(255, 153, 51)); // Orange/Warning color
+        deleteBudgetButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        deleteBudgetButton.setText("Delete Budget");
+        deleteBudgetButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteBudgetButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout budgetHeaderPanelLayout = new javax.swing.GroupLayout(budgetHeaderPanel);
         budgetHeaderPanel.setLayout(budgetHeaderPanelLayout);
         budgetHeaderPanelLayout.setHorizontalGroup(
@@ -837,6 +856,8 @@ public class HomePageView extends javax.swing.JFrame {
                                 .addComponent(addBudgetButton, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(editBudgetButton, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(deleteBudgetButton, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap(30, Short.MAX_VALUE))
         );
         budgetHeaderPanelLayout.setVerticalGroup(
@@ -846,7 +867,8 @@ public class HomePageView extends javax.swing.JFrame {
                                 .addGroup(budgetHeaderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(budgetHeader, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
                                         .addComponent(addBudgetButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(editBudgetButton))
+                                        .addComponent(editBudgetButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(deleteBudgetButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addContainerGap())
         );
 
@@ -1083,7 +1105,7 @@ public class HomePageView extends javax.swing.JFrame {
             }
         });
 
-        addBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        addBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Dining", "Leisure", "Gifts", "School" }));
 
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
@@ -1866,6 +1888,24 @@ public class HomePageView extends javax.swing.JFrame {
 
     private void budgetButtonActionPerformed(java.awt.event.ActionEvent evt) {
         showCard(CARD_BUDGET);
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) budgetTable.getModel();
+
+        for (int i = 0; i < model.getRowCount(); i++) {
+            String category = (String) model.getValueAt(i, 0);
+            double limit = (double) model.getValueAt(i, 1);
+            double spent = BudgetInteractor.calculateSpent(category);
+            double remaining = limit - spent;
+
+            model.setValueAt(spent, i, 2);
+            model.setValueAt(remaining, i, 3);
+
+            if (remaining <= 0) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Warning: You have reached or exceeded your budget for " + category + "!",
+                        "Budget Warning",
+                        javax.swing.JOptionPane.WARNING_MESSAGE);
+            }
+        }
     }
 
     private void reportButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -1959,11 +1999,167 @@ public class HomePageView extends javax.swing.JFrame {
     }
 
     private void addBudgetFinishButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        String category = (String) addBudgetCategorySelect.getSelectedItem();
+        String amountText = addBudgetAmountEntry.getText().trim();
+        double limit;
+
+        try {
+            limit = Double.parseDouble(amountText);
+            if (limit <= 0) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Please enter a positive number for the budget.",
+                        "Invalid Input",
+                        javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please enter a valid number for the budget (e.g., 500.00).",
+                    "Invalid Input",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        SetBudgetRequestModel request = new SetBudgetRequestModel();
+        request.category = category;
+        request.limit = limit;
+
+        BudgetInteractor.setBudget(request);
+        double spent = BudgetInteractor.calculateSpent(category);
+
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) budgetTable.getModel();
+        boolean updated = false;
+
+        for (int i = 0; i < model.getRowCount(); i++) {
+            if (model.getValueAt(i, 0).equals(category)) {
+                model.setValueAt(limit, i, 1);
+                model.setValueAt(spent, i, 2);
+                model.setValueAt(limit - spent, i, 3);
+                updated = true;
+                break;
+            }
+        }
+
+        if (!updated) {
+            model.addRow(new Object[]{category, limit, spent, limit - spent});
+        }
+
+        if (spent >= limit) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Warning: You have reached or exceeded your budget for " + category + "!",
+                    "Budget Warning",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Budget set successfully!",
+                    "Success",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        addBudgetAmountEntry.setText("0.00");
+        addBudgetCategorySelect.setSelectedIndex(0);
+
+        showCard(CARD_BUDGET);
+    }
+
+    private void deleteBudgetButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        int selectedRow = budgetTable.getSelectedRow();
+        if (selectedRow == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please select a category to delete.",
+                    "No Selection",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String category = (String) budgetTable.getValueAt(selectedRow, 0);
+
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to delete the budget for " + category + "?",
+                "Confirm Delete",
+                javax.swing.JOptionPane.YES_NO_OPTION);
+
+        if (confirm != javax.swing.JOptionPane.YES_OPTION) {
+            return; // User canceled
+        }
+
+        try {
+            BudgetInteractor.deleteBudget(category);
+            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) budgetTable.getModel();
+            model.removeRow(selectedRow);
+
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Budget deleted successfully!",
+                    "Success",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Failed to delete budget: " + e.getMessage(),
+                    "Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void editBudgetButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        showCard(CARD_CHOOSE_BUDGET);
+        int selectedRow = budgetTable.getSelectedRow();
+        if (selectedRow == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please select a category to edit.",
+                    "No Selection",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String category = (String) budgetTable.getValueAt(selectedRow, 0);
+
+        String amountText = javax.swing.JOptionPane.showInputDialog(this,
+                "Enter new budget amount for " + category + ":",
+                "Edit Budget",
+                javax.swing.JOptionPane.PLAIN_MESSAGE);
+
+        if (amountText == null) return; // User cancelled
+
+        double limit;
+        try {
+            limit = Double.parseDouble(amountText.trim());
+            if (limit <= 0) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Please enter a positive number for the budget.",
+                        "Invalid Input",
+                        javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please enter a valid number for the budget (e.g., 500.00).",
+                    "Invalid Input",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        SetBudgetRequestModel request = new SetBudgetRequestModel();
+        request.category = category;
+        request.limit = limit;
+
+        BudgetInteractor.setBudget(request);
+        double spent = BudgetInteractor.calculateSpent(category);
+
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) budgetTable.getModel();
+        model.setValueAt(limit, selectedRow, 1);
+        model.setValueAt(spent, selectedRow, 2);
+        model.setValueAt(limit - spent, selectedRow, 3);
+
+        if (limit - spent <= 0) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Warning: You have reached or exceeded your budget for " + category + "!",
+                    "Budget Warning",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+        }
+
+        javax.swing.JOptionPane.showMessageDialog(this,
+                "Budget updated successfully!",
+                "Success",
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void cancelAdtTransactionButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -2296,8 +2492,14 @@ public class HomePageView extends javax.swing.JFrame {
         EditTransactionPresenter editTransactionPresenter = new EditTransactionPresenter(viewManagerModel, transactionViewModel);
         EditTransactionInteractor editTransactionInteractor = new EditTransactionInteractor(editTransactionPresenter, dao);
 
+        BudgetViewModel budgetViewModel = new BudgetViewModel();
+        BudgetRepository budgetRepository = new InMemoryBudgetRepository();
+        BudgetOutputBoundary budgetPresenter = new BudgetPresenter(budgetViewModel);
+        BudgetInteractor budgetInteractor = new BudgetInteractor(budgetRepository, dao, budgetPresenter);
+
+
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new HomePageView(addTransactionInteractor, deleteTransactionInteractor, editTransactionInteractor).setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new HomePageView(addTransactionInteractor, deleteTransactionInteractor, editTransactionInteractor, budgetInteractor).setVisible(true));
     }
 
     // Variables declaration - do not modify
