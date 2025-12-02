@@ -1,4 +1,4 @@
-package use_case4.data;
+package use_case4_depreciated.data;
 
 import frontend.Transaction;
 import java.util.List;

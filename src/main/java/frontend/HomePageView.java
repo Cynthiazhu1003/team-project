@@ -1,5 +1,7 @@
 package frontend;
 
+import api.fina.FinaCategorizationGateway;
+import api.fina.FinaCategorizationGatewayImpl;
 import api.news.NewsApiGateway;
 import api.news.NewsApiGatewayImpl;
 import api.news.NewsApiResponse;
@@ -11,14 +13,11 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.swing.*;
-import frontend.Transaction;
 
 import use_case1.UseCase1;
-import java.awt.font.LayoutPath;
 import use_case2.data_access.InMemoryTransactionDataAccessObject;
 import use_case2.interface_adapter.ViewManagerModel;
 import use_case2.interface_adapter.add_transaction.AddTransactionController;
@@ -80,14 +79,16 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     private JList<String> newsList = new JList<>(newsListModel);
     private java.util.List<NewsApiResponse.Article> currentArticles = new java.util.ArrayList<>();
 
-    private final AddTransactionController addTransactionController;
-    private final DeleteTransactionController deleteTransactionController;
-    private final EditTransactionController editTransactionController;
-    private final BudgetController budgetController;
+    private AddTransactionController addTransactionController;
+    private DeleteTransactionController deleteTransactionController;
+    private EditTransactionController editTransactionController;
+    private BudgetController budgetController;
 
-    private final TransactionViewModel transactionViewModel;
-    private final BudgetViewModel budgetViewModel;
-    private final ViewManagerModel viewManagerModel;
+    private TransactionViewModel transactionViewModel;
+    private BudgetViewModel budgetViewModel;
+    private ViewManagerModel viewManagerModel;
+
+    private UseCase1 useCase1;
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
@@ -139,25 +140,58 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     /**
      * Creates new form HomePage
      */
-    public HomePageView(AddTransactionController addTransactionController,
-                        DeleteTransactionController deleteTransactionController,
-                        EditTransactionController editTransactionController,
-                        BudgetController budgetController,
-                        TransactionViewModel transactionViewModel,
-                        BudgetViewModel budgetViewModel,
-                        ViewManagerModel viewManagerModel) {
+    public HomePageView() {
         initComponents();
+        setupNewsPanel();
+        setupReportBody();
+        setupCategoryReportUseCase();
+        loadNewsAsync();
 
-        this.addTransactionController = addTransactionController;
-        this.deleteTransactionController = deleteTransactionController;
-        this.editTransactionController = editTransactionController;
+        mainPanel.add(newsPanel, CARD_HOME);
+        mainPanel.add(cardTransaction, CARD_TRANS);
+        mainPanel.add(cardBudget, CARD_BUDGET);
+        mainPanel.add(cardReport, CARD_REPORT);
+        mainPanel.add(cardImport, CARD_IMPORT);
+        mainPanel.add(cardEditTransaction, CARD_EDIT_TRANS);
+        mainPanel.add(cardAddBudget, CARD_ADD_BUDGET);
+        mainPanel.add(cardAddTransaction, CARD_ADD_TRANS);
+        mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
+        mainPanel.add(cardEditCategory, CARD_EDIT_CATEGORY);
+        mainPanel.add(cardChooseTransaction, CARD_CHOOSE_TRANS);
+
+        showCard(CARD_HOME);
+    }
+
+    // Setter for UseCase1
+    public void setUseCase1(UseCase1 useCase1) {
+        this.useCase1 = useCase1;
+    }
+
+    // Setter for controllers
+    public void setControllers(
+            AddTransactionController addController,
+            DeleteTransactionController deleteController,
+            EditTransactionController editController,
+            BudgetController budgetController
+    ) {
+        this.addTransactionController = addController;
+        this.deleteTransactionController = deleteController;
+        this.editTransactionController = editController;
         this.budgetController = budgetController;
+    }
 
+    // Setter for view models
+    public void setViewModels(
+            TransactionViewModel transactionViewModel,
+            BudgetViewModel budgetViewModel,
+            ViewManagerModel viewManagerModel
+    ) {
         this.transactionViewModel = transactionViewModel;
         this.budgetViewModel = budgetViewModel;
         this.viewManagerModel = viewManagerModel;
 
-        budgetViewModel.addPropertyChangeListener(evt -> {
+        // example listener for budgets
+        this.budgetViewModel.addPropertyChangeListener(evt -> {
             String name = evt.getPropertyName();
 
             if ("budget".equals(name)) {
@@ -167,26 +201,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                 showBudgetNotification((BudgetNotificationModel) evt.getNewValue());
             }
         });
-
-        setupNewsPanel();
-        setupReportBody();
-        setupCategoryReportUseCase();
-        loadNewsAsync();
-        // Register each card with its name
-        mainPanel.add(newsPanel,        CARD_HOME);
-        mainPanel.add(cardTransaction, CARD_TRANS);
-        mainPanel.add(cardBudget,      CARD_BUDGET);
-        mainPanel.add(cardReport,      CARD_REPORT);
-        mainPanel.add(cardImport,      CARD_IMPORT);
-        mainPanel.add(cardEditTransaction,CARD_EDIT_TRANS);
-        mainPanel.add(cardAddBudget, CARD_ADD_BUDGET);
-        mainPanel.add(cardAddTransaction, CARD_ADD_TRANS);
-        mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
-        mainPanel.add(cardEditCategory, CARD_EDIT_CATEGORY);
-        mainPanel.add(cardChooseTransaction, CARD_CHOOSE_TRANS);
-
-        showCard(CARD_HOME);
-
     }
 
     private void setupNewsPanel() {
@@ -379,7 +393,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
      */
     @SuppressWarnings("unchecked")
     private void initComponents() {
-
         jPanel3 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
@@ -1174,14 +1187,9 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
             }
         });
 
-        addBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {"home",
-                "bills & utilities","auto & transport","vehicle & repairs","gas","other transportation",
-                "food & drink","groceries","restaurants & other","health & wellness","medical","gym",
-                "other health & wellness","travel & vacation","shopping","clothing","other shopping",
-                "entertainment & lifestyle","education","gifts & donations","loans & financial fees",
-                "family & pets","subscriptions","business & work","investments","taxes","insurance",
-                "other expenses","primary paycheck","business income","repayment from others",
-                "other income","transfer","credit card payment"}));
+        // Using non-clean architecture UI updates - Angry Eric
+        List<String> baseList = frontend.CategoryList.getBaseCategories();
+        addBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(baseList.toArray(new String[0])));
 
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
@@ -1810,7 +1818,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                                 .addGap(0, 2, Short.MAX_VALUE))
         );
 
-        cardEditBudget.add(jPanel20, java.awt.BorderLayout.PAGE_START);
+        cardEditBudget.add(jPanel20, java.awt.BorderLayout.PAGE_START); // not used
 
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel7.setText("Amount: ");
@@ -1918,26 +1926,29 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         );
 
         try {
-            List<Transaction> transactions = UseCase1.importFromFile(selectedFile);
-
+            List<Transaction> transactions = useCase1.importFromFile(selectedFile);
             Transaction.addAll(transactions);
 
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) transactionTable.getModel();
 
+            DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("yyyy-MMMM-d"); // or "yyyy-MMMM-dd" for zero-padding
+
             for (Transaction t : transactions) {
-                String date = t.getDate().toString();
+                LocalDate dateObj = t.getDate();
+                String formattedDate = dateObj.format(displayFormatter);
+
                 String merchant = t.getMerchant();
                 String description = t.getDescription();
                 double amount = t.getAmount();
-                String category = t.getCategory();
+                String category = t.getCategory() != null ? t.getCategory() : "";
 
-                if (category == null) {
-                    category = ""; // or "Uncategorized"
-                }
+                // Add to DAO
+                addTransactionController.execute(dateObj, description, merchant, amount, category);
 
+                // Add to table
                 model.addRow(new Object[]{
-                        date,
+                        formattedDate,
                         merchant,
                         description,
                         amount,
@@ -2273,6 +2284,11 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
 
         filterModel.addElement(newCategory);
 
+        // Temp fix for non-clean architecture use case 3 for budget category select - Angry Eric
+        javax.swing.DefaultComboBoxModel<String> addBudgetModel =
+                (javax.swing.DefaultComboBoxModel<String>) addBudgetCategorySelect.getModel();
+        addBudgetModel.addElement(newCategory);
+
         javax.swing.DefaultComboBoxModel<String> addTransModel =
                 (javax.swing.DefaultComboBoxModel<String>) addTransactionCategorySelect.getModel();
         addTransModel.addElement(newCategory);
@@ -2282,7 +2298,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         editTransModel.addElement(newCategory);
 
         javax.swing.JOptionPane.showMessageDialog(this,
-                "Category '" + newCategory + "' added successfully and available in all forms!",
+                "Category '" + newCategory + "' added successfully and available in all forms!", // lies
                 "Success",
                 javax.swing.JOptionPane.INFORMATION_MESSAGE);
     }
@@ -2579,64 +2595,51 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         }
         //</editor-fold>
 
-        // ======= VIEW MODELS =======
+        // ===== VIEW MODELS =====
         ViewManagerModel viewManagerModel = new ViewManagerModel();
         TransactionViewModel transactionViewModel = new TransactionViewModel();
         BudgetViewModel budgetViewModel = new BudgetViewModel();
 
-        // ======= DATA ACCESS =======
+        // ===== DATA ACCESS =====
         TransactionDataAccessInterface transactionDAO = new InMemoryTransactionDataAccessObject();
         BudgetRepository budgetRepository = new InMemoryBudgetRepository();
 
-        // ======= PRESENTERS =======
-        AddTransactionPresenter addPresenter =
-                new AddTransactionPresenter(viewManagerModel, transactionViewModel);
+        // ===== PRESENTERS =====
+        AddTransactionPresenter addPresenter = new AddTransactionPresenter(viewManagerModel, transactionViewModel);
+        DeleteTransactionPresenter deletePresenter = new DeleteTransactionPresenter(viewManagerModel, transactionViewModel);
+        EditTransactionPresenter editPresenter = new EditTransactionPresenter(viewManagerModel, transactionViewModel);
+        BudgetOutputBoundary budgetPresenter = new BudgetPresenter(budgetViewModel);
 
-        DeleteTransactionPresenter deletePresenter =
-                new DeleteTransactionPresenter(viewManagerModel, transactionViewModel);
+        // ===== INTERACTORS =====
+        AddTransactionInputBoundary addInteractor = new AddTransactionInteractor(addPresenter, transactionDAO);
+        DeleteTransactionInputBoundary deleteInteractor = new DeleteTransactionInteractor(deletePresenter, transactionDAO);
+        EditTransactionInputBoundary editInteractor = new EditTransactionInteractor(editPresenter, transactionDAO);
+        BudgetInputBoundary budgetInteractor = new BudgetInteractor(budgetRepository, transactionDAO, budgetPresenter);
 
-        EditTransactionPresenter editPresenter =
-                new EditTransactionPresenter(viewManagerModel, transactionViewModel);
+        // ===== CONTROLLERS =====
+        AddTransactionController addController = new AddTransactionController(addInteractor);
+        DeleteTransactionController deleteController = new DeleteTransactionController(deleteInteractor);
+        EditTransactionController editController = new EditTransactionController(editInteractor);
+        BudgetController budgetController = new BudgetController(budgetInteractor);
 
-        BudgetOutputBoundary budgetPresenter =
-                new BudgetPresenter(budgetViewModel);
+        // ===== USE CASE =====
+        FinaCategorizationGateway gateway = new FinaCategorizationGatewayImpl();
+        UseCase1 useCase = new UseCase1(gateway);
 
-        // ======= INTERACTORS =======
-        AddTransactionInputBoundary addInteractor =
-                new AddTransactionInteractor(addPresenter, transactionDAO);
+        // ===== CREATE VIEW =====
+        HomePageView homeView = new HomePageView();
 
-        DeleteTransactionInputBoundary deleteInteractor =
-                new DeleteTransactionInteractor(deletePresenter, transactionDAO);
+        // Inject UseCase1
+        homeView.setUseCase1(useCase);
 
-        EditTransactionInputBoundary editInteractor =
-                new EditTransactionInteractor(editPresenter, transactionDAO);
+        // Inject controllers
+        homeView.setControllers(addController, deleteController, editController, budgetController);
 
-        BudgetInputBoundary budgetInteractor =
-                new BudgetInteractor(budgetRepository, transactionDAO, budgetPresenter);
+        // Inject view models
+        homeView.setViewModels(transactionViewModel, budgetViewModel, viewManagerModel);
 
-        // ======= CONTROLLERS =======
-        AddTransactionController addController =
-                new AddTransactionController(addInteractor);
-
-        DeleteTransactionController deleteController =
-                new DeleteTransactionController(deleteInteractor);
-
-        EditTransactionController editController =
-                new EditTransactionController(editInteractor);
-
-        BudgetController budgetController =
-                new BudgetController(budgetInteractor);
-
-        // ======= UI VIEW (DEPENDENCY-INVERTED) =======
-        java.awt.EventQueue.invokeLater(() -> new HomePageView(
-                addController,
-                deleteController,
-                editController,
-                budgetController,
-                transactionViewModel,
-                budgetViewModel,
-                viewManagerModel
-        ).setVisible(true));
+        // Show UI
+        java.awt.EventQueue.invokeLater(() -> homeView.setVisible(true));
     }
 
     @Override

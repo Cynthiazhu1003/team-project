@@ -6,4 +6,8 @@ public class BudgetResponseModel {
     public double spent;
     public double remaining;
     public String warningLevel;
+
+    public void setWarningLevel(String warningLevel) {
+        this.warningLevel = warningLevel;
+    }
 }

@@ -1,14 +1,14 @@
-package use_case4.use_case;
+package use_case4_depreciated.use_case;
 
 import api.fina.FinaCategorizationGateway;
 import api.fina.FinaCategorizationGateway.FinaCategorizationException;
 
 import frontend.Transaction;
 
-import use_case4.boundary.AutoCategorizeInputBoundary;
-import use_case4.boundary.AutoCategorizeOutputBoundary;
-import use_case4.data.AutoCategorizeRequestModel;
-import use_case4.data.AutoCategorizeResponseModel;
+import use_case4_depreciated.boundary.AutoCategorizeInputBoundary;
+import use_case4_depreciated.boundary.AutoCategorizeOutputBoundary;
+import use_case4_depreciated.data.AutoCategorizeRequestModel;
+import use_case4_depreciated.data.AutoCategorizeResponseModel;
 
 import java.util.ArrayList;
 import java.util.List;
