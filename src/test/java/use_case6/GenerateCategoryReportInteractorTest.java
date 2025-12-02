@@ -154,9 +154,39 @@ class GenerateCategoryReportInteractorTest {
     }
 
     @Test
+    void transactionsExistButNoneInDateRangeProducesNoTransactionsError() {
+        LocalDate today = LocalDate.of(2025, 12, 1);
+
+        // matching category but too old
+        gateway.add(new Transaction(
+                LocalDate.of(2025, 10, 1),
+                "Old purchase",
+                "Old Store",
+                25.0,
+                "groceries"
+        ));
+        // a recent transaction but different category
+        gateway.add(new Transaction(
+                LocalDate.of(2025, 11, 20),
+                "Dinner",
+                "Some Restaurant",
+                30.0,
+                "restaurants & other"
+        ));
+
+        interactor.generateReport(request("groceries", 30, today));
+
+        assertNull(presenter.lastResponse);
+        assertEquals(
+                "No transactions found for category \"groceries\" in the last 30 days.",
+                presenter.lastError
+        );
+    }
+
+    @Test
     void filtersByCategoryAndInclusiveDateRange() {
-        LocalDate today = LocalDate.of(2025, 12, 1);      
-        int daysBack = 30;                                
+        LocalDate today = LocalDate.of(2025, 12, 1);
+        int daysBack = 30;
 
         gateway.add(new Transaction(LocalDate.of(2025, 11, 2),
                 "Milk", "Store A", 20.0, "groceries"));
