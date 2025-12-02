@@ -1,7 +1,7 @@
 @startuml use_case6_generate_category_report
 title Use Case 6 : Generate Category Report
-hide methods          
-hide fields         
+hide methods
+hide fields
 skinparam linetype ortho
 left to right direction
 
@@ -27,6 +27,10 @@ package "use_case6.boundary" {
     +present(responseModel: GenerateCategoryReportResponseModel)
     +presentError(message: String)
   }
+}
+
+' ===== use_case6.data =====
+package "use_case6.data" {
 
   class GenerateCategoryReportRequestModel {
     -category: String
@@ -135,7 +139,7 @@ package "use_case6.interface_adapter" {
 
 ' ===== Relationships between classes =====
 
-' Interactor <-> boundary models
+' Interactor <-> data models
 GenerateCategoryReportInteractor --> GenerateCategoryReportRequestModel
 GenerateCategoryReportInteractor --> GenerateCategoryReportResponseModel
 GenerateCategoryReportResponseModel --> TransactionSummary

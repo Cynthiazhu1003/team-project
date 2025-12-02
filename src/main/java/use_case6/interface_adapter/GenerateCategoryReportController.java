@@ -3,7 +3,7 @@ package use_case6.interface_adapter;
 import java.time.LocalDate;
 
 import use_case6.boundary.GenerateCategoryReportInputBoundary;
-import use_case6.boundary.GenerateCategoryReportRequestModel;
+import use_case6.data.GenerateCategoryReportRequestModel;
 
 public class GenerateCategoryReportController {
 

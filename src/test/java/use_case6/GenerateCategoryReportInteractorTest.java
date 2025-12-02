@@ -5,8 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import use_case2.use_case.TransactionDataAccessInterface;
 import use_case6.boundary.GenerateCategoryReportOutputBoundary;
-import use_case6.boundary.GenerateCategoryReportRequestModel;
-import use_case6.boundary.GenerateCategoryReportResponseModel;
+import use_case6.data.GenerateCategoryReportRequestModel;
+import use_case6.data.GenerateCategoryReportResponseModel;
 import use_case6.use_case.GenerateCategoryReportInteractor;
 
 import java.time.LocalDate;

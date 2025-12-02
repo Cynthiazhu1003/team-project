@@ -1,4 +1,4 @@
-package use_case6.boundary;
+package use_case6.data;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -4,8 +4,8 @@ import frontend.Transaction;
 import use_case2.use_case.TransactionDataAccessInterface;
 import use_case6.boundary.GenerateCategoryReportInputBoundary;
 import use_case6.boundary.GenerateCategoryReportOutputBoundary;
-import use_case6.boundary.GenerateCategoryReportRequestModel;
-import use_case6.boundary.GenerateCategoryReportResponseModel;
+import use_case6.data.GenerateCategoryReportRequestModel;
+import use_case6.data.GenerateCategoryReportResponseModel;
 
 import java.time.LocalDate;
 import java.util.List;
