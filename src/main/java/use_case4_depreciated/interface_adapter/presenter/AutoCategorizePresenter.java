@@ -1,8 +1,8 @@
-package use_case4.interface_adapter.presenter;
+package use_case4_depreciated.interface_adapter.presenter;
 
-import use_case4.boundary.AutoCategorizeOutputBoundary;
-import use_case4.data.AutoCategorizeResponseModel;
-import use_case4.interface_adapter.viewmodel.AutoCategorizeViewModel;
+import use_case4_depreciated.boundary.AutoCategorizeOutputBoundary;
+import use_case4_depreciated.data.AutoCategorizeResponseModel;
+import use_case4_depreciated.interface_adapter.viewmodel.AutoCategorizeViewModel;
 
 public class AutoCategorizePresenter implements AutoCategorizeOutputBoundary {
 

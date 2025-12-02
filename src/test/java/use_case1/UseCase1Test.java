@@ -13,7 +13,6 @@ import static org.junit.Assert.*;
 
 public class UseCase1Test {
 
-
     private File createTempCsv(String content) throws IOException {
         File temp = File.createTempFile("transactions_test", ".csv");
         temp.deleteOnExit();
@@ -30,10 +29,12 @@ public class UseCase1Test {
 
         File csvFile = createTempCsv(csv);
 
-        // act
-        List<Transaction> transactions = UseCase1.importFromFile(csvFile);
+        // Use the real gateway
+        api.fina.FinaCategorizationGateway gateway = new api.fina.FinaCategorizationGatewayImpl();
+        UseCase1 useCase = new UseCase1(gateway);
 
-        // assert
+        List<Transaction> transactions = useCase.importFromFile(csvFile);
+
         assertEquals(2, transactions.size());
 
         Transaction t1 = transactions.get(0);
@@ -41,16 +42,14 @@ public class UseCase1Test {
         assertEquals("Groceries", t1.getDescription());
         assertEquals("Loblaws", t1.getMerchant());
         assertEquals(-50.25, t1.getAmount(), 0.0001);
+        assertNotNull(t1.getCategory()); // category should be set by real gateway
 
         Transaction t2 = transactions.get(1);
         assertEquals(LocalDate.of(2024, 1, 2), t2.getDate());
         assertEquals("Coffee", t2.getDescription());
         assertEquals("Starbucks", t2.getMerchant());
         assertEquals(-4.75, t2.getAmount(), 0.0001);
-
-        // category is not set here, so we expect null
-        assertNull(t1.getCategory());
-        assertNull(t2.getCategory());
+        assertNotNull(t2.getCategory()); // category should be set by real gateway
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -59,7 +58,10 @@ public class UseCase1Test {
 
         File csvFile = createTempCsv(csv);
 
-        UseCase1.importFromFile(csvFile);
+        api.fina.FinaCategorizationGateway gateway = new api.fina.FinaCategorizationGatewayImpl();
+        UseCase1 useCase = new UseCase1(gateway);
+
+        useCase.importFromFile(csvFile);
     }
 
     @Test
@@ -69,9 +71,11 @@ public class UseCase1Test {
                         "not-a-date,BadRow,Loblaws,-50.25\n";
 
         File csvFile = createTempCsv(csv);
+        api.fina.FinaCategorizationGateway gateway = new api.fina.FinaCategorizationGatewayImpl();
+        UseCase1 useCase = new UseCase1(gateway);
 
         try {
-            UseCase1.importFromFile(csvFile);
+            useCase.importFromFile(csvFile);
             fail("Expected IllegalArgumentException to be thrown");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().startsWith("CSV format is not correct"));

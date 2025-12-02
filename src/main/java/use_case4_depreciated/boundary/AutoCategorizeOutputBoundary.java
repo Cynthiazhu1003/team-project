@@ -1,6 +1,6 @@
-package use_case4.boundary;
+package use_case4_depreciated.boundary;
 
-import use_case4.data.AutoCategorizeResponseModel;
+import use_case4_depreciated.data.AutoCategorizeResponseModel;
 
 public interface AutoCategorizeOutputBoundary {
     void present(AutoCategorizeResponseModel responseModel);
