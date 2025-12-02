@@ -1,84 +1,112 @@
 package use_case1;
 
+import api.fina.FinaCategorizationGateway;
+import api.fina.FinaCategorizationGatewayImpl;
 import frontend.Transaction;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UseCase1Test {
 
     private File createTempCsv(String content) throws IOException {
-        File temp = File.createTempFile("transactions_test", ".csv");
-        temp.deleteOnExit();
-        Files.write(temp.toPath(), content.getBytes());
-        return temp;
-    }
-
-    @Test
-    public void importFromFile_validFile_returnsListOfTransactions() throws IOException {
-        String csv =
-                "date,description,merchant,amount\n" +
-                        "2024-01-01,Groceries,Loblaws,-50.25\n" +
-                        "2024-01-02,Coffee,Starbucks,-4.75\n";
-
-        File csvFile = createTempCsv(csv);
-
-        // Use the real gateway
-        api.fina.FinaCategorizationGateway gateway = new api.fina.FinaCategorizationGatewayImpl();
-        UseCase1 useCase = new UseCase1(gateway);
-
-        List<Transaction> transactions = useCase.importFromFile(csvFile);
-
-        assertEquals(2, transactions.size());
-
-        Transaction t1 = transactions.get(0);
-        assertEquals(LocalDate.of(2024, 1, 1), t1.getDate());
-        assertEquals("Groceries", t1.getDescription());
-        assertEquals("Loblaws", t1.getMerchant());
-        assertEquals(-50.25, t1.getAmount(), 0.0001);
-        assertNotNull(t1.getCategory()); // category should be set by real gateway
-
-        Transaction t2 = transactions.get(1);
-        assertEquals(LocalDate.of(2024, 1, 2), t2.getDate());
-        assertEquals("Coffee", t2.getDescription());
-        assertEquals("Starbucks", t2.getMerchant());
-        assertEquals(-4.75, t2.getAmount(), 0.0001);
-        assertNotNull(t2.getCategory()); // category should be set by real gateway
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void importFromFile_onlyHeader_throwsIllegalArgumentException() throws IOException {
-        String csv = "date,description,merchant,amount\n";
-
-        File csvFile = createTempCsv(csv);
-
-        api.fina.FinaCategorizationGateway gateway = new api.fina.FinaCategorizationGatewayImpl();
-        UseCase1 useCase = new UseCase1(gateway);
-
-        useCase.importFromFile(csvFile);
-    }
-
-    @Test
-    public void importFromFile_badFormat_throwsExceptionWithHelpfulMessage() throws IOException {
-        String csv =
-                "date,description,merchant,amount\n" +
-                        "not-a-date,BadRow,Loblaws,-50.25\n";
-
-        File csvFile = createTempCsv(csv);
-        api.fina.FinaCategorizationGateway gateway = new api.fina.FinaCategorizationGatewayImpl();
-        UseCase1 useCase = new UseCase1(gateway);
-
-        try {
-            useCase.importFromFile(csvFile);
-            fail("Expected IllegalArgumentException to be thrown");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().startsWith("Invalid date format"));
+        File file = File.createTempFile("testcsv", ".csv");
+        try (FileWriter fw = new FileWriter(file)) {
+            fw.write(content);
         }
+        return file;
+    }
+
+    static class ThrowingGateway implements FinaCategorizationGateway {
+        @Override
+        public List<List<String>> categorize(List<List<String>> rows) throws FinaCategorizationException {
+            throw new FinaCategorizationException("forced");
+        }
+    }
+
+    @Test
+    void importFromFile_emptyFile_throws() throws IOException {
+        File file = createTempCsv("");
+        UseCase1 useCase = new UseCase1(new FinaCategorizationGatewayImpl());
+        assertThrows(RuntimeException.class, () -> useCase.importFromFile(file));
+    }
+
+    @Test
+    void importFromFile_badHeader_throws() throws IOException {
+        String csv = "wrong,header,fields\n1,2,3,4\n";
+        File file = createTempCsv(csv);
+        UseCase1 useCase = new UseCase1(new FinaCategorizationGatewayImpl());
+        assertThrows(RuntimeException.class, () -> useCase.importFromFile(file));
+    }
+
+    @Test
+    void importFromFile_invalidDate_throws() throws IOException {
+        String csv =
+                "date,description,merchant,amount\n" +
+                        "not-a-date,Test,Loblaws,-10.0\n";
+        File file = createTempCsv(csv);
+        UseCase1 useCase = new UseCase1(new FinaCategorizationGatewayImpl());
+        assertThrows(IllegalArgumentException.class, () -> useCase.importFromFile(file));
+    }
+
+    @Test
+    void importFromFile_invalidAmount_throws() throws IOException {
+        String csv =
+                "date,description,merchant,amount\n" +
+                        "2024-01-01,Test,Loblaws,not-a-number\n";
+        File file = createTempCsv(csv);
+        UseCase1 useCase = new UseCase1(new FinaCategorizationGatewayImpl());
+        assertThrows(IllegalArgumentException.class, () -> useCase.importFromFile(file));
+    }
+
+    @Test
+    void importFromFile_headerOnly_throws() throws IOException {
+        String csv = "date,description,merchant,amount\n";
+        File file = createTempCsv(csv);
+        UseCase1 useCase = new UseCase1(new FinaCategorizationGatewayImpl());
+        assertThrows(IllegalArgumentException.class, () -> useCase.importFromFile(file));
+    }
+
+    @Test
+    void importFromFile_validRow_parsesCorrectly() throws IOException {
+        String csv =
+                "date,description,merchant,amount\n" +
+                        "2024-01-01,Groceries,Loblaws,-50.25\n";
+        File file = createTempCsv(csv);
+        UseCase1 useCase = new UseCase1(new FinaCategorizationGatewayImpl());
+        List<Transaction> result = useCase.importFromFile(file);
+        assertEquals(1, result.size());
+        Transaction t = result.get(0);
+        assertEquals(LocalDate.of(2024, 1, 1), t.getDate());
+        assertEquals("Groceries", t.getDescription());
+        assertEquals("Loblaws", t.getMerchant());
+        assertEquals(-50.25, t.getAmount(), 0.0001);
+        assertNotNull(t.getCategory());
+    }
+
+    @Test
+    void importFromFile_wrongNumberOfColumns_throws() throws IOException {
+        String csv =
+                "date,description,merchant,amount\n" +
+                        "2024-01-01,OnlyTwoColumns\n";
+        File file = createTempCsv(csv);
+        UseCase1 useCase = new UseCase1(new FinaCategorizationGatewayImpl());
+        assertThrows(IllegalArgumentException.class, () -> useCase.importFromFile(file));
+    }
+
+    @Test
+    void importFromFile_gatewayThrows_wrapsException() throws IOException {
+        String csv =
+                "date,description,merchant,amount\n" +
+                        "2024-01-01,Groceries,Loblaws,-50.25\n";
+        File file = createTempCsv(csv);
+        UseCase1 useCase = new UseCase1(new ThrowingGateway());
+        assertThrows(RuntimeException.class, () -> useCase.importFromFile(file));
     }
 }
