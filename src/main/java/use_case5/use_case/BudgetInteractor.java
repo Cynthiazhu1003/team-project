@@ -88,7 +88,7 @@ public class BudgetInteractor implements BudgetInputBoundary {
 
         repository.delete(category);
 
-        // 1️⃣ Send a budget update to remove the row
+        // Send a budget update to remove the row
         BudgetResponseModel deletedBudget = new BudgetResponseModel();
         deletedBudget.category = category;
         deletedBudget.limit = 0;
@@ -98,7 +98,7 @@ public class BudgetInteractor implements BudgetInputBoundary {
 
         presenter.presentBudget(deletedBudget);
 
-        // 2️⃣ Send a notification
+        // Send a notification
         BudgetNotificationModel notif = new BudgetNotificationModel(
                 category,
                 "Budget for " + category + " has been deleted.",
