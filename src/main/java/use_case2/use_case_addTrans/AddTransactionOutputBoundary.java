@@ -1,4 +1,4 @@
-package use_case2.use_case;
+package use_case2.use_case_addTrans;
 
 public interface AddTransactionOutputBoundary {
     void prepareSuccessView(AddTransactionOutputData outputData);

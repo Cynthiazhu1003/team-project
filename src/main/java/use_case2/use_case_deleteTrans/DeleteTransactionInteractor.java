@@ -1,6 +1,7 @@
-package use_case2.use_case;
+package use_case2.use_case_deleteTrans;
 
 import frontend.Transaction;
+import use_case2.data_access.TransactionDataAccessInterface;
 
 import java.util.List;
 

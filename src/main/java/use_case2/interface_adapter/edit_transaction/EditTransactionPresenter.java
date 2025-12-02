@@ -1,10 +1,10 @@
 package use_case2.interface_adapter.edit_transaction;
 
-import use_case2.use_case_edit_transactions.EditTransactionOutputBoundary;
-import use_case2.use_case_edit_transactions.EditTransactionOutputData;
-import use_case2.interface_adapter.ViewManagerModel;
-import use_case2.interface_adapter.transaction.TransactionState;
-import use_case2.interface_adapter.transaction.TransactionViewModel;
+import use_case2.use_case_editTrans.EditTransactionOutputBoundary;
+import use_case2.use_case_editTrans.EditTransactionOutputData;
+import use_case2.interface_adapter.transaction_Managment.ViewManagerModel;
+import use_case2.interface_adapter.transaction_Managment.TransactionState;
+import use_case2.interface_adapter.transaction_Managment.TransactionViewModel;
 
 public class EditTransactionPresenter implements EditTransactionOutputBoundary {
     private final TransactionViewModel transactionViewModel;
@@ -19,7 +19,7 @@ public class EditTransactionPresenter implements EditTransactionOutputBoundary {
     @Override
     public void prepareSuccessView(EditTransactionOutputData outputData) {
         TransactionState currentState = transactionViewModel.getState();
-        currentState.setEditingTransactionIndex(-1); // Reset editing state
+        currentState.setEditingTransactionIndex(-1);
         currentState.setDate(null);
         currentState.setDescription("");
         currentState.setMerchant("");

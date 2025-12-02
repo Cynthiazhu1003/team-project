@@ -1,10 +1,10 @@
 package use_case2.interface_adapter.delete_transaction;
 
-import use_case2.interface_adapter.ViewManagerModel;
-import use_case2.interface_adapter.transaction.TransactionState;
-import use_case2.interface_adapter.transaction.TransactionViewModel;
-import use_case2.use_case.DeleteTransactionOutputBoundary;
-import use_case2.use_case.DeleteTransactionOutputData;
+import use_case2.interface_adapter.transaction_Managment.ViewManagerModel;
+import use_case2.interface_adapter.transaction_Managment.TransactionState;
+import use_case2.interface_adapter.transaction_Managment.TransactionViewModel;
+import use_case2.use_case_deleteTrans.DeleteTransactionOutputBoundary;
+import use_case2.use_case_deleteTrans.DeleteTransactionOutputData;
 
 public class DeleteTransactionPresenter implements DeleteTransactionOutputBoundary {
     private final TransactionViewModel transactionViewModel;

@@ -1,11 +1,11 @@
 package use_case2.interface_adapter.add_transaction;
 
 
-import use_case2.use_case.AddTransactionOutputBoundary;
-import use_case2.use_case.AddTransactionOutputData;
-import use_case2.interface_adapter.ViewManagerModel;
-import use_case2.interface_adapter.transaction.TransactionState;
-import use_case2.interface_adapter.transaction.TransactionViewModel;
+import use_case2.use_case_addTrans.AddTransactionOutputBoundary;
+import use_case2.use_case_addTrans.AddTransactionOutputData;
+import use_case2.interface_adapter.transaction_Managment.ViewManagerModel;
+import use_case2.interface_adapter.transaction_Managment.TransactionState;
+import use_case2.interface_adapter.transaction_Managment.TransactionViewModel;
 
 public class AddTransactionPresenter implements AddTransactionOutputBoundary {
     private final TransactionViewModel transactionViewModel;

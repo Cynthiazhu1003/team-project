@@ -1,9 +1,9 @@
-package use_case2.use_case_edit_transactions;
+package use_case2.use_case_editTrans;
 
 import java.time.LocalDate;
 
 public class EditTransactionInputData {
-    private final int transactionIndex;  // Index to identify which transaction to edit
+    private final int transactionIndex;
     private final LocalDate date;
     private final String description;
     private final String merchant;

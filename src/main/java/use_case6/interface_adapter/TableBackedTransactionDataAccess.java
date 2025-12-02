@@ -1,7 +1,7 @@
 package use_case6.interface_adapter;
 
 import frontend.Transaction;
-import use_case2.use_case.TransactionDataAccessInterface;
+import use_case2.data_access.TransactionDataAccessInterface;
 import java.time.format.DateTimeParseException;
 
 import javax.swing.JTable;
