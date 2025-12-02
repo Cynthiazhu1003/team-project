@@ -42,7 +42,7 @@ import use_case5.interface_adapter.BudgetPresenter;
 import use_case5.interface_adapter.BudgetViewModel;
 import use_case5.use_case.BudgetInteractor;
 
-import use_case6.boundary.GenerateCategoryReportResponseModel;
+import use_case6.data.GenerateCategoryReportResponseModel;
 import use_case6.interface_adapter.CategoryReportViewBoundary;
 import use_case6.interface_adapter.GenerateCategoryReportController;
 import use_case6.interface_adapter.GenerateCategoryReportPresenter;

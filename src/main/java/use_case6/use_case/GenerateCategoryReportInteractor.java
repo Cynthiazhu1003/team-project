@@ -39,7 +39,6 @@ public class GenerateCategoryReportInteractor implements GenerateCategoryReportI
         LocalDate endDate = requestModel.getToday();
         LocalDate startDate = endDate.minusDays(daysBack);
 
-        // ✅ Use existing DAO, no changes to use_case2:
         List<Transaction> all = transactionGateway.getAllTransactions();
 
         List<Transaction> matching = all.stream()
