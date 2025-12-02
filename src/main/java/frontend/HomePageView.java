@@ -23,8 +23,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import use_case1.UseCase1;
 import use_case2.data_access.InMemoryTransactionDataAccessObject;
@@ -102,6 +100,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     private final BudgetViewModel budgetViewModel;
     private final ViewManagerModel viewManagerModel;
     private final UseCase1 useCase1;
+    private CategoryReportViewModel categoryReportViewModel;
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
