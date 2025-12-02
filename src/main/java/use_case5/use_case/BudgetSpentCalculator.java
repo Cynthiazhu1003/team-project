@@ -1,22 +1,28 @@
 package use_case5.use_case;
 
 import frontend.Transaction;
-import use_case2.use_case.TransactionDataAccessInterface;
-
 import java.time.LocalDate;
 import java.util.List;
+import use_case2.use_case.TransactionDataAccessInterface;
 
-// Helper class for Budget use cases
+/**
+ * Helper class to calculate Budget spent for each category.
+ */
 public class BudgetSpentCalculator {
+    private final TransactionDataAccessInterface transactionDao;
 
-    private final TransactionDataAccessInterface transactionDAO;
-
+    /**
+     * Constructor for the calculator.
+     */
     public BudgetSpentCalculator(TransactionDataAccessInterface dao) {
-        this.transactionDAO = dao;
+        this.transactionDao = dao;
     }
 
+    /**
+     * Actual method to calculate the spending of a category.
+     */
     public double calculateSpent(String category) {
-        List<Transaction> all = transactionDAO.getAllTransactions();
+        List<Transaction> all = transactionDao.getAllTransactions();
         LocalDate firstDay = LocalDate.now().withDayOfMonth(1);
 
         return all.stream()
