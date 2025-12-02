@@ -53,6 +53,7 @@ import use_case5.use_case.BudgetInteractor;
 
 import use_case6.data.GenerateCategoryReportResponseModel;
 import use_case6.interface_adapter.CategoryReportViewBoundary;
+import use_case6.interface_adapter.CategoryReportViewModel;
 import use_case6.interface_adapter.GenerateCategoryReportController;
 import use_case6.interface_adapter.GenerateCategoryReportPresenter;
 import use_case6.interface_adapter.TableBackedTransactionDataAccess;
@@ -431,19 +432,19 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     }
 
     private void setupCategoryReportUseCase() {
-        // Use the existing transactionTable as the data source
         TransactionDataAccessInterface transactionGateway =
                 new TableBackedTransactionDataAccess(transactionTable);
 
+        categoryReportViewModel = new CategoryReportViewModel();
+
         GenerateCategoryReportPresenter presenter =
-                new GenerateCategoryReportPresenter(this);
+                new GenerateCategoryReportPresenter(categoryReportViewModel, this);
 
         GenerateCategoryReportInteractor interactor =
                 new GenerateCategoryReportInteractor(transactionGateway, presenter);
 
         categoryReportController = new GenerateCategoryReportController(interactor);
 
-        // Hook up the Generate Report button
         generateReportButton.addActionListener(e -> {
             String category = (String) reportCategorySelected.getSelectedItem();
             String periodText = (String) reportDateSelected.getSelectedItem();
