@@ -4,10 +4,16 @@ import use_case5.boundary.*;
 
 public class BudgetController {
 
-    private final BudgetInputBoundary interactor;
+    private final SetBudgetInputBoundary setBoundary;
+    private final DeleteBudgetInputBoundary deleteBoundary;
+    private final RefreshBudgetsInputBoundary refreshBoundary;
 
-    public BudgetController(BudgetInputBoundary interactor) {
-        this.interactor = interactor;
+    public BudgetController(SetBudgetInputBoundary setBoundary,
+                            DeleteBudgetInputBoundary deleteBoundary,
+                            RefreshBudgetsInputBoundary refreshBoundary) {
+        this.setBoundary = setBoundary;
+        this.deleteBoundary = deleteBoundary;
+        this.refreshBoundary = refreshBoundary;
     }
 
     public void setBudget(String category, double limit) {
@@ -15,25 +21,14 @@ public class BudgetController {
         req.category = category;
         req.limit = limit;
         req.month = java.time.YearMonth.now();
-        interactor.setBudget(req);
-    }
-
-    public void addSpending(String category, double amount) {
-        UpdateBudgetRequestModel req = new UpdateBudgetRequestModel();
-        req.category = category;
-        req.amount = amount;
-        interactor.addSpending(req);
-    }
-
-    public double calculateSpent(String category){
-        return interactor.calculateSpent(category);
+        setBoundary.setBudget(req);
     }
 
     public void deleteBudget(String category){
-        interactor.deleteBudget(category);
+        deleteBoundary.deleteBudget(category);
     }
 
     public void refreshAllBudgets() {
-        interactor.refreshAllBudgets();
+        refreshBoundary.refreshAllBudgets();
     }
 }
