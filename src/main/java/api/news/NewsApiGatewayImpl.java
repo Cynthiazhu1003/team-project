@@ -1,23 +1,27 @@
 package api.news;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import okhttp3.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Implementation of NewsApiGateway with optional query parameters,
  * loading NEWS_API_KEY from a .env file.
  */
 public class NewsApiGatewayImpl implements NewsApiGateway {
-
     private final OkHttpClient client = new OkHttpClient();
     private final String apiKey;
 
+    /**
+     * Constructor for the News API gateway implementation.
+     */
     public NewsApiGatewayImpl() throws NewsApiException {
         // Load .env
         Dotenv dotenv = Dotenv.configure()
@@ -44,11 +48,21 @@ public class NewsApiGatewayImpl implements NewsApiGateway {
             HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse("https://newsapi.org/v2/top-headlines"))
                     .newBuilder();
 
-            if (req.country != null) urlBuilder.addQueryParameter("country", req.country);
-            if (req.category != null) urlBuilder.addQueryParameter("category", req.category);
-            if (req.query != null) urlBuilder.addQueryParameter("q", req.query);
-            if (req.pageSize != null) urlBuilder.addQueryParameter("pageSize", req.pageSize.toString());
-            if (req.page != null) urlBuilder.addQueryParameter("page", req.page.toString());
+            if (req.country != null) {
+                urlBuilder.addQueryParameter("country", req.country);
+            }
+            if (req.category != null) {
+                urlBuilder.addQueryParameter("category", req.category);
+            }
+            if (req.query != null) {
+                urlBuilder.addQueryParameter("q", req.query);
+            }
+            if (req.pageSize != null) {
+                urlBuilder.addQueryParameter("pageSize", req.pageSize.toString());
+            }
+            if (req.page != null) {
+                urlBuilder.addQueryParameter("page", req.page.toString());
+            }
 
             urlBuilder.addQueryParameter("apiKey", apiKey);
 

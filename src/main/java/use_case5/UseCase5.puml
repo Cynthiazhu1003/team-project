@@ -1,5 +1,10 @@
 @startuml
 !theme plain
+skinparam packageStyle rectangle
+
+' Force vertical layered layout (top → bottom)
+top to bottom direction
+left to right direction
 
 package "External" {
   [UI]
@@ -12,16 +17,22 @@ package "Interface Adapters" {
 }
 
 package "Use Cases" {
-  [BudgetInteractor]
+  [SetBudgetInteractor]
+  [DeleteBudgetInteractor]
+  [RefreshBudgetsInteractor]
+  [BudgetSpentCalculator]
 }
 
 package "Boundary" {
-  interface [BudgetInputBoundary]
+  interface [SetBudgetInputBoundary]
+  interface [DeleteBudgetInputBoundary]
+  interface [RefreshBudgetsInputBoundary]
+
   interface [BudgetOutputBoundary]
+
   [BudgetResponseModel]
   [BudgetNotificationModel]
   [SetBudgetRequestModel]
-  [UpdateBudgetRequestModel]
 }
 
 package "Data" {
@@ -31,51 +42,83 @@ package "Data" {
   [BudgetEntity]
 }
 
-' UI -> Controller
+' ===== UI -> Controller =====
 [UI] --> [BudgetController]
 
-' UI -> View Model
+' ===== UI -> ViewModel =====
 [UI] --> [BudgetViewModel]
 
-' Controller -> Input boundary
-[BudgetController] --> [BudgetInputBoundary]
+' ===== Controller -> Input Boundaries =====
+[BudgetController] --> [SetBudgetInputBoundary]
+[BudgetController] --> [DeleteBudgetInputBoundary]
+[BudgetController] --> [RefreshBudgetsInputBoundary]
 
-' Interactor implements Input Boundary
-[BudgetInteractor] ..|> [BudgetInputBoundary]
+' ===== Interactors implement their Input Boundaries =====
+[SetBudgetInteractor] ..|> [SetBudgetInputBoundary]
+[DeleteBudgetInteractor] ..|> [DeleteBudgetInputBoundary]
+[RefreshBudgetsInteractor] ..|> [RefreshBudgetsInputBoundary]
 
-' Presenter implements Output Boundary
+' ===== Presenter implements Output Boundary =====
 [BudgetPresenter] ..|> [BudgetOutputBoundary]
 
-' Interactor -> Presenter
-[BudgetInteractor] --> [BudgetPresenter]
+' ===== Interactors -> Presenter =====
+[SetBudgetInteractor] --> [BudgetPresenter]
+[DeleteBudgetInteractor] --> [BudgetPresenter]
+[RefreshBudgetsInteractor] --> [BudgetPresenter]
 
-' Presenter -> ViewModel
+' ===== Presenter -> ViewModel =====
 [BudgetPresenter] --> [BudgetViewModel]
 
-' Interactor -> Repository
-[BudgetInteractor] --> [BudgetRepository]
+' ===== Interactors -> Data repositories =====
+[SetBudgetInteractor] --> [BudgetRepository]
+[DeleteBudgetInteractor] --> [BudgetRepository]
+[RefreshBudgetsInteractor] --> [BudgetRepository]
 
-' Interactor -> Transaction Repository
-[BudgetInteractor] --> [TransactionDataAccessInterface]
+' ===== Interactors using calculator =====
+[SetBudgetInteractor] --> [BudgetSpentCalculator]
+[RefreshBudgetsInteractor] --> [BudgetSpentCalculator]
 
-' Concrete Repository
+' ===== Calculator -> TransactionDAO =====
+[BudgetSpentCalculator] --> [TransactionDataAccessInterface]
+
+' ===== Concrete Repo Implements Interface =====
 [InMemoryBudgetRepository] ..|> [BudgetRepository]
 [BudgetRepository] --> [BudgetEntity]
 
-' Data models
-[BudgetInteractor] --> [BudgetResponseModel]
-[BudgetInteractor] --> [BudgetNotificationModel]
-[BudgetInteractor] --> [UpdateBudgetRequestModel]
-[BudgetInteractor] --> [SetBudgetRequestModel]
-[BudgetInteractor] --> [BudgetOutputBoundary]
-[BudgetController] --> [SetBudgetRequestModel]
-[BudgetController] --> [UpdateBudgetRequestModel]
+' ===== Data models =====
+[SetBudgetInteractor] --> [SetBudgetRequestModel]
+[SetBudgetInteractor] --> [BudgetResponseModel]
+[SetBudgetInteractor] --> [BudgetNotificationModel]
 
-note bottom of [BudgetInteractor]
-  Business Logic:
-  - Set/Update budgets
-  - Calculate spending
-  - Trigger notifications
+[DeleteBudgetInteractor] --> [BudgetResponseModel]
+[DeleteBudgetInteractor] --> [BudgetNotificationModel]
+
+[RefreshBudgetsInteractor] --> [BudgetResponseModel]
+[RefreshBudgetsInteractor] --> [BudgetNotificationModel]
+
+' ===== Notes for Use Cases =====
+note bottom of [SetBudgetInteractor]
+  Use Case:
+  - Create/Update a budget
+  - Recalculate spending
+  - Send UI and notification updates
+end note
+
+note bottom of [DeleteBudgetInteractor]
+  Use Case:
+  - Delete a budget
+  - Send UI and notification updates
+end note
+
+note bottom of [RefreshBudgetsInteractor]
+  Use Case:
+  - Recalculate all budgets
+  - Send UI and notification updates
+end note
+
+note bottom of [BudgetSpentCalculator]
+  Domain Service:
+  - Calculates monthly spending per category
 end note
 
 @enduml

@@ -3,14 +3,15 @@ package api.fina;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Local test class for the Fina Categorization API.
+ */
 public class LocalTest {
-
-    public static void main(String[] args) throws FinaCategorizationGateway.FinaCategorizationException {
-
-        // Create gateway to API
-        FinaCategorizationGatewayImpl gateway =
-                new FinaCategorizationGatewayImpl();
-
+    /**
+     * Main for the local test class.
+     */
+    public static void main(String[] args)
+            throws FinaCategorizationGateway.FinaCategorizationException {
         // Build example input rows (Add / delete below to stress test API)
         List<List<String>> rows = new ArrayList<>();
 
@@ -44,6 +45,9 @@ public class LocalTest {
         rows.add(List.of("PAYPAL * EBAY", "eBay", "-27.99"));
         rows.add(List.of("SOUTWEST AIRLINES", "Southwest Airlines", "-412.77"));
         rows.add(List.of("PANDA EXPRESS", "Panda Express", "-9.15"));
+
+        // Create gateway to API
+        FinaCategorizationGatewayImpl gateway = new FinaCategorizationGatewayImpl();
 
         // Call categorize()
         System.out.println("Sending to Fina API...");

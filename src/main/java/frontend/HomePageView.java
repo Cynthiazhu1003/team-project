@@ -38,17 +38,17 @@ import use_case2.interface_adapter.transaction.TransactionViewModel;
 import use_case2.use_case.*;
 import use_case2.use_case_edit_transactions.EditTransactionInputBoundary;
 import use_case2.use_case_edit_transactions.EditTransactionInteractor;
-import use_case5.boundary.BudgetInputBoundary;
-import use_case5.boundary.BudgetNotificationModel;
-import use_case5.boundary.BudgetOutputBoundary;
-import use_case5.boundary.BudgetResponseModel;
+import use_case5.boundary.*;
 import use_case5.data.BudgetRepository;
 import use_case5.data.InMemoryBudgetRepository;
 import use_case5.interface_adapter.BudgetController;
 import use_case5.interface_adapter.BudgetPresenter;
 import use_case5.interface_adapter.BudgetViewModel;
-import use_case5.use_case.BudgetInteractor;
 
+import use_case5.use_case.BudgetSpentCalculator;
+import use_case5.use_case.DeleteBudgetInteractor;
+import use_case5.use_case.RefreshBudgetsInteractor;
+import use_case5.use_case.SetBudgetInteractor;
 import use_case6.data.GenerateCategoryReportResponseModel;
 import use_case6.interface_adapter.CategoryReportViewBoundary;
 import use_case6.interface_adapter.CategoryReportViewModel;
@@ -2741,13 +2741,28 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         AddTransactionInputBoundary addInteractor = new AddTransactionInteractor(addPresenter, transactionDAO);
         DeleteTransactionInputBoundary deleteInteractor = new DeleteTransactionInteractor(deletePresenter, transactionDAO);
         EditTransactionInputBoundary editInteractor = new EditTransactionInteractor(editPresenter, transactionDAO);
-        BudgetInputBoundary budgetInteractor = new BudgetInteractor(budgetRepository, transactionDAO, budgetPresenter);
+
+        BudgetSpentCalculator spentCalculator =
+                new BudgetSpentCalculator(transactionDAO);
+        SetBudgetInputBoundary setBudgetInteractor =
+                new SetBudgetInteractor(budgetRepository, spentCalculator, budgetPresenter);
+
+        DeleteBudgetInputBoundary deleteBudgetInteractor =
+                new DeleteBudgetInteractor(budgetRepository, budgetPresenter);
+
+        RefreshBudgetsInputBoundary refreshBudgetsInteractor =
+                new RefreshBudgetsInteractor(budgetRepository, spentCalculator, budgetPresenter);
 
         // ===== CONTROLLERS =====
         AddTransactionController addController = new AddTransactionController(addInteractor);
         DeleteTransactionController deleteController = new DeleteTransactionController(deleteInteractor);
         EditTransactionController editController = new EditTransactionController(editInteractor);
-        BudgetController budgetController = new BudgetController(budgetInteractor);
+        BudgetController budgetController =
+                new BudgetController(
+                        setBudgetInteractor,
+                        deleteBudgetInteractor,
+                        refreshBudgetsInteractor
+                );
 
         // ===== USE CASE =====
         FinaCategorizationGateway gateway = new FinaCategorizationGatewayImpl();

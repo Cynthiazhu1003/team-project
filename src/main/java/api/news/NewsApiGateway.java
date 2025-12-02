@@ -1,7 +1,5 @@
 package api.news;
 
-import java.util.List;
-
 /**
  * Interface for fetching top headlines from NewsAPI.org.
  */
@@ -27,8 +25,16 @@ public interface NewsApiGateway {
         public Integer page;
     }
 
+    /**
+     * Exception for the News API.
+     */
     class NewsApiException extends Exception {
-        public NewsApiException(String message) { super(message); }
-        public NewsApiException(String message, Throwable cause) { super(message, cause); }
+        public NewsApiException(String message) {
+            super(message);
+        }
+
+        public NewsApiException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }
