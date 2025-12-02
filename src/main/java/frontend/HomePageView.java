@@ -14,6 +14,7 @@ import java.time.Month;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import javax.swing.*;
 
 import use_case1.UseCase1;
@@ -381,7 +382,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
      */
     @SuppressWarnings("unchecked")
     private void initComponents() {
-
         jPanel3 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
@@ -1176,14 +1176,9 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
             }
         });
 
-        addBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {"home",
-                "bills & utilities","auto & transport","vehicle & repairs","gas","other transportation",
-                "food & drink","groceries","restaurants & other","health & wellness","medical","gym",
-                "other health & wellness","travel & vacation","shopping","clothing","other shopping",
-                "entertainment & lifestyle","education","gifts & donations","loans & financial fees",
-                "family & pets","subscriptions","business & work","investments","taxes","insurance",
-                "other expenses","primary paycheck","business income","repayment from others",
-                "other income","transfer","credit card payment"}));
+        // Using non-clean architecture UI updates - Angry Eric
+        List<String> baseList = frontend.CategoryList.getBaseCategories();
+        addBudgetCategorySelect.setModel(new javax.swing.DefaultComboBoxModel<>(baseList.toArray(new String[0])));
 
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
@@ -1812,7 +1807,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                                 .addGap(0, 2, Short.MAX_VALUE))
         );
 
-        cardEditBudget.add(jPanel20, java.awt.BorderLayout.PAGE_START);
+        cardEditBudget.add(jPanel20, java.awt.BorderLayout.PAGE_START); // not used
 
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel7.setText("Amount: ");
@@ -2277,6 +2272,11 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
 
         filterModel.addElement(newCategory);
 
+        // Temp fix for non-clean architecture use case 3 for budget category select - Angry Eric
+        javax.swing.DefaultComboBoxModel<String> addBudgetModel =
+                (javax.swing.DefaultComboBoxModel<String>) addBudgetCategorySelect.getModel();
+        addBudgetModel.addElement(newCategory);
+
         javax.swing.DefaultComboBoxModel<String> addTransModel =
                 (javax.swing.DefaultComboBoxModel<String>) addTransactionCategorySelect.getModel();
         addTransModel.addElement(newCategory);
@@ -2286,7 +2286,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         editTransModel.addElement(newCategory);
 
         javax.swing.JOptionPane.showMessageDialog(this,
-                "Category '" + newCategory + "' added successfully and available in all forms!",
+                "Category '" + newCategory + "' added successfully and available in all forms!", // lies
                 "Success",
                 javax.swing.JOptionPane.INFORMATION_MESSAGE);
     }
