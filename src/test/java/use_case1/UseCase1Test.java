@@ -78,7 +78,7 @@ public class UseCase1Test {
             useCase.importFromFile(csvFile);
             fail("Expected IllegalArgumentException to be thrown");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().startsWith("CSV format is not correct"));
+            assertTrue(e.getMessage().startsWith("Invalid date format"));
         }
     }
 }
