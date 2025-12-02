@@ -1,7 +1,12 @@
 package api.news;
 
+/**
+ * Local test class for the News API.
+ */
 public class LocalTest {
-
+    /**
+     * Main for the local test class.
+     */
     public static void main(String[] args) throws NewsApiGateway.NewsApiException {
 
         NewsApiGatewayImpl gateway = new NewsApiGatewayImpl();

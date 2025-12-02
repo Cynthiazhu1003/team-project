@@ -1,11 +1,14 @@
 package api.fina;
 
-import okhttp3.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * FinaCategorizationGateway implementation that relies on the app.fina.money categorization API.
@@ -17,13 +20,16 @@ public class FinaCategorizationGatewayImpl implements FinaCategorizationGateway 
     private final OkHttpClient client = new OkHttpClient();
 
     /**
-     * Generate a category based on the given information of a row in the format ["name", "merchant", "amount"]
+     * Generate a category based on the given information of a row
+     * in the format ["name", "merchant", "amount"].
+     *
      * @param rows the rows to get the correctly formatted individual row of data
      * @return list of the same rows param but with an auto generated category attached to each row
      * @throws FinaCategorizationException if the API call fails for any reason or code issues
      */
     @Override
-    public List<List<String>> categorize(List<List<String>> rows) throws FinaCategorizationException {
+    public List<List<String>> categorize(List<List<String>> rows)
+            throws FinaCategorizationException {
         try {
             String jsonBody = convertRowsToJson(rows);
 
