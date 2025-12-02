@@ -1,10 +1,6 @@
 package use_case2.interface_adapter.transaction;
 
-import frontend.Transaction;
-
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TransactionState {
     private LocalDate date;
@@ -14,12 +10,9 @@ public class TransactionState {
     private String category = "";
     private String transactionError;
     private String transactionSuccess;
-    private int editingTransactionIndex = -1;
-    private List<Transaction> transactions;
-    public TransactionState() {
-        this.transactions = new ArrayList<>();
-    }
+    private int editingTransactionIndex = -1; // -1 means not editing, >= 0 means editing specific transaction
 
+    public TransactionState() {}
     public TransactionState(TransactionState copy) {
         this.date = copy.date;
         this.category = copy.category;
@@ -29,11 +22,6 @@ public class TransactionState {
         this.transactionError = copy.transactionError;
         this.transactionSuccess = copy.transactionSuccess;
         this.editingTransactionIndex = copy.editingTransactionIndex;
-        if (copy.transactions != null) {
-            this.transactions = List.copyOf(copy.transactions);
-        } else {
-            this.transactions = null; // Or List.of()
-        }
     }
 
     // Getters and Setters
@@ -54,7 +42,4 @@ public class TransactionState {
     public int getEditingTransactionIndex() { return editingTransactionIndex; }
     public void setEditingTransactionIndex(int editingTransactionIndex) { this.editingTransactionIndex
             = editingTransactionIndex; }
-    public List<Transaction> getTransactions() {return transactions;}
-    public void setTransactions(List<Transaction> transactions) {this.transactions = transactions;}
-
 }

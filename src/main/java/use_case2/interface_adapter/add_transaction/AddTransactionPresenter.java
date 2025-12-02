@@ -27,7 +27,6 @@ public class AddTransactionPresenter implements AddTransactionOutputBoundary {
         currentState.setDescription("");
         currentState.setTransactionError(null);
         currentState.setTransactionSuccess("Transaction added successfully!");
-        currentState.setTransactions(outputData.getUpdatedTransactionList());
 
         transactionViewModel.setState(currentState);
         transactionViewModel.firePropertyChanged();

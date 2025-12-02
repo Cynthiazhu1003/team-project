@@ -1,9 +1,5 @@
 package use_case2.use_case;
 
-import frontend.Transaction;
-
-import java.util.List;
-
 public class DeleteTransactionInteractor implements DeleteTransactionInputBoundary {
 
     private final DeleteTransactionOutputBoundary transactionPresenter;
@@ -20,14 +16,7 @@ public class DeleteTransactionInteractor implements DeleteTransactionInputBounda
         boolean success = transactionDataAccess.deleteByIndex(index);
 
         if (success) {
-            List<Transaction> updatedList = transactionDataAccess.getAllTransactions();
-
-
-            DeleteTransactionOutputData outputData =
-                    new DeleteTransactionOutputData("Transaction deleted successfully!", updatedList);
-
-
-            transactionPresenter.prepareSuccessView(outputData);
+            transactionPresenter.prepareSuccessView("Transaction deleted successfully!");
         } else {
             transactionPresenter.prepareFailView("Error: Could not find transaction at index " + index);
         }

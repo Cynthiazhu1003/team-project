@@ -4,7 +4,6 @@ import use_case2.interface_adapter.ViewManagerModel;
 import use_case2.interface_adapter.transaction.TransactionState;
 import use_case2.interface_adapter.transaction.TransactionViewModel;
 import use_case2.use_case.DeleteTransactionOutputBoundary;
-import use_case2.use_case.DeleteTransactionOutputData;
 
 public class DeleteTransactionPresenter implements DeleteTransactionOutputBoundary {
     private final TransactionViewModel transactionViewModel;
@@ -17,15 +16,15 @@ public class DeleteTransactionPresenter implements DeleteTransactionOutputBounda
     }
 
     @Override
-    public void prepareSuccessView(DeleteTransactionOutputData outputData) {
+    public void prepareSuccessView(String successMessage) {
         TransactionState currentState = transactionViewModel.getState();
-        currentState.setTransactions(outputData.getUpdatedList());
-        currentState.setTransactionSuccess(outputData.getMessage());
         currentState.setTransactionError(null);
+        currentState.setTransactionSuccess(successMessage);
 
         transactionViewModel.setState(currentState);
         transactionViewModel.firePropertyChanged();
 
+        // No view change needed, just an update to the current transaction view
     }
 
     @Override
