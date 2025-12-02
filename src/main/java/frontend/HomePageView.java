@@ -8,7 +8,6 @@ import api.news.NewsApiResponse;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Component;
 import java.time.LocalDate;
 import java.time.Month;
@@ -17,14 +16,6 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.swing.*;
-import java.awt.CardLayout;
-import frontend.Transaction;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import use_case1.UseCase1;
 import use_case2.data_access.InMemoryTransactionDataAccessObject;
@@ -35,7 +26,6 @@ import use_case2.interface_adapter.delete_transaction.DeleteTransactionControlle
 import use_case2.interface_adapter.delete_transaction.DeleteTransactionPresenter;
 import use_case2.interface_adapter.edit_transaction.EditTransactionController;
 import use_case2.interface_adapter.edit_transaction.EditTransactionPresenter;
-import use_case2.interface_adapter.transaction.TransactionView;
 import use_case2.interface_adapter.transaction.TransactionViewModel;
 import use_case2.use_case.*;
 import use_case2.use_case_edit_transactions.EditTransactionInputBoundary;
@@ -90,16 +80,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     private java.util.List<NewsApiResponse.Article> currentArticles = new java.util.ArrayList<>();
 
     private AddTransactionController addTransactionController;
-    private final DeleteTransactionController deleteTransactionController;
-    private final EditTransactionController editTransactionController;
-    private final BudgetController budgetController;
-
-    private CardLayout cardLayout;
-    private JPanel mainPanel;
-    private TransactionView transactionView;
-    private final TransactionViewModel transactionViewModel;
-    private final BudgetViewModel budgetViewModel;
-    private final ViewManagerModel viewManagerModel;
     private DeleteTransactionController deleteTransactionController;
     private EditTransactionController editTransactionController;
     private BudgetController budgetController;
@@ -112,9 +92,8 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
-        cardLayout.show(mainPanel, cardName);
-        viewManagerModel.setActiveView(cardName);
-        viewManagerModel.firePropertyChanged();
+        java.awt.CardLayout layout = (java.awt.CardLayout) mainPanel.getLayout();
+        layout.show(mainPanel, cardName);
     }
 
     /**
@@ -211,40 +190,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         this.budgetViewModel = budgetViewModel;
         this.viewManagerModel = viewManagerModel;
 
-        setupViews();
-        setupNewsPanel();
-        setupReportBody();
-        setupCategoryReportUseCase();
-        loadNewsAsync();
-        // Register each card with its name
-        mainPanel.add(newsPanel,        CARD_HOME);
-        mainPanel.add(cardTransaction, CARD_TRANS);
-        mainPanel.add(cardBudget,      CARD_BUDGET);
-        mainPanel.add(cardReport,      CARD_REPORT);
-        mainPanel.add(cardImport,      CARD_IMPORT);
-        mainPanel.add(cardEditTransaction,CARD_EDIT_TRANS);
-        mainPanel.add(cardAddBudget, CARD_ADD_BUDGET);
-        mainPanel.add(cardAddTransaction, CARD_ADD_TRANS);
-        mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
-        mainPanel.add(cardEditCategory, CARD_EDIT_CATEGORY);
-        mainPanel.add(cardChooseTransaction, CARD_CHOOSE_TRANS);
-
-        showCard(CARD_HOME);
-
-
-        this.viewManagerModel.addPropertyChangeListener(new ViewManagerListener(this.cardLayout, this.mainPanel));
-        String initialView = this.viewManagerModel.getActiveView();
-        if (initialView == null) {
-            initialView = CARD_TRANS;
-        }
-        showCard(initialView);
-
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.pack();
-        this.setSize(800, 600);
-        this.setLocationRelativeTo(null);
-
-        budgetViewModel.addPropertyChangeListener(evt -> {
         // example listener for budgets
         this.budgetViewModel.addPropertyChangeListener(evt -> {
             String name = evt.getPropertyName();
@@ -256,25 +201,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                 showBudgetNotification((BudgetNotificationModel) evt.getNewValue());
             }
         });
-
-    }
-
-    private void setupViews() {
-        try {
-            this.transactionView = new TransactionView(
-                    this.transactionViewModel,
-                    this.addTransactionController,
-                    this.editTransactionController,
-                    this.deleteTransactionController,
-                    this.transactionTable
-
-            );
-            mainPanel.add(this.transactionView, CARD_TRANS);
-            logger.log(Level.INFO, "TransactionView created and added successfully.");
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to create TransactionView", e);
-            mainPanel.add(new JLabel("Error loading Transaction View: " + e.getMessage()), "error");
-        }
     }
 
     private void setupNewsPanel() {
@@ -604,11 +530,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         editBudgetEditButton = new javax.swing.JButton();
         editBudgetCancelButton = new javax.swing.JButton();
 
-        mainPanel = new JPanel();
-        cardLayout = new CardLayout();
-        mainPanel.setLayout(cardLayout); // mainPanel now uses CardLayout
-        getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -800,6 +721,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
 
         getContentPane().add(sidebarPanel, java.awt.BorderLayout.LINE_START);
 
+        mainPanel.setLayout(new java.awt.CardLayout());
 
         javax.swing.GroupLayout cardHomeLayout = new javax.swing.GroupLayout(newsPanel);
         newsPanel.setLayout(cardHomeLayout);
@@ -1972,7 +1894,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
 
         pack();
-
     }// </editor-fold>
 
     private void handleImportFileButtonClick() {
@@ -2640,6 +2561,10 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
             try {
                 deleteTransactionController.execute(selectedRow);
 
+                javax.swing.table.DefaultTableModel model =
+                        (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+                model.removeRow(selectedRow);
+
             } catch (Exception e) {
                 javax.swing.JOptionPane.showMessageDialog(this,
                         "Failed to delete transaction: " + e.getMessage(),
@@ -2911,27 +2836,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
             g2.dispose();
         }
     }
-    // Define this class AT THE END of your HomePageView.java file
-    private static class ViewManagerListener implements PropertyChangeListener {
 
-        // Fields to hold the references to the UI components
-        private final CardLayout cardLayout;
-        private final JPanel mainPanel;
-        // Constructor to receive the necessary UI components
-        public ViewManagerListener(CardLayout cardLayout, JPanel mainPanel) {
-            this.cardLayout = cardLayout;
-            this.mainPanel = mainPanel;
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if ("view".equals(evt.getPropertyName())) {
-                String activeView = (String) evt.getNewValue();
-                // Now references its own local, non-static fields
-                this.cardLayout.show(this.mainPanel, activeView);
-            }
-        }
-    }
     // Variables declaration
     private javax.swing.JTextField addBudgetAmountEntry;
     private javax.swing.JButton addBudgetButton;
@@ -3050,6 +2955,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JLabel label;
+    private javax.swing.JPanel mainPanel;
     private javax.swing.JPanel newsPanel;
     private javax.swing.JLabel projectLabel;
     private javax.swing.JPanel reportBodyPanel;
