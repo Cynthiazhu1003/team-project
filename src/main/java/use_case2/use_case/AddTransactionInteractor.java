@@ -3,6 +3,8 @@ package use_case2.use_case;
 
 import frontend.Transaction;
 
+import java.util.List;
+
 public class AddTransactionInteractor implements AddTransactionInputBoundary {
     private final AddTransactionOutputBoundary presenter;
     private final TransactionDataAccessInterface transactionDataAccess;
@@ -37,7 +39,8 @@ public class AddTransactionInteractor implements AddTransactionInputBoundary {
                     inputData.getCategory()
             );
             transactionDataAccess.save(transaction);
-            AddTransactionOutputData outputData = new AddTransactionOutputData(true, null);
+            List<Transaction> updatedList = transactionDataAccess.getAllTransactions();
+            AddTransactionOutputData outputData = new AddTransactionOutputData(true, null, updatedList);
             presenter.prepareSuccessView(outputData);
         } catch (Exception e) {
             presenter.prepareFailView("Failed to add transaction: " + e.getMessage());
