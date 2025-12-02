@@ -1,47 +1,32 @@
 @startuml
-!theme plain
+title Clean Architecture - Simple Flow
 
-package "External" {
-  [Swing UI]
-  [InMemoryDAO]
-}
+actor User
 
-package "Interface Adapters" {
-  [AddTransaction\nController]
-  [AddTransaction\nPresenter]
-  [EditTransaction\nController]
-  [EditTransaction\nPresenter]
-}
+participant "TransactionView" as View
+participant "AddTransactionController" as Controller
+participant "TransactionInteractor" as Interactor
+participant "Transaction" as Entity
+participant "TransactionPresenter" as Presenter
 
-package "Use Cases" {
-  [AddTransaction\nInteractor]
-  [EditTransaction\nInteractor]
-}
+User -> View: 1. Submit form
+View -> Controller: 2. execute()
+Controller -> Interactor: 3. execute(InputData)
+Interactor -> Interactor: 4. Validate business rules
 
-package "Entities" {
-  [Transaction]
-}
+alt Add
+    Interactor -> Entity: 5. save()
+else Edit
+    Interactor -> Entity: 5. update()
+end
 
-' Clean Architecture Dependencies
-[Swing UI] --> [AddTransaction\nController]
-[Swing UI] --> [EditTransaction\nController]
+alt Success
+    Interactor -> Presenter: 6. prepareSuccessView()
+else Failure
+    Interactor -> Presenter: 6. prepareFailView()
+end
 
-[AddTransaction\nController] --> [AddTransaction\nInteractor]
-[EditTransaction\nController] --> [EditTransaction\nInteractor]
-
-[AddTransaction\nInteractor] --> [AddTransaction\nPresenter]
-[EditTransaction\nInteractor] --> [EditTransaction\nPresenter]
-
-[AddTransaction\nInteractor] --> [InMemoryDAO]
-[EditTransaction\nInteractor] --> [InMemoryDAO]
-
-[InMemoryDAO] --> [Transaction]
-
-note bottom of [AddTransaction\nInteractor]
-  Business Rules
-  - Validate input
-  - Process transaction
-  - Handle errors
-end note
+Presenter -> View: 7. Update state
+View -> User: 8. Show result
 
 @enduml
