@@ -1,4 +1,4 @@
-package use_case2.interface_adapter.transaction;
+package use_case2.interface_adapter.transaction_Managment;
 
 
 import frontend.Transaction;
@@ -103,7 +103,7 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
         formPanel.add(new JLabel("Description:"));
         formPanel.add(descriptionField);
 
-        formPanel.add(new JLabel("")); // Empty cell
+        formPanel.add(new JLabel(""));
         formPanel.add(submitButton);
 
         this.add(formPanel);
@@ -176,8 +176,6 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        //line #180 IS FOR TESTING PURPOSE
-        //System.out.println("Property Change Event Received by TransactionView. Property: " + evt.getPropertyName());
         TransactionState state = transactionViewModel.getState();
 
         // Update error/success messages
@@ -205,7 +203,7 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
         if (state.getEditingTransactionIndex() >= 0) {
             submitButton.setText("Update Transaction");
             populateForm(state);
-        } else {
+        }else {
             submitButton.setText("Submit");
             clearForm();
         }

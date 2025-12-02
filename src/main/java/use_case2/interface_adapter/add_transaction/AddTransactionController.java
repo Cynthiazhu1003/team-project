@@ -1,7 +1,8 @@
 package use_case2.interface_adapter.add_transaction;
 
-import use_case2.use_case.AddTransactionInputBoundary;
-import use_case2.use_case.AddTransactionInputData;
+
+import use_case2.use_case_addTrans.AddTransactionInputBoundary;
+import use_case2.use_case_addTrans.AddTransactionInputData;
 import java.time.LocalDate;
 
 public class AddTransactionController {

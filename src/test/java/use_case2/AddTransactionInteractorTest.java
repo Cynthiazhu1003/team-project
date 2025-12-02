@@ -4,11 +4,10 @@ import frontend.Transaction;
 import use_case2.data_access.InMemoryTransactionDataAccessObject;
 import org.junit.Before;
 import org.junit.Test;
-import use_case2.use_case.AddTransactionInteractor;
-import use_case2.use_case.AddTransactionInputData;
-import use_case2.use_case.AddTransactionOutputBoundary;
-import use_case2.use_case.AddTransactionOutputData;
-import use_case2.use_case.TransactionDataAccessInterface;
+import use_case2.use_case_addTrans.AddTransactionInteractor;
+import use_case2.use_case_addTrans.AddTransactionInputData;
+import use_case2.use_case_addTrans.AddTransactionOutputBoundary;
+import use_case2.use_case_addTrans.AddTransactionOutputData;
 
 import java.time.LocalDate;
 

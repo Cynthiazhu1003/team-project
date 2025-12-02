@@ -1,7 +1,7 @@
 package use_case6.use_case;
 
 import frontend.Transaction;
-import use_case2.use_case.TransactionDataAccessInterface;
+import use_case2.data_access.TransactionDataAccessInterface;
 import use_case6.boundary.GenerateCategoryReportInputBoundary;
 import use_case6.boundary.GenerateCategoryReportOutputBoundary;
 import use_case6.data.GenerateCategoryReportRequestModel;

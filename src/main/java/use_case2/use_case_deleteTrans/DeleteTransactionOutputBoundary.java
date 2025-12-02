@@ -1,4 +1,4 @@
-package use_case2.use_case;
+package use_case2.use_case_deleteTrans;
 
 public interface DeleteTransactionOutputBoundary {
     void prepareSuccessView(DeleteTransactionOutputData outputData);

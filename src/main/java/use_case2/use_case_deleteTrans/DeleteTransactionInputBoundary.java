@@ -1,4 +1,4 @@
-package use_case2.use_case;
+package use_case2.use_case_deleteTrans;
 
 /**
  * The input boundary for the Delete Transaction use case.

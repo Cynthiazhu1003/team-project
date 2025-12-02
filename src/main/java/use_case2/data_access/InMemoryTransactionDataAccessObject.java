@@ -1,7 +1,7 @@
 package use_case2.data_access;
 
 import frontend.Transaction;
-import use_case2.use_case.TransactionDataAccessInterface;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,12 +27,8 @@ public class InMemoryTransactionDataAccessObject implements TransactionDataAcces
             }
         }
     }
-    /**
-     * Deletes a transaction from the list based on its index.
-     * @param index The zero-based index of the transaction to delete.
-     * @return true if deletion was successful, false otherwise.
-     */
-    public boolean deleteByIndex(int index) { // ⭐️ MUST be public boolean and take an int ⭐️
+
+    public boolean deleteByIndex(int index) {
         if (index >= 0 && index < transactions.size()) {
             transactions.remove(index);
             return true;

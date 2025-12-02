@@ -1,6 +1,6 @@
 package use_case2.interface_adapter.delete_transaction;
 
-import use_case2.use_case.DeleteTransactionInputBoundary;
+import use_case2.use_case_deleteTrans.DeleteTransactionInputBoundary;
 
 /**
  * The Controller for the Delete Transaction use case.

@@ -3,7 +3,7 @@ package use_case5.use_case;
 import frontend.Transaction;
 import java.time.LocalDate;
 import java.util.List;
-import use_case2.use_case.TransactionDataAccessInterface;
+import use_case2.data_access.TransactionDataAccessInterface;
 
 /**
  * Helper class to calculate Budget spent for each category.

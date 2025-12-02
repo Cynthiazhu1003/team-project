@@ -8,7 +8,6 @@ import api.news.NewsApiResponse;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Component;
 import java.time.LocalDate;
 import java.time.Month;
@@ -18,26 +17,27 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.swing.*;
 import java.awt.CardLayout;
-import frontend.Transaction;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import use_case1.UseCase1;
 import use_case2.data_access.InMemoryTransactionDataAccessObject;
-import use_case2.interface_adapter.ViewManagerModel;
+import use_case2.data_access.TransactionDataAccessInterface;
+import use_case2.interface_adapter.transaction_Managment.ViewManagerModel;
 import use_case2.interface_adapter.add_transaction.AddTransactionController;
 import use_case2.interface_adapter.add_transaction.AddTransactionPresenter;
 import use_case2.interface_adapter.delete_transaction.DeleteTransactionController;
 import use_case2.interface_adapter.delete_transaction.DeleteTransactionPresenter;
 import use_case2.interface_adapter.edit_transaction.EditTransactionController;
 import use_case2.interface_adapter.edit_transaction.EditTransactionPresenter;
-import use_case2.interface_adapter.transaction.TransactionView;
-import use_case2.interface_adapter.transaction.TransactionViewModel;
-import use_case2.use_case.*;
-import use_case2.use_case_edit_transactions.EditTransactionInputBoundary;
-import use_case2.use_case_edit_transactions.EditTransactionInteractor;
+import use_case2.interface_adapter.transaction_Managment.TransactionView;
+import use_case2.interface_adapter.transaction_Managment.TransactionViewModel;
+import use_case2.use_case_addTrans.*;
+import use_case2.use_case_deleteTrans.DeleteTransactionInputBoundary;
+import use_case2.use_case_deleteTrans.DeleteTransactionInteractor;
+import use_case2.use_case_editTrans.EditTransactionInputBoundary;
+import use_case2.use_case_editTrans.EditTransactionInteractor;
 import use_case5.boundary.*;
 import use_case5.data.BudgetRepository;
 import use_case5.data.InMemoryBudgetRepository;
@@ -155,92 +155,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     /**
      * Creates new form HomePage
      */
-//    public HomePageView() {
-//        initComponents();
-//
-//        this.addTransactionController = addTransactionController;
-//        this.deleteTransactionController = deleteTransactionController;
-//        this.editTransactionController = editTransactionController;
-//        this.budgetController = budgetController;
-//
-//        this.transactionViewModel = transactionViewModel;
-//        this.budgetViewModel = budgetViewModel;
-//        this.viewManagerModel = viewManagerModel;
-//
-//        setupViews();
-//        setupNewsPanel();
-//        setupReportBody();
-//        setupCategoryReportUseCase();
-//        loadNewsAsync();
-//
-//        mainPanel.add(newsPanel, CARD_HOME);
-//        mainPanel.add(cardTransaction, CARD_TRANS);
-//        mainPanel.add(cardBudget, CARD_BUDGET);
-//        mainPanel.add(cardReport, CARD_REPORT);
-//        mainPanel.add(cardImport, CARD_IMPORT);
-//        mainPanel.add(cardEditTransaction, CARD_EDIT_TRANS);
-//        mainPanel.add(cardAddBudget, CARD_ADD_BUDGET);
-//        mainPanel.add(cardAddTransaction, CARD_ADD_TRANS);
-//        mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
-//        mainPanel.add(cardEditCategory, CARD_EDIT_CATEGORY);
-//        mainPanel.add(cardChooseTransaction, CARD_CHOOSE_TRANS);
-//
-//        showCard(CARD_HOME);
-//    }
-
-//    // Setter for UseCase1
-//    public void setUseCase1(UseCase1 useCase1) {
-//        this.useCase1 = useCase1;
-//    }
-
-//    // Setter for controllers
-//    public void setControllers(
-//            AddTransactionController addController,
-//            DeleteTransactionController deleteController,
-//            EditTransactionController editController,
-//            BudgetController budgetController
-//    ) {
-//        this.addTransactionController = addController;
-//        this.deleteTransactionController = deleteController;
-//        this.editTransactionController = editController;
-//        this.budgetController = budgetController;
-//    }
-//
-//    // Setter for view models
-//    public void setViewModels(
-//            TransactionViewModel transactionViewModel,
-//            BudgetViewModel budgetViewModel,
-//            ViewManagerModel viewManagerModel
-//    ) {
-//        this.transactionViewModel = transactionViewModel;
-//        this.budgetViewModel = budgetViewModel;
-//        this.viewManagerModel = viewManagerModel;
-//
-//
-//        this.viewManagerModel.addPropertyChangeListener(new ViewManagerListener(this.cardLayout, this.mainPanel));
-//        String initialView = this.viewManagerModel.getActiveView();
-//        if (initialView == null) {
-//            initialView = CARD_TRANS;
-//        }
-//        showCard(initialView);
-//
-//        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-//        this.pack();
-//        this.setSize(800, 600);
-//        this.setLocationRelativeTo(null);
-//
-//        budgetViewModel.addPropertyChangeListener(evt -> {
-//            String name = evt.getPropertyName();
-//
-//            if ("budget".equals(name)) {
-//                updateBudgetTable((BudgetResponseModel) evt.getNewValue());
-//            }
-//            else if ("notification".equals(name)) {
-//                showBudgetNotification((BudgetNotificationModel) evt.getNewValue());
-//            }
-//        });
-//
-//    }
     public HomePageView(
             AddTransactionController addTransactionController,
             DeleteTransactionController deleteTransactionController,

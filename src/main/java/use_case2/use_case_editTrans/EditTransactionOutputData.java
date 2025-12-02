@@ -1,4 +1,4 @@
-package use_case2.use_case_edit_transactions;
+package use_case2.use_case_editTrans;
 
 public class EditTransactionOutputData {
     private final boolean success;
