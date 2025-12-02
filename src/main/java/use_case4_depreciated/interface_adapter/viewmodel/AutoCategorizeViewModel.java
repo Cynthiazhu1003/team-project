@@ -1,4 +1,4 @@
-package use_case4.interface_adapter.viewmodel;
+package use_case4_depreciated.interface_adapter.viewmodel;
 
 import frontend.Transaction;
 import java.util.List;

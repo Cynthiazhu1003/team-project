@@ -1,5 +1,7 @@
 package frontend;
 
+import api.fina.FinaCategorizationGateway;
+import api.fina.FinaCategorizationGatewayImpl;
 import api.news.NewsApiGateway;
 import api.news.NewsApiGatewayImpl;
 import api.news.NewsApiResponse;
@@ -11,14 +13,10 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.swing.*;
-import frontend.Transaction;
 
 import use_case1.UseCase1;
-import java.awt.font.LayoutPath;
 import use_case2.data_access.InMemoryTransactionDataAccessObject;
 import use_case2.interface_adapter.ViewManagerModel;
 import use_case2.interface_adapter.add_transaction.AddTransactionController;
@@ -89,6 +87,8 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     private final BudgetViewModel budgetViewModel;
     private final ViewManagerModel viewManagerModel;
 
+    private final UseCase1 useCase1;
+
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
         java.awt.CardLayout layout = (java.awt.CardLayout) mainPanel.getLayout();
@@ -139,7 +139,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     /**
      * Creates new form HomePage
      */
-    public HomePageView(AddTransactionController addTransactionController,
+    public HomePageView(UseCase1 useCase1, AddTransactionController addTransactionController,
                         DeleteTransactionController deleteTransactionController,
                         EditTransactionController editTransactionController,
                         BudgetController budgetController,
@@ -156,6 +156,8 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         this.transactionViewModel = transactionViewModel;
         this.budgetViewModel = budgetViewModel;
         this.viewManagerModel = viewManagerModel;
+
+        this.useCase1 = useCase1;
 
         budgetViewModel.addPropertyChangeListener(evt -> {
             String name = evt.getPropertyName();
@@ -1918,7 +1920,7 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         );
 
         try {
-            List<Transaction> transactions = UseCase1.importFromFile(selectedFile);
+            List<Transaction> transactions = useCase1.importFromFile(selectedFile);
 
             Transaction.addAll(transactions);
 
@@ -1935,6 +1937,8 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                 if (category == null) {
                     category = ""; // or "Uncategorized"
                 }
+
+                addTransactionController.execute(LocalDate.parse(date), description, merchant, amount, category);
 
                 model.addRow(new Object[]{
                         date,
@@ -2627,8 +2631,12 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         BudgetController budgetController =
                 new BudgetController(budgetInteractor);
 
-        // ======= UI VIEW (DEPENDENCY-INVERTED) =======
+        FinaCategorizationGateway gateway = new FinaCategorizationGatewayImpl(); // your implementation
+        UseCase1 useCase = new UseCase1(gateway);
+
+        // ======= UI VIEW =======
         java.awt.EventQueue.invokeLater(() -> new HomePageView(
+                useCase,
                 addController,
                 deleteController,
                 editController,

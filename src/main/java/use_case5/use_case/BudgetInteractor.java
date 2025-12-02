@@ -33,7 +33,7 @@ public class BudgetInteractor implements BudgetInputBoundary {
         repository.save(budget);
 
         presenter.presentBudget(buildResponse(budget));
-        presenter.presentNotification(buildWarning(budget));
+        presenter.presentNotification(buildWarning(budget, false));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class BudgetInteractor implements BudgetInputBoundary {
         repository.save(budget);
 
         presenter.presentBudget(buildResponse(budget));
-        presenter.presentNotification(buildWarning(budget));
+        presenter.presentNotification(buildWarning(budget, false));
     }
 
     @Override
@@ -114,11 +114,11 @@ public class BudgetInteractor implements BudgetInputBoundary {
             double spent = calculateSpent(budget.getCategory());
             budget.setSpent(spent);
             presenter.presentBudget(buildResponse(budget));
-            presenter.presentNotification(buildWarning(budget));
+            presenter.presentNotification(buildWarning(budget, true));
         }
     }
 
-    private BudgetNotificationModel buildWarning(Budget budget) {
+    private BudgetNotificationModel buildWarning(Budget budget, boolean fromRefresh) {
 
         String level = budget.getWarningLevel();  // e.g., "EXCEEDED", "WARNING", "OK"
         double spent = budget.getSpent();
@@ -151,6 +151,9 @@ public class BudgetInteractor implements BudgetInputBoundary {
                 );
 
             default:
+                if (fromRefresh) {
+                    return null;
+                }
                 message = String.format(
                         "Budget updated for %s.\nLimit: %.2f\nSpent: %.2f\nRemaining: %.2f",
                         budget.getCategory(), limit, spent, remaining

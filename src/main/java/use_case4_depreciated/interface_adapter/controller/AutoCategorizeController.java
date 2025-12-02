@@ -1,9 +1,9 @@
-package use_case4.interface_adapter.controller;
+package use_case4_depreciated.interface_adapter.controller;
 
 import frontend.Transaction;
 
-import use_case4.boundary.AutoCategorizeInputBoundary;
-import use_case4.data.AutoCategorizeRequestModel;
+import use_case4_depreciated.boundary.AutoCategorizeInputBoundary;
+import use_case4_depreciated.data.AutoCategorizeRequestModel;
 
 import java.util.List;
 
