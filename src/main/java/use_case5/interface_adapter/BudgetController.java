@@ -24,4 +24,16 @@ public class BudgetController {
         req.amount = amount;
         interactor.addSpending(req);
     }
+
+    public double calculateSpent(String category){
+        return interactor.calculateSpent(category);
+    }
+
+    public void deleteBudget(String category){
+        interactor.deleteBudget(category);
+    }
+
+    public void refreshAllBudgets() {
+        interactor.refreshAllBudgets();
+    }
 }

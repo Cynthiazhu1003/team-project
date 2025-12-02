@@ -1,6 +1,8 @@
 package use_case5.data;
 
 import frontend.Budget;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +14,8 @@ public class InMemoryBudgetRepository implements BudgetRepository {
     public Budget find(String category) {
         Budget budget = storage.get(category);
         if (budget != null) {
-            System.out.println("[DAO] Found budget for category '" + category + "': Limit=" + budget.getMonthlyLimit() + ", Spent=" + budget.getSpent());
+            System.out.println("[DAO] Found budget for category '" + category +
+                    "': Limit=" + budget.getMonthlyLimit() + ", Spent=" + budget.getSpent());
         } else {
             System.out.println("[DAO] No budget found for category '" + category + "'");
         }
@@ -22,10 +25,11 @@ public class InMemoryBudgetRepository implements BudgetRepository {
     @Override
     public void save(Budget budget) {
         storage.put(budget.getCategory(), budget);
-        System.out.println("[DAO] Saved budget for category '" + budget.getCategory() + "': Limit=" + budget.getMonthlyLimit() + ", Spent=" + budget.getSpent());
+        System.out.println("[DAO] Saved budget for category '" + budget.getCategory() +
+                "': Limit=" + budget.getMonthlyLimit() + ", Spent=" + budget.getSpent());
     }
 
-    // Add delete method
+    @Override
     public void delete(String category) {
         if (storage.containsKey(category)) {
             storage.remove(category);
@@ -33,5 +37,10 @@ public class InMemoryBudgetRepository implements BudgetRepository {
         } else {
             System.out.println("[DAO] Cannot delete, no budget found for category '" + category + "'");
         }
+    }
+
+    @Override
+    public Collection<Budget> findAll() {
+        return storage.values();
     }
 }
