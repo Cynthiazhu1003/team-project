@@ -28,11 +28,11 @@ As a user, I want to assign categories to transactions so I can see where my mon
 
 Eric:
 
-User story 4: Auto-categorization.
+User story 4: Auto-categorization. (Depreciated)
 
 As a user, I want the app to suggest categories based on merchant/name so I save time.
 
-Ryan:
+Ryan (Dropped out so Eric's part):
 
 User Story 5: Budgets.
 
@@ -45,15 +45,15 @@ User Story 6: Weekly reports.
 As a user, I want weekly email or in-app reports summarizing my spending and trends.
 
 APIs:
-Exchange Rates	
+Newsapi
 
-exchangerate.host (https://exchangerate.host/)
+newsapi.org docs (https://newsapi.org/docs)
 
-Free, public domain currency conversion API.
+Free, public domain news API.
 
 Auto categorization	
 
 https://app.fina.money/doc/vAmbM52OaDgRal	
 
-- screenshots or animations demonstrating current functionality
+- screenshots or animations demonstrating current functionality (Check slides)
 
