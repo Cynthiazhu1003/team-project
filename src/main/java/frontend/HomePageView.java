@@ -13,8 +13,8 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.io.File;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 import javax.swing.*;
 
 import use_case1.UseCase1;
@@ -79,16 +79,16 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     private JList<String> newsList = new JList<>(newsListModel);
     private java.util.List<NewsApiResponse.Article> currentArticles = new java.util.ArrayList<>();
 
-    private final AddTransactionController addTransactionController;
-    private final DeleteTransactionController deleteTransactionController;
-    private final EditTransactionController editTransactionController;
-    private final BudgetController budgetController;
+    private AddTransactionController addTransactionController;
+    private DeleteTransactionController deleteTransactionController;
+    private EditTransactionController editTransactionController;
+    private BudgetController budgetController;
 
-    private final TransactionViewModel transactionViewModel;
-    private final BudgetViewModel budgetViewModel;
-    private final ViewManagerModel viewManagerModel;
+    private TransactionViewModel transactionViewModel;
+    private BudgetViewModel budgetViewModel;
+    private ViewManagerModel viewManagerModel;
 
-    private final UseCase1 useCase1;
+    private UseCase1 useCase1;
 
     // --- Helper method to switch cards ---
     private void showCard(String cardName) {
@@ -140,27 +140,58 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
     /**
      * Creates new form HomePage
      */
-    public HomePageView(UseCase1 useCase1, AddTransactionController addTransactionController,
-                        DeleteTransactionController deleteTransactionController,
-                        EditTransactionController editTransactionController,
-                        BudgetController budgetController,
-                        TransactionViewModel transactionViewModel,
-                        BudgetViewModel budgetViewModel,
-                        ViewManagerModel viewManagerModel) {
+    public HomePageView() {
         initComponents();
+        setupNewsPanel();
+        setupReportBody();
+        setupCategoryReportUseCase();
+        loadNewsAsync();
 
-        this.addTransactionController = addTransactionController;
-        this.deleteTransactionController = deleteTransactionController;
-        this.editTransactionController = editTransactionController;
+        mainPanel.add(newsPanel, CARD_HOME);
+        mainPanel.add(cardTransaction, CARD_TRANS);
+        mainPanel.add(cardBudget, CARD_BUDGET);
+        mainPanel.add(cardReport, CARD_REPORT);
+        mainPanel.add(cardImport, CARD_IMPORT);
+        mainPanel.add(cardEditTransaction, CARD_EDIT_TRANS);
+        mainPanel.add(cardAddBudget, CARD_ADD_BUDGET);
+        mainPanel.add(cardAddTransaction, CARD_ADD_TRANS);
+        mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
+        mainPanel.add(cardEditCategory, CARD_EDIT_CATEGORY);
+        mainPanel.add(cardChooseTransaction, CARD_CHOOSE_TRANS);
+
+        showCard(CARD_HOME);
+    }
+
+    // Setter for UseCase1
+    public void setUseCase1(UseCase1 useCase1) {
+        this.useCase1 = useCase1;
+    }
+
+    // Setter for controllers
+    public void setControllers(
+            AddTransactionController addController,
+            DeleteTransactionController deleteController,
+            EditTransactionController editController,
+            BudgetController budgetController
+    ) {
+        this.addTransactionController = addController;
+        this.deleteTransactionController = deleteController;
+        this.editTransactionController = editController;
         this.budgetController = budgetController;
+    }
 
+    // Setter for view models
+    public void setViewModels(
+            TransactionViewModel transactionViewModel,
+            BudgetViewModel budgetViewModel,
+            ViewManagerModel viewManagerModel
+    ) {
         this.transactionViewModel = transactionViewModel;
         this.budgetViewModel = budgetViewModel;
         this.viewManagerModel = viewManagerModel;
 
-        this.useCase1 = useCase1;
-
-        budgetViewModel.addPropertyChangeListener(evt -> {
+        // example listener for budgets
+        this.budgetViewModel.addPropertyChangeListener(evt -> {
             String name = evt.getPropertyName();
 
             if ("budget".equals(name)) {
@@ -170,26 +201,6 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
                 showBudgetNotification((BudgetNotificationModel) evt.getNewValue());
             }
         });
-
-        setupNewsPanel();
-        setupReportBody();
-        setupCategoryReportUseCase();
-        loadNewsAsync();
-        // Register each card with its name
-        mainPanel.add(newsPanel,        CARD_HOME);
-        mainPanel.add(cardTransaction, CARD_TRANS);
-        mainPanel.add(cardBudget,      CARD_BUDGET);
-        mainPanel.add(cardReport,      CARD_REPORT);
-        mainPanel.add(cardImport,      CARD_IMPORT);
-        mainPanel.add(cardEditTransaction,CARD_EDIT_TRANS);
-        mainPanel.add(cardAddBudget, CARD_ADD_BUDGET);
-        mainPanel.add(cardAddTransaction, CARD_ADD_TRANS);
-        mainPanel.add(cardEditBudget, CARD_EDIT_BUDGET);
-        mainPanel.add(cardEditCategory, CARD_EDIT_CATEGORY);
-        mainPanel.add(cardChooseTransaction, CARD_CHOOSE_TRANS);
-
-        showCard(CARD_HOME);
-
     }
 
     private void setupNewsPanel() {
@@ -1916,27 +1927,28 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
 
         try {
             List<Transaction> transactions = useCase1.importFromFile(selectedFile);
-
             Transaction.addAll(transactions);
 
             javax.swing.table.DefaultTableModel model =
                     (javax.swing.table.DefaultTableModel) transactionTable.getModel();
 
+            DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("yyyy-MMMM-d"); // or "yyyy-MMMM-dd" for zero-padding
+
             for (Transaction t : transactions) {
-                String date = t.getDate().toString();
+                LocalDate dateObj = t.getDate();
+                String formattedDate = dateObj.format(displayFormatter);
+
                 String merchant = t.getMerchant();
                 String description = t.getDescription();
                 double amount = t.getAmount();
-                String category = t.getCategory();
+                String category = t.getCategory() != null ? t.getCategory() : "";
 
-                if (category == null) {
-                    category = ""; // or "Uncategorized"
-                }
+                // Add to DAO
+                addTransactionController.execute(dateObj, description, merchant, amount, category);
 
-                addTransactionController.execute(LocalDate.parse(date), description, merchant, amount, category);
-
+                // Add to table
                 model.addRow(new Object[]{
-                        date,
+                        formattedDate,
                         merchant,
                         description,
                         amount,
@@ -2583,68 +2595,51 @@ public class HomePageView extends javax.swing.JFrame implements CategoryReportVi
         }
         //</editor-fold>
 
-        // ======= VIEW MODELS =======
+        // ===== VIEW MODELS =====
         ViewManagerModel viewManagerModel = new ViewManagerModel();
         TransactionViewModel transactionViewModel = new TransactionViewModel();
         BudgetViewModel budgetViewModel = new BudgetViewModel();
 
-        // ======= DATA ACCESS =======
+        // ===== DATA ACCESS =====
         TransactionDataAccessInterface transactionDAO = new InMemoryTransactionDataAccessObject();
         BudgetRepository budgetRepository = new InMemoryBudgetRepository();
 
-        // ======= PRESENTERS =======
-        AddTransactionPresenter addPresenter =
-                new AddTransactionPresenter(viewManagerModel, transactionViewModel);
+        // ===== PRESENTERS =====
+        AddTransactionPresenter addPresenter = new AddTransactionPresenter(viewManagerModel, transactionViewModel);
+        DeleteTransactionPresenter deletePresenter = new DeleteTransactionPresenter(viewManagerModel, transactionViewModel);
+        EditTransactionPresenter editPresenter = new EditTransactionPresenter(viewManagerModel, transactionViewModel);
+        BudgetOutputBoundary budgetPresenter = new BudgetPresenter(budgetViewModel);
 
-        DeleteTransactionPresenter deletePresenter =
-                new DeleteTransactionPresenter(viewManagerModel, transactionViewModel);
+        // ===== INTERACTORS =====
+        AddTransactionInputBoundary addInteractor = new AddTransactionInteractor(addPresenter, transactionDAO);
+        DeleteTransactionInputBoundary deleteInteractor = new DeleteTransactionInteractor(deletePresenter, transactionDAO);
+        EditTransactionInputBoundary editInteractor = new EditTransactionInteractor(editPresenter, transactionDAO);
+        BudgetInputBoundary budgetInteractor = new BudgetInteractor(budgetRepository, transactionDAO, budgetPresenter);
 
-        EditTransactionPresenter editPresenter =
-                new EditTransactionPresenter(viewManagerModel, transactionViewModel);
+        // ===== CONTROLLERS =====
+        AddTransactionController addController = new AddTransactionController(addInteractor);
+        DeleteTransactionController deleteController = new DeleteTransactionController(deleteInteractor);
+        EditTransactionController editController = new EditTransactionController(editInteractor);
+        BudgetController budgetController = new BudgetController(budgetInteractor);
 
-        BudgetOutputBoundary budgetPresenter =
-                new BudgetPresenter(budgetViewModel);
-
-        // ======= INTERACTORS =======
-        AddTransactionInputBoundary addInteractor =
-                new AddTransactionInteractor(addPresenter, transactionDAO);
-
-        DeleteTransactionInputBoundary deleteInteractor =
-                new DeleteTransactionInteractor(deletePresenter, transactionDAO);
-
-        EditTransactionInputBoundary editInteractor =
-                new EditTransactionInteractor(editPresenter, transactionDAO);
-
-        BudgetInputBoundary budgetInteractor =
-                new BudgetInteractor(budgetRepository, transactionDAO, budgetPresenter);
-
-        // ======= CONTROLLERS =======
-        AddTransactionController addController =
-                new AddTransactionController(addInteractor);
-
-        DeleteTransactionController deleteController =
-                new DeleteTransactionController(deleteInteractor);
-
-        EditTransactionController editController =
-                new EditTransactionController(editInteractor);
-
-        BudgetController budgetController =
-                new BudgetController(budgetInteractor);
-
-        FinaCategorizationGateway gateway = new FinaCategorizationGatewayImpl(); // your implementation
+        // ===== USE CASE =====
+        FinaCategorizationGateway gateway = new FinaCategorizationGatewayImpl();
         UseCase1 useCase = new UseCase1(gateway);
 
-        // ======= UI VIEW =======
-        java.awt.EventQueue.invokeLater(() -> new HomePageView(
-                useCase,
-                addController,
-                deleteController,
-                editController,
-                budgetController,
-                transactionViewModel,
-                budgetViewModel,
-                viewManagerModel
-        ).setVisible(true));
+        // ===== CREATE VIEW =====
+        HomePageView homeView = new HomePageView();
+
+        // Inject UseCase1
+        homeView.setUseCase1(useCase);
+
+        // Inject controllers
+        homeView.setControllers(addController, deleteController, editController, budgetController);
+
+        // Inject view models
+        homeView.setViewModels(transactionViewModel, budgetViewModel, viewManagerModel);
+
+        // Show UI
+        java.awt.EventQueue.invokeLater(() -> homeView.setVisible(true));
     }
 
     @Override
