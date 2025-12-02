@@ -1,7 +1,9 @@
 package use_case2.interface_adapter.transaction;
 
 
+import frontend.Transaction;
 import use_case2.interface_adapter.add_transaction.AddTransactionController;
+import use_case2.interface_adapter.delete_transaction.DeleteTransactionController;
 import use_case2.interface_adapter.edit_transaction.EditTransactionController;
 
 import javax.swing.*;
@@ -17,10 +19,12 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
     private final TransactionViewModel transactionViewModel;
     private final AddTransactionController addTransactionController;
     private final EditTransactionController editTransactionController;
+    private final DeleteTransactionController deleteTransactionController;
 
     // UI Components
     private final JLabel titleLabel = new JLabel(TransactionViewModel.TITLE_LABEL);
     private final JButton addTransactionButton = new JButton(TransactionViewModel.ADD_BUTTON_LABEL);
+    private final JButton deleteSelectedButton = new JButton("Delete Selected");
 
     // Form components
     private final JTextField dateField = new JTextField(10);
@@ -29,17 +33,22 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
     private final JTextField amountField = new JTextField(10);
     private final JTextField descriptionField = new JTextField(10);
     private final JButton submitButton = new JButton("Submit");
+    private final javax.swing.JTable transactionTable;
 
     private final JLabel errorLabel = new JLabel();
     private final JLabel successLabel = new JLabel();
 
     public TransactionView(TransactionViewModel transactionViewModel,
                            AddTransactionController addTransactionController, EditTransactionController
-                                   editTransactionController) {
+                                   editTransactionController, DeleteTransactionController deleteTransactionController,
+                           javax.swing.JTable transactionTable) {
         this.transactionViewModel = transactionViewModel;
         this.addTransactionController = addTransactionController;
         this.editTransactionController = editTransactionController;
+        this.deleteTransactionController = deleteTransactionController;
+        this.transactionTable = transactionTable;
         this.transactionViewModel.addPropertyChangeListener(this);
+
 
 
         setupUI();
@@ -55,8 +64,8 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
 
         addTransactionButton.addActionListener(this);
         submitButton.addActionListener(this);
+        deleteSelectedButton.addActionListener(this);
 
-        // Set today's date as default
         dateField.setText(LocalDate.now().toString());
     }
 
@@ -112,6 +121,8 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == submitButton) {
             handleAddTransaction();
+        }else if (e.getSource() == deleteSelectedButton) {
+            handleDeleteTransaction();
         }
     }
 
@@ -142,8 +153,31 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
         }
     }
 
+    private void handleDeleteTransaction() {
+        int selectedTransactionIndex = getSelectedTransactionIndexFromTable();
+
+        if (selectedTransactionIndex >= 0) {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to delete this transaction?",
+                    "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                deleteTransactionController.execute(selectedTransactionIndex);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a transaction to delete.",
+                    "Error", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private int getSelectedTransactionIndexFromTable() {
+        return -1;
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        //line #180 IS FOR TESTING PURPOSE
+        //System.out.println("Property Change Event Received by TransactionView. Property: " + evt.getPropertyName());
         TransactionState state = transactionViewModel.getState();
 
         // Update error/success messages
@@ -151,23 +185,49 @@ public class TransactionView extends JPanel implements ActionListener, PropertyC
             errorLabel.setText(state.getTransactionError());
             successLabel.setText("");
         } else if (state.getTransactionSuccess() != null) {
-            successLabel.setText(state.getTransactionSuccess());
+            String successMessage = state.getTransactionSuccess();
+            if (successMessage.contains("deleted successfully")) {
+                JOptionPane.showMessageDialog(this, successMessage, "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+            successLabel.setText(successMessage);
             errorLabel.setText("");
 
-            // Clear form on success
-            if (state.getTransactionSuccess().contains("successfully")) {
+            if (successMessage.contains("successfully added") || successMessage.contains("successfully updated")) {
                 clearForm();
                 if (state.getEditingTransactionIndex() >= 0) {
                     state.setEditingTransactionIndex(-1);
                     transactionViewModel.setState(state);
-                    submitButton.setText("Submit"); // Reset button text if changed
+                    submitButton.setText("Submit");
                 }
             }
+            state.setTransactionSuccess(null);
         }
+        updateTransactionTable(state);
         // Handle entering edit mode (if you want to support pre-populating form)
         if (state.getEditingTransactionIndex() >= 0) {
-            // If you want to change UI to indicate edit mode, do it here
             submitButton.setText("Update Transaction");
+        }
+    }
+    // Inside TransactionView.java
+
+    private void updateTransactionTable(TransactionState state) {
+        javax.swing.table.DefaultTableModel model =
+                (javax.swing.table.DefaultTableModel) transactionTable.getModel();
+
+        model.setRowCount(0);
+
+        java.util.List<Transaction> transactions = state.getTransactions();
+
+        if (transactions != null) {
+            for (Transaction transaction : transactions) {
+                model.addRow(new Object[]{
+                        transaction.getDate().toString(),
+                        transaction.getMerchant(),
+                        transaction.getDescription(),
+                        transaction.getAmount(),
+                        transaction.getCategory()
+                });
+            }
         }
     }
     private void clearForm() {
