@@ -7,4 +7,6 @@ public interface BudgetInputBoundary {
     double calculateSpent(String category);
 
     void deleteBudget(String category);
+
+    void refreshAllBudgets();
 }

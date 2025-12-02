@@ -9,10 +9,6 @@ import use_case2.use_case.TransactionDataAccessInterface;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Interactor for handling budget operations.
- * Automatically recalculates spending using TransactionDAO.
- */
 public class BudgetInteractor implements BudgetInputBoundary {
 
     private final BudgetRepository repository;
@@ -27,26 +23,19 @@ public class BudgetInteractor implements BudgetInputBoundary {
         this.presenter = presenter;
     }
 
-    /**
-     * Sets a new budget for a category/month.
-     * Initial spent value comes from existing transactions.
-     */
     @Override
     public void setBudget(SetBudgetRequestModel request) {
         Budget budget = new Budget(request.category, request.limit, request.month);
 
-        // Auto-calc spent from DAO
         double spent = calculateSpent(request.category);
         budget.setSpent(spent);
 
         repository.save(budget);
+
         presenter.presentBudget(buildResponse(budget));
+        presenter.presentNotification(buildWarning(budget));
     }
 
-    /**
-     * Recomputes total spending for this category.
-     * Ignores the incoming amount because DAO is the source of truth.
-     */
     @Override
     public void addSpending(UpdateBudgetRequestModel request) {
         Budget budget = repository.find(request.category);
@@ -55,31 +44,19 @@ public class BudgetInteractor implements BudgetInputBoundary {
             throw new RuntimeException("Budget does not exist for category: " + request.category);
         }
 
-        // FULLY recalc based on all transactions (grouped by category)
         double spent = calculateSpent(request.category);
         budget.setSpent(spent);
 
         repository.save(budget);
 
         presenter.presentBudget(buildResponse(budget));
-
-        // Trigger UI notification if needed
-        if (!budget.getWarningLevel().equals("OK")) {
-            BudgetNotificationModel notif = new BudgetNotificationModel();
-            notif.category = budget.getCategory();
-            notif.message = "Budget " + budget.getWarningLevel();
-            presenter.presentNotification(notif);
-        }
+        presenter.presentNotification(buildWarning(budget));
     }
 
-    /**
-     * Sums all transactions in DAO for this category.
-     */
     @Override
     public double calculateSpent(String category) {
         List<Transaction> all = transactionDAO.getAllTransactions();
 
-        // Get the first day of the current month
         LocalDate firstDayOfCurrentMonth = LocalDate.now().withDayOfMonth(1);
 
         return all.stream()
@@ -87,14 +64,11 @@ public class BudgetInteractor implements BudgetInputBoundary {
                 .filter(t ->
                         t.getDate().isEqual(firstDayOfCurrentMonth) ||
                                 t.getDate().isAfter(firstDayOfCurrentMonth)
-                )// only transactions during current month
+                )
                 .mapToDouble(Transaction::getAmount)
                 .sum();
     }
 
-    /**
-     * Converts Budget → ResponseModel
-     */
     private BudgetResponseModel buildResponse(Budget budget) {
         BudgetResponseModel res = new BudgetResponseModel();
         res.category = budget.getCategory();
@@ -107,16 +81,85 @@ public class BudgetInteractor implements BudgetInputBoundary {
 
     public void deleteBudget(String category) {
         Budget budget = repository.find(category);
+
         if (budget == null) {
             throw new RuntimeException("Budget does not exist for category: " + category);
         }
 
         repository.delete(category);
 
-        BudgetNotificationModel notif = new BudgetNotificationModel();
-        notif.category = category;
-        notif.message = "Budget for " + category + " has been deleted.";
+        // Send a budget update to remove the row
+        BudgetResponseModel deletedBudget = new BudgetResponseModel();
+        deletedBudget.category = category;
+        deletedBudget.limit = 0;
+        deletedBudget.spent = 0;
+        deletedBudget.remaining = 0;
+        deletedBudget.warningLevel = "DELETED";
+
+        presenter.presentBudget(deletedBudget);
+
+        // Send a notification
+        BudgetNotificationModel notif = new BudgetNotificationModel(
+                category,
+                "Budget for " + category + " has been deleted.",
+                BudgetNotificationModel.NotificationType.INFO
+        );
+
         presenter.presentNotification(notif);
     }
 
+    public void refreshAllBudgets() {
+        for (Budget budget : repository.findAll()) {
+
+            double spent = calculateSpent(budget.getCategory());
+            budget.setSpent(spent);
+            presenter.presentBudget(buildResponse(budget));
+            presenter.presentNotification(buildWarning(budget));
+        }
+    }
+
+    private BudgetNotificationModel buildWarning(Budget budget) {
+
+        String level = budget.getWarningLevel();  // e.g., "EXCEEDED", "WARNING", "OK"
+        double spent = budget.getSpent();
+        double limit = budget.getMonthlyLimit();
+        double remaining = budget.getRemaining();
+
+        String message;
+
+        switch (level) {
+            case "EXCEEDED":
+                message = String.format(
+                        "Budget exceeded for %s!\nLimit: %.2f\nSpent: %.2f\nOver by: %.2f",
+                        budget.getCategory(), limit, spent, Math.abs(remaining)
+                );
+                return new BudgetNotificationModel(
+                        budget.getCategory(),
+                        message,
+                        BudgetNotificationModel.NotificationType.WARNING
+                );
+
+            case "WARNING":
+                message = String.format(
+                        "Warning: You're close to exceeding your budget for %s.\nLimit: %.2f\nSpent: %.2f\nRemaining: %.2f",
+                        budget.getCategory(), limit, spent, remaining
+                );
+                return new BudgetNotificationModel(
+                        budget.getCategory(),
+                        message,
+                        BudgetNotificationModel.NotificationType.WARNING
+                );
+
+            default:
+                message = String.format(
+                        "Budget updated for %s.\nLimit: %.2f\nSpent: %.2f\nRemaining: %.2f",
+                        budget.getCategory(), limit, spent, remaining
+                );
+                return new BudgetNotificationModel(
+                        budget.getCategory(),
+                        message,
+                        BudgetNotificationModel.NotificationType.INFO
+                );
+        }
+    }
 }

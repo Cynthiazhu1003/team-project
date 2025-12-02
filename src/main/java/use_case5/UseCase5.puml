@@ -1,0 +1,81 @@
+@startuml
+!theme plain
+
+package "External" {
+  [UI]
+}
+
+package "Interface Adapters" {
+  [BudgetController]
+  [BudgetPresenter]
+  [BudgetViewModel]
+}
+
+package "Use Cases" {
+  [BudgetInteractor]
+}
+
+package "Boundary" {
+  interface [BudgetInputBoundary]
+  interface [BudgetOutputBoundary]
+  [BudgetResponseModel]
+  [BudgetNotificationModel]
+  [SetBudgetRequestModel]
+  [UpdateBudgetRequestModel]
+}
+
+package "Data" {
+  interface [BudgetRepository]
+  interface [TransactionDataAccessInterface]
+  [InMemoryBudgetRepository]
+  [BudgetEntity]
+}
+
+' UI -> Controller
+[UI] --> [BudgetController]
+
+' UI -> View Model
+[UI] --> [BudgetViewModel]
+
+' Controller -> Input boundary
+[BudgetController] --> [BudgetInputBoundary]
+
+' Interactor implements Input Boundary
+[BudgetInteractor] ..|> [BudgetInputBoundary]
+
+' Presenter implements Output Boundary
+[BudgetPresenter] ..|> [BudgetOutputBoundary]
+
+' Interactor -> Presenter
+[BudgetInteractor] --> [BudgetPresenter]
+
+' Presenter -> ViewModel
+[BudgetPresenter] --> [BudgetViewModel]
+
+' Interactor -> Repository
+[BudgetInteractor] --> [BudgetRepository]
+
+' Interactor -> Transaction Repository
+[BudgetInteractor] --> [TransactionDataAccessInterface]
+
+' Concrete Repository
+[InMemoryBudgetRepository] ..|> [BudgetRepository]
+[BudgetRepository] --> [BudgetEntity]
+
+' Data models
+[BudgetInteractor] --> [BudgetResponseModel]
+[BudgetInteractor] --> [BudgetNotificationModel]
+[BudgetInteractor] --> [UpdateBudgetRequestModel]
+[BudgetInteractor] --> [SetBudgetRequestModel]
+[BudgetInteractor] --> [BudgetOutputBoundary]
+[BudgetController] --> [SetBudgetRequestModel]
+[BudgetController] --> [UpdateBudgetRequestModel]
+
+note bottom of [BudgetInteractor]
+  Business Logic:
+  - Set/Update budgets
+  - Calculate spending
+  - Trigger notifications
+end note
+
+@enduml
