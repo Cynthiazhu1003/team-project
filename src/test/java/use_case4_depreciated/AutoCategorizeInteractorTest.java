@@ -1,13 +1,13 @@
-package use_case4;
+package use_case4_depreciated;
 
 import api.fina.FinaCategorizationGateway;
 import frontend.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import use_case4.boundary.AutoCategorizeOutputBoundary;
-import use_case4.data.AutoCategorizeRequestModel;
-import use_case4.interface_adapter.viewmodel.AutoCategorizeViewModel;
-import use_case4.use_case.AutoCategorizeInteractor;
+import use_case4_depreciated.boundary.AutoCategorizeOutputBoundary;
+import use_case4_depreciated.data.AutoCategorizeRequestModel;
+import use_case4_depreciated.interface_adapter.viewmodel.AutoCategorizeViewModel;
+import use_case4_depreciated.use_case.AutoCategorizeInteractor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ class AutoCategorizeInteractorTest {
     void setUp() {
         mockGateway = new MockGateway();
         viewModel = new AutoCategorizeViewModel();
-        AutoCategorizeOutputBoundary presenter = new use_case4.interface_adapter.presenter.AutoCategorizePresenter(viewModel);
+        AutoCategorizeOutputBoundary presenter = new use_case4_depreciated.interface_adapter.presenter.AutoCategorizePresenter(viewModel);
         interactor = new AutoCategorizeInteractor(mockGateway, presenter);
     }
 
