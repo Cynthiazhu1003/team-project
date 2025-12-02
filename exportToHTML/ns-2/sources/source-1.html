@@ -1,0 +1,166 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > InMemoryTransactionDataAccessObject</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">use_case2.data_access</a>
+</div>
+
+<h1>Coverage Summary for Class: InMemoryTransactionDataAccessObject (use_case2.data_access)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">InMemoryTransactionDataAccessObject</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71.4%
+  </span>
+  <span class="absValue">
+    (5/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    37.5%
+  </span>
+  <span class="absValue">
+    (3/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    61.5%
+  </span>
+  <span class="absValue">
+    (8/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package use_case2.data_access;
+&nbsp;
+&nbsp;import frontend.Transaction;
+&nbsp;import use_case2.use_case.TransactionDataAccessInterface;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+<b class="fc">&nbsp;public class InMemoryTransactionDataAccessObject implements TransactionDataAccessInterface {</b>
+<b class="fc">&nbsp;    private final List&lt;Transaction&gt; transactions = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void save(Transaction transaction) {
+<b class="fc">&nbsp;        transactions.add(transaction);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;Transaction&gt; getAllTransactions() {
+<b class="fc">&nbsp;        return new ArrayList&lt;&gt;(transactions);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void update(Transaction transaction) {
+<b class="pc">&nbsp;        for (int i = 0; i &lt; transactions.size(); i++) {</b>
+<b class="fc">&nbsp;            if (transactions.get(i).equals(transaction)) {</b>
+<b class="fc">&nbsp;                transactions.set(i, transaction);</b>
+&nbsp;                return;
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;    /**
+&nbsp;     * Deletes a transaction from the list based on its index.
+&nbsp;     * @param index The zero-based index of the transaction to delete.
+&nbsp;     * @return true if deletion was successful, false otherwise.
+&nbsp;     */
+&nbsp;    public boolean deleteByIndex(int index) { // ⭐️ MUST be public boolean and take an int ⭐️
+<b class="nc">&nbsp;        if (index &gt;= 0 &amp;&amp; index &lt; transactions.size()) {</b>
+<b class="nc">&nbsp;            transactions.remove(index);</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;    @Override
+&nbsp;    public void delete(Transaction transaction) {
+<b class="nc">&nbsp;        transactions.remove(transaction);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public int getTransactionCount() {
+<b class="fc">&nbsp;        return transactions.size();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-01 13:33</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,299 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TransactionView</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">use_case2.interface_adapter.transaction</a>
+</div>
+
+<h1>Coverage Summary for Class: TransactionView (use_case2.interface_adapter.transaction)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TransactionView</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/88)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package use_case2.interface_adapter.transaction;
+&nbsp;
+&nbsp;
+&nbsp;import use_case2.interface_adapter.add_transaction.AddTransactionController;
+&nbsp;import use_case2.interface_adapter.edit_transaction.EditTransactionController;
+&nbsp;
+&nbsp;import javax.swing.*;
+&nbsp;import java.awt.*;
+&nbsp;import java.awt.event.ActionEvent;
+&nbsp;import java.awt.event.ActionListener;
+&nbsp;import java.beans.PropertyChangeEvent;
+&nbsp;import java.beans.PropertyChangeListener;
+&nbsp;import java.time.LocalDate;
+&nbsp;
+&nbsp;public class TransactionView extends JPanel implements ActionListener, PropertyChangeListener {
+<b class="nc">&nbsp;    public final String viewName = &quot;transaction&quot;;</b>
+&nbsp;    private final TransactionViewModel transactionViewModel;
+&nbsp;    private final AddTransactionController addTransactionController;
+&nbsp;    private final EditTransactionController editTransactionController;
+&nbsp;
+&nbsp;    // UI Components
+<b class="nc">&nbsp;    private final JLabel titleLabel = new JLabel(TransactionViewModel.TITLE_LABEL);</b>
+<b class="nc">&nbsp;    private final JButton addTransactionButton = new JButton(TransactionViewModel.ADD_BUTTON_LABEL);</b>
+&nbsp;
+&nbsp;    // Form components
+<b class="nc">&nbsp;    private final JTextField dateField = new JTextField(10);</b>
+<b class="nc">&nbsp;    private final JTextField categoryField = new JTextField(10);</b>
+<b class="nc">&nbsp;    private final JTextField  merchantField = new JTextField(10);</b>
+<b class="nc">&nbsp;    private final JTextField amountField = new JTextField(10);</b>
+<b class="nc">&nbsp;    private final JTextField descriptionField = new JTextField(10);</b>
+<b class="nc">&nbsp;    private final JButton submitButton = new JButton(&quot;Submit&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;    private final JLabel errorLabel = new JLabel();</b>
+<b class="nc">&nbsp;    private final JLabel successLabel = new JLabel();</b>
+&nbsp;
+&nbsp;    public TransactionView(TransactionViewModel transactionViewModel,
+&nbsp;                           AddTransactionController addTransactionController, EditTransactionController
+<b class="nc">&nbsp;                                   editTransactionController) {</b>
+<b class="nc">&nbsp;        this.transactionViewModel = transactionViewModel;</b>
+<b class="nc">&nbsp;        this.addTransactionController = addTransactionController;</b>
+<b class="nc">&nbsp;        this.editTransactionController = editTransactionController;</b>
+<b class="nc">&nbsp;        this.transactionViewModel.addPropertyChangeListener(this);</b>
+&nbsp;
+&nbsp;
+<b class="nc">&nbsp;        setupUI();</b>
+<b class="nc">&nbsp;        layoutComponents();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void setupUI() {
+<b class="nc">&nbsp;        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);</b>
+<b class="nc">&nbsp;        titleLabel.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 18));</b>
+&nbsp;
+<b class="nc">&nbsp;        errorLabel.setForeground(Color.RED);</b>
+<b class="nc">&nbsp;        successLabel.setForeground(Color.GREEN);</b>
+&nbsp;
+<b class="nc">&nbsp;        addTransactionButton.addActionListener(this);</b>
+<b class="nc">&nbsp;        submitButton.addActionListener(this);</b>
+&nbsp;
+&nbsp;        // Set today&#39;s date as default
+<b class="nc">&nbsp;        dateField.setText(LocalDate.now().toString());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void layoutComponents() {
+<b class="nc">&nbsp;        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));</b>
+&nbsp;
+&nbsp;        // Title
+<b class="nc">&nbsp;        this.add(Box.createVerticalStrut(20));</b>
+<b class="nc">&nbsp;        this.add(titleLabel);</b>
+<b class="nc">&nbsp;        this.add(Box.createVerticalStrut(30));</b>
+&nbsp;
+&nbsp;        // Add Transaction Button
+<b class="nc">&nbsp;        JPanel buttonPanel = new JPanel();</b>
+<b class="nc">&nbsp;        buttonPanel.add(addTransactionButton);</b>
+<b class="nc">&nbsp;        this.add(buttonPanel);</b>
+<b class="nc">&nbsp;        this.add(Box.createVerticalStrut(20));</b>
+&nbsp;
+&nbsp;        // Form Panel
+<b class="nc">&nbsp;        JPanel formPanel = new JPanel();</b>
+<b class="nc">&nbsp;        formPanel.setLayout(new GridLayout(6, 2, 10, 10));</b>
+<b class="nc">&nbsp;        formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));</b>
+&nbsp;
+<b class="nc">&nbsp;        formPanel.add(new JLabel(&quot;Date (YYYY-MM-DD):&quot;));</b>
+<b class="nc">&nbsp;        formPanel.add(dateField);</b>
+&nbsp;
+<b class="nc">&nbsp;        formPanel.add(new JLabel(&quot;Category:&quot;));</b>
+<b class="nc">&nbsp;        formPanel.add(categoryField);</b>
+&nbsp;
+<b class="nc">&nbsp;        formPanel.add(new JLabel(&quot;Merchant:&quot;));</b>
+<b class="nc">&nbsp;        formPanel.add(merchantField);</b>
+&nbsp;
+<b class="nc">&nbsp;        formPanel.add(new JLabel(&quot;Amount:&quot;));</b>
+<b class="nc">&nbsp;        formPanel.add(amountField);</b>
+&nbsp;
+<b class="nc">&nbsp;        formPanel.add(new JLabel(&quot;Description:&quot;));</b>
+<b class="nc">&nbsp;        formPanel.add(descriptionField);</b>
+&nbsp;
+<b class="nc">&nbsp;        formPanel.add(new JLabel(&quot;&quot;)); // Empty cell</b>
+<b class="nc">&nbsp;        formPanel.add(submitButton);</b>
+&nbsp;
+<b class="nc">&nbsp;        this.add(formPanel);</b>
+<b class="nc">&nbsp;        this.add(Box.createVerticalStrut(10));</b>
+&nbsp;
+&nbsp;        // Messages
+<b class="nc">&nbsp;        JPanel messagePanel = new JPanel();</b>
+<b class="nc">&nbsp;        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));</b>
+<b class="nc">&nbsp;        messagePanel.add(errorLabel);</b>
+<b class="nc">&nbsp;        messagePanel.add(successLabel);</b>
+<b class="nc">&nbsp;        this.add(messagePanel);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void actionPerformed(ActionEvent e) {
+<b class="nc">&nbsp;        if (e.getSource() == submitButton) {</b>
+<b class="nc">&nbsp;            handleAddTransaction();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private void handleAddTransaction() {
+&nbsp;        try {
+<b class="nc">&nbsp;            LocalDate date = LocalDate.parse(dateField.getText());</b>
+<b class="nc">&nbsp;            String category = categoryField.getText();</b>
+<b class="nc">&nbsp;            String merchant = merchantField.getText();</b>
+<b class="nc">&nbsp;            double amount = Double.parseDouble(amountField.getText());</b>
+<b class="nc">&nbsp;            String description = descriptionField.getText();</b>
+&nbsp;
+<b class="nc">&nbsp;            TransactionState state = transactionViewModel.getState();</b>
+&nbsp;            // Check if we&#39;re in edit mode or add mode
+<b class="nc">&nbsp;            if (state.getEditingTransactionIndex() &gt;= 0 &amp;&amp; editTransactionController != null) {</b>
+&nbsp;                // Edit mode - use EditTransactionController
+<b class="nc">&nbsp;                editTransactionController.execute(</b>
+<b class="nc">&nbsp;                        state.getEditingTransactionIndex(),</b>
+&nbsp;                        date, description, merchant, amount, category
+&nbsp;                );
+&nbsp;            } else {
+&nbsp;                // Add mode - use AddTransactionController
+<b class="nc">&nbsp;                addTransactionController.execute(date, description, merchant, amount, category);</b>
+&nbsp;            }
+&nbsp;
+&nbsp;        } catch (Exception ex) {
+<b class="nc">&nbsp;            JOptionPane.showMessageDialog(this, &quot;Invalid input: &quot; + ex.getMessage(),</b>
+&nbsp;                    &quot;Error&quot;, JOptionPane.ERROR_MESSAGE);
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void propertyChange(PropertyChangeEvent evt) {
+<b class="nc">&nbsp;        TransactionState state = transactionViewModel.getState();</b>
+&nbsp;
+&nbsp;        // Update error/success messages
+<b class="nc">&nbsp;        if (state.getTransactionError() != null) {</b>
+<b class="nc">&nbsp;            errorLabel.setText(state.getTransactionError());</b>
+<b class="nc">&nbsp;            successLabel.setText(&quot;&quot;);</b>
+<b class="nc">&nbsp;        } else if (state.getTransactionSuccess() != null) {</b>
+<b class="nc">&nbsp;            successLabel.setText(state.getTransactionSuccess());</b>
+<b class="nc">&nbsp;            errorLabel.setText(&quot;&quot;);</b>
+&nbsp;
+&nbsp;            // Clear form on success
+<b class="nc">&nbsp;            if (state.getTransactionSuccess().contains(&quot;successfully&quot;)) {</b>
+<b class="nc">&nbsp;                clearForm();</b>
+<b class="nc">&nbsp;                if (state.getEditingTransactionIndex() &gt;= 0) {</b>
+<b class="nc">&nbsp;                    state.setEditingTransactionIndex(-1);</b>
+<b class="nc">&nbsp;                    transactionViewModel.setState(state);</b>
+<b class="nc">&nbsp;                    submitButton.setText(&quot;Submit&quot;); // Reset button text if changed</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;        // Handle entering edit mode (if you want to support pre-populating form)
+<b class="nc">&nbsp;        if (state.getEditingTransactionIndex() &gt;= 0) {</b>
+&nbsp;            // If you want to change UI to indicate edit mode, do it here
+<b class="nc">&nbsp;            submitButton.setText(&quot;Update Transaction&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;    private void clearForm() {
+<b class="nc">&nbsp;        dateField.setText(LocalDate.now().toString());</b>
+<b class="nc">&nbsp;        categoryField.setText(&quot;&quot;);</b>
+<b class="nc">&nbsp;        merchantField.setText(&quot;&quot;);</b>
+<b class="nc">&nbsp;        amountField.setText(&quot;&quot;);</b>
+<b class="nc">&nbsp;        descriptionField.setText(&quot;&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+&nbsp;
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-01 13:33</div>
+</div>
+</body>
+</html>

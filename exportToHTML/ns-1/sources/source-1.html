@@ -1,0 +1,192 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Transaction</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">frontend</a>
+</div>
+
+<h1>Coverage Summary for Class: Transaction (frontend)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Transaction</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68.8%
+  </span>
+  <span class="absValue">
+    (11/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    35.7%
+  </span>
+  <span class="absValue">
+    (5/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55.9%
+  </span>
+  <span class="absValue">
+    (19/34)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package frontend;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;public class Transaction {
+&nbsp;
+&nbsp;    private LocalDate date;
+&nbsp;    private String description;
+&nbsp;    private String merchant;
+&nbsp;    private double amount;
+&nbsp;    private String category;
+&nbsp;
+&nbsp;    // Full constructor including category
+<b class="fc">&nbsp;    public Transaction(LocalDate date, String description, String merchant, double amount, String category) {</b>
+<b class="fc">&nbsp;        this.date = date;</b>
+<b class="fc">&nbsp;        this.description = description;</b>
+<b class="fc">&nbsp;        this.merchant = merchant;</b>
+<b class="fc">&nbsp;        this.amount = amount;</b>
+<b class="fc">&nbsp;        this.category = category;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Constructor without category
+&nbsp;    public Transaction(LocalDate date, String description, String merchant, double amount) {
+<b class="nc">&nbsp;        this(date, description, merchant, amount, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Static factory to parse from CSV line
+&nbsp;    public static Transaction of(String line) {
+<b class="nc">&nbsp;        String[] parts = line.split(&quot;,&quot;);</b>
+<b class="nc">&nbsp;        LocalDate date = LocalDate.parse(parts[0]);</b>
+<b class="nc">&nbsp;        String description = parts[1];</b>
+<b class="nc">&nbsp;        String merchant = parts[2];</b>
+<b class="nc">&nbsp;        double amount = Double.parseDouble(parts[3]);</b>
+<b class="nc">&nbsp;        return new Transaction(date, description, merchant, amount);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Getters
+<b class="nc">&nbsp;    public LocalDate getDate() { return date; }</b>
+<b class="fc">&nbsp;    public String getDescription() { return description; }</b>
+<b class="fc">&nbsp;    public String getMerchant() { return merchant; }</b>
+<b class="fc">&nbsp;    public double getAmount() { return amount; }</b>
+<b class="fc">&nbsp;    public String getCategory() { return category; }</b>
+&nbsp;
+&nbsp;    // Setters
+<b class="fc">&nbsp;    public void setDate(LocalDate date) { this.date = date; }</b>
+<b class="fc">&nbsp;    public void setDescription(String description) { this.description = description; }</b>
+<b class="fc">&nbsp;    public void setMerchant(String merchant) { this.merchant = merchant; }</b>
+<b class="fc">&nbsp;    public void setAmount(double amount) { this.amount = amount; }</b>
+<b class="fc">&nbsp;    public void setCategory(String category) { this.category = category; }</b>
+&nbsp;
+&nbsp;    // Equals and hashCode
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object o) {
+<b class="fc">&nbsp;        if (this == o) return true;</b>
+<b class="pc">&nbsp;        if (o == null || getClass() != o.getClass()) return false;</b>
+<b class="fc">&nbsp;        Transaction that = (Transaction) o;</b>
+<b class="pc">&nbsp;        return Double.compare(that.amount, amount) == 0 &amp;&amp;</b>
+<b class="nc">&nbsp;                Objects.equals(date, that.date) &amp;&amp;</b>
+<b class="nc">&nbsp;                Objects.equals(description, that.description) &amp;&amp;</b>
+<b class="nc">&nbsp;                Objects.equals(merchant, that.merchant) &amp;&amp;</b>
+<b class="nc">&nbsp;                Objects.equals(category, that.category);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="nc">&nbsp;        return Objects.hash(date, description, merchant, amount, category);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // toString
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        return String.format(&quot;Transaction{date=%s, description=&#39;%s&#39;, merchant=&#39;%s&#39;, amount=%.2f, category=&#39;%s&#39;}&quot;,</b>
+<b class="nc">&nbsp;                date, description, merchant, amount, category);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-01 13:33</div>
+</div>
+</body>
+</html>
