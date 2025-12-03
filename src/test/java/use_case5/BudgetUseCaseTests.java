@@ -30,7 +30,7 @@ class BudgetUseCaseTests {
     private DeleteBudgetInteractor deleteInteractor;
     private RefreshBudgetsInteractor refreshInteractor;
 
-    // ========== Test Presenter ==========
+    // Test Presenter
     static class TestPresenter implements BudgetOutputBoundary {
         BudgetResponseModel lastResponse;
         BudgetNotificationModel lastNotification;
@@ -46,7 +46,7 @@ class BudgetUseCaseTests {
         }
     }
 
-    // ========== Setup ==========
+    // Setup
     @BeforeEach
     void setup() {
         budgetRepo = new InMemoryBudgetRepository();
@@ -59,16 +59,14 @@ class BudgetUseCaseTests {
         refreshInteractor = new RefreshBudgetsInteractor(budgetRepo, calculator, presenter);
     }
 
-    // =======================================================
-    //    TEST 1 — Set Budget + Computes Spent
-    // =======================================================
     @Test
     void testSetBudgetWithExistingTransactions() {
 
-        // Fake transactions
+        // Create two transactions that fall in the current month
         txnDao.save(new Transaction(LocalDate.now(), "Lunch", "Cafe", 50, "Food"));
         txnDao.save(new Transaction(LocalDate.now(), "Dinner", "Restaurant", 60, "Food"));
 
+        // Create budget for the category
         SetBudgetRequestModel req = new SetBudgetRequestModel();
         req.category = "Food";
         req.limit = 200;
@@ -76,6 +74,7 @@ class BudgetUseCaseTests {
 
         setInteractor.setBudget(req);
 
+        // The interactor should calculate spent = 110 and remaining = 90
         assertEquals("Food", presenter.lastResponse.category);
         assertEquals(200, presenter.lastResponse.limit);
         assertEquals(110, presenter.lastResponse.spent);
@@ -83,38 +82,34 @@ class BudgetUseCaseTests {
         assertEquals("OK", presenter.lastResponse.warningLevel);
     }
 
-    // =======================================================
-    //    TEST 2 — Delete Budget
-    // =======================================================
     @Test
     void testDeleteBudget() {
-        // Create a budget first
+        // First create a budget to delete
         SetBudgetRequestModel req = new SetBudgetRequestModel();
         req.category = "Travel";
         req.limit = 500;
         req.month = YearMonth.now();
         setInteractor.setBudget(req);
 
-        // Now delete it
+        // Delete the budget
         deleteInteractor.deleteBudget("Travel");
 
+        // Response should indicate "DELETED"
         assertEquals("Travel", presenter.lastResponse.category);
         assertEquals(0, presenter.lastResponse.limit);
         assertEquals(0, presenter.lastResponse.spent);
         assertEquals("DELETED", presenter.lastResponse.warningLevel);
 
+        // Notification should also be sent
         assertNotNull(presenter.lastNotification);
         assertEquals("Travel", presenter.lastNotification.category);
         assertTrue(presenter.lastNotification.message.contains("deleted"));
     }
 
-    // =======================================================
-    //    TEST 3 — Refresh All Budgets (Recomputes Spending)
-    // =======================================================
     @Test
     void testRefreshBudgetsUpdatesSpentValues() {
 
-        // Create budgets
+        // Create two budgets to refresh
         SetBudgetRequestModel foodReq = new SetBudgetRequestModel();
         foodReq.category = "Food";
         foodReq.limit = 300;
@@ -127,18 +122,52 @@ class BudgetUseCaseTests {
         funReq.month = YearMonth.now();
         setInteractor.setBudget(funReq);
 
-        // Fake transactions
+        // Create transactions for both categories
         txnDao.save(new Transaction(LocalDate.now(), "Pizza", "Store", 20, "Food"));
         txnDao.save(new Transaction(LocalDate.now(), "Burger", "FastFood", 30, "Food"));
         txnDao.save(new Transaction(LocalDate.now(), "Movie", "Cinema", 15, "Fun"));
 
-        // Refresh all budgets
+        // Perform refresh — presenter should reflect the last updated budget
         refreshInteractor.refreshAllBudgets();
 
-        // Last updated budget will be "Food" due to iteration order
         assertEquals("Food", presenter.lastResponse.category);
         assertEquals(50, presenter.lastResponse.spent);
         assertEquals(250, presenter.lastResponse.remaining);
         assertEquals("OK", presenter.lastResponse.warningLevel);
+    }
+
+    @Test
+    void testDeleteBudgetThrowsIfNotExists() {
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> deleteInteractor.deleteBudget("Nonexistent"));
+
+        assertTrue(ex.getMessage().contains("Budget does not exist"));
+    }
+
+    @Test
+    void testBudgetSpentCalculator_AllBranchesCovered() {
+        InMemoryTransactionDataAccessObject dao = new InMemoryTransactionDataAccessObject();
+        BudgetSpentCalculator calc = new BudgetSpentCalculator(dao);
+
+        String target = "Food";
+        LocalDate now = LocalDate.now();
+        LocalDate lastMonth = now.minusMonths(1);
+
+        // Branch 1: category == null (filtered out)
+        dao.save(new Transaction(now, "NullCat", "Store", 100, null));
+
+        // Branch 2: category doesn't match (filtered out)
+        dao.save(new Transaction(now, "WrongCat", "Store", 200, "Other"));
+
+        // Branch 3: category matches BUT date is before first day (filtered out)
+        dao.save(new Transaction(lastMonth, "OldTx", "Store", 300, target));
+
+        // Branch 4: category matches AND date is valid (included)
+        dao.save(new Transaction(now, "ValidTx", "Store", 50, target));
+
+        double result = calc.calculateSpent(target);
+
+        // Only the valid current-month transaction should be counted.
+        assertEquals(50, result);
     }
 }
